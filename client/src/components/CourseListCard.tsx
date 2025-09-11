@@ -1,0 +1,133 @@
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { MapPin, Star, Phone, Globe } from 'lucide-react';
+import type { GolfCourseWithStatus, CourseStatus } from '@shared/schema';
+
+interface CourseListCardProps {
+  course: GolfCourseWithStatus;
+  onStatusChange: (courseId: string, status: CourseStatus) => void;
+  onLocationClick: (courseId: string) => void;
+}
+
+export default function CourseListCard({ course, onStatusChange, onLocationClick }: CourseListCardProps) {
+  const getStatusColor = (status: CourseStatus) => {
+    switch (status) {
+      case 'played': return 'bg-golf-played text-white';
+      case 'want-to-play': return 'bg-golf-want text-black';
+      case 'not-played': return 'bg-golf-not-played text-white';
+    }
+  };
+
+  const getStatusLabel = (status: CourseStatus) => {
+    switch (status) {
+      case 'played': return 'Played';
+      case 'want-to-play': return 'Want to Play';
+      case 'not-played': return 'Not Played';
+    }
+  };
+
+  const handleStatusChange = (newStatus: CourseStatus) => {
+    onStatusChange(course.id, newStatus);
+    console.log(`Status changed for ${course.name}: ${newStatus}`);
+  };
+
+  const handleLocationClick = () => {
+    onLocationClick(course.id);
+    console.log(`Location clicked for: ${course.name}`);
+  };
+
+  return (
+    <Card className="hover-elevate">
+      <CardContent className="p-4 space-y-3">
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h3 className="font-poppins font-semibold text-lg leading-tight">{course.name}</h3>
+            <button 
+              onClick={handleLocationClick}
+              className="flex items-center gap-1 text-muted-foreground hover:text-primary text-sm mt-1 transition-colors"
+              data-testid={`button-location-${course.id}`}
+            >
+              <MapPin className="w-4 h-4" />
+              {course.location}
+            </button>
+          </div>
+          
+          <Badge className={getStatusColor(course.status || 'not-played')}>
+            {getStatusLabel(course.status || 'not-played')}
+          </Badge>
+        </div>
+
+        {/* Rating */}
+        {course.rating && (
+          <div className="flex items-center gap-2">
+            <Star className="w-4 h-4 fill-golf-want text-golf-want" />
+            <span className="font-medium">{course.rating}</span>
+            <span className="text-muted-foreground text-sm">rating</span>
+          </div>
+        )}
+
+        {/* Description */}
+        {course.description && (
+          <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
+        )}
+
+        {/* Contact Info */}
+        <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+          {course.phone && (
+            <div className="flex items-center gap-1">
+              <Phone className="w-3 h-3" />
+              <span>{course.phone}</span>
+            </div>
+          )}
+          {course.website && (
+            <div className="flex items-center gap-1">
+              <Globe className="w-3 h-3" />
+              <a 
+                href={course.website} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary hover:underline"
+                data-testid={`link-website-${course.id}`}
+              >
+                Website
+              </a>
+            </div>
+          )}
+        </div>
+
+        {/* Status Buttons */}
+        <div className="grid grid-cols-3 gap-2 pt-2">
+          <Button
+            size="sm"
+            variant={course.status === 'played' ? 'default' : 'outline'}
+            onClick={() => handleStatusChange('played')}
+            className="text-xs"
+            data-testid={`button-status-played-${course.id}`}
+          >
+            Played
+          </Button>
+          <Button
+            size="sm"
+            variant={course.status === 'want-to-play' ? 'default' : 'outline'}
+            onClick={() => handleStatusChange('want-to-play')}
+            className="text-xs"
+            data-testid={`button-status-want-${course.id}`}
+          >
+            Want to Play
+          </Button>
+          <Button
+            size="sm"
+            variant={course.status === 'not-played' ? 'default' : 'outline'}
+            onClick={() => handleStatusChange('not-played')}
+            className="text-xs"
+            data-testid={`button-status-not-played-${course.id}`}
+          >
+            Not Played
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

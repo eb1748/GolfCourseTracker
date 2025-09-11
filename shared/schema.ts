@@ -1,0 +1,56 @@
+import { sql } from "drizzle-orm";
+import { pgTable, text, varchar, decimal, integer } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { z } from "zod";
+
+export const users = pgTable("users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+});
+
+export const golfCourses = pgTable("golf_courses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  location: text("location").notNull(),
+  state: text("state").notNull(),
+  latitude: decimal("latitude", { precision: 10, scale: 8 }).notNull(),
+  longitude: decimal("longitude", { precision: 11, scale: 8 }).notNull(),
+  rating: decimal("rating", { precision: 3, scale: 1 }),
+  description: text("description"),
+  website: text("website"),
+  phone: text("phone"),
+});
+
+export const userCourseStatus = pgTable("user_course_status", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  courseId: varchar("course_id").notNull(),
+  status: text("status").notNull(), // 'played', 'want-to-play', 'not-played'
+});
+
+export const insertUserSchema = createInsertSchema(users).pick({
+  username: true,
+  password: true,
+});
+
+export const insertGolfCourseSchema = createInsertSchema(golfCourses).omit({
+  id: true,
+});
+
+export const insertUserCourseStatusSchema = createInsertSchema(userCourseStatus).omit({
+  id: true,
+});
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+export type GolfCourse = typeof golfCourses.$inferSelect;
+export type InsertGolfCourse = z.infer<typeof insertGolfCourseSchema>;
+export type UserCourseStatus = typeof userCourseStatus.$inferSelect;
+export type InsertUserCourseStatus = z.infer<typeof insertUserCourseStatusSchema>;
+
+export type CourseStatus = 'played' | 'want-to-play' | 'not-played';
+
+export interface GolfCourseWithStatus extends GolfCourse {
+  status?: CourseStatus;
+}
