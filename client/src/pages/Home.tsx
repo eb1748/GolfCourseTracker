@@ -1,9 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Map, List, BarChart3 } from 'lucide-react';
+import { Map, List, BarChart3, Loader2 } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
 
 import HeroSection from '@/components/HeroSection';
 import GolfCourseMap from '@/components/GolfCourseMap';
@@ -11,21 +13,49 @@ import FilterControls from '@/components/FilterControls';
 import CourseListCard from '@/components/CourseListCard';
 import ThemeToggle from '@/components/ThemeToggle';
 
-import { TOP_100_GOLF_COURSES } from '@/data/golfCourses';
+import { api } from '@/lib/api';
 import type { GolfCourseWithStatus, CourseStatus } from '@shared/schema';
 
 export default function Home() {
-  //todo: remove mock functionality - replace with real user data
-  const [courses, setCourses] = useState<GolfCourseWithStatus[]>(() => 
-    TOP_100_GOLF_COURSES.map(course => ({
-      ...course,
-      status: Math.random() > 0.7 ? 'played' : Math.random() > 0.4 ? 'want-to-play' : 'not-played' as CourseStatus
-    }))
-  );
-  
   const [activeFilter, setActiveFilter] = useState<CourseStatus | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('hero');
+  
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  // Fetch courses data
+  const { data: courses = [], isLoading: coursesLoading, error: coursesError } = useQuery({
+    queryKey: ['/api/courses'],
+    queryFn: api.getAllCourses,
+  });
+
+  // Fetch user stats
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ['/api/users/stats'],
+    queryFn: api.getUserStats,
+  });
+
+  // Status update mutation
+  const statusMutation = useMutation({
+    mutationFn: ({ courseId, status }: { courseId: string; status: CourseStatus }) =>
+      api.updateCourseStatus(courseId, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/courses'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users/stats'] });
+      toast({
+        title: "Status Updated",
+        description: "Course status has been updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Update Failed",
+        description: "Failed to update course status. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Filter and search courses
   const filteredCourses = useMemo(() => {
@@ -49,21 +79,20 @@ export default function Home() {
     return filtered;
   }, [courses, activeFilter, searchQuery]);
 
-  // Calculate stats
-  const stats = useMemo(() => {
+  // Calculate default stats if API stats not available
+  const calculatedStats = useMemo(() => {
+    if (stats) return stats;
+    
     const total = courses.length;
     const played = courses.filter(c => c.status === 'played').length;
     const wantToPlay = courses.filter(c => c.status === 'want-to-play').length;
     const notPlayed = courses.filter(c => c.status === 'not-played').length;
 
     return { total, played, wantToPlay, notPlayed };
-  }, [courses]);
+  }, [courses, stats]);
 
   const handleStatusChange = (courseId: string, status: CourseStatus) => {
-    setCourses(prev => prev.map(course => 
-      course.id === courseId ? { ...course, status } : course
-    ));
-    console.log(`Course ${courseId} status changed to: ${status}`);
+    statusMutation.mutate({ courseId, status });
   };
 
   const handleLocationClick = (courseId: string) => {
@@ -79,6 +108,30 @@ export default function Home() {
     setActiveTab(tab);
     console.log(`Tab changed to: ${tab}`);
   };
+
+  // Loading state
+  if (coursesLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto" />
+          <p className="text-muted-foreground">Loading golf courses...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (coursesError) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <p className="text-destructive">Failed to load golf courses</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -97,7 +150,7 @@ export default function Home() {
           
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground hidden sm:block">
-              {stats.played}/{stats.total} played
+              {calculatedStats.played}/{calculatedStats.total} played
             </span>
             <ThemeToggle />
           </div>
@@ -124,8 +177,8 @@ export default function Home() {
 
           <TabsContent value="hero" className="space-y-6">
             <HeroSection
-              totalCourses={stats.total}
-              coursesPlayed={stats.played}
+              totalCourses={calculatedStats.total}
+              coursesPlayed={calculatedStats.played}
               onGetStarted={handleGetStarted}
             />
             
@@ -133,19 +186,19 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card>
                 <CardContent className="p-6 text-center">
-                  <div className="text-2xl font-bold text-golf-played">{stats.played}</div>
+                  <div className="text-2xl font-bold text-golf-played">{calculatedStats.played}</div>
                   <p className="text-muted-foreground">Courses Played</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-6 text-center">
-                  <div className="text-2xl font-bold text-golf-want">{stats.wantToPlay}</div>
+                  <div className="text-2xl font-bold text-golf-want">{calculatedStats.wantToPlay}</div>
                   <p className="text-muted-foreground">Want to Play</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-6 text-center">
-                  <div className="text-2xl font-bold text-golf-not-played">{stats.notPlayed}</div>
+                  <div className="text-2xl font-bold text-golf-not-played">{calculatedStats.notPlayed}</div>
                   <p className="text-muted-foreground">Not Played</p>
                 </CardContent>
               </Card>
@@ -161,7 +214,7 @@ export default function Home() {
                   onFilterChange={setActiveFilter}
                   searchQuery={searchQuery}
                   onSearchChange={setSearchQuery}
-                  stats={stats}
+                  stats={calculatedStats}
                 />
               </div>
               
@@ -189,7 +242,7 @@ export default function Home() {
                   onFilterChange={setActiveFilter}
                   searchQuery={searchQuery}
                   onSearchChange={setSearchQuery}
-                  stats={stats}
+                  stats={calculatedStats}
                 />
               </div>
               

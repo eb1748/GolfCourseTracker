@@ -40,6 +40,8 @@ export const insertGolfCourseSchema = createInsertSchema(golfCourses).omit({
 
 export const insertUserCourseStatusSchema = createInsertSchema(userCourseStatus).omit({
   id: true,
+}).extend({
+  status: z.enum(['played', 'want-to-play', 'not-played'])
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
