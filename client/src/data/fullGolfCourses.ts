@@ -71,7 +71,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.3",
     description: "Modern links-style course with Puget Sound views",
     website: "https://chambersbay.com",
-    phone: "(253) 460-4653"
+    phone: "(253) 460-4653",
+    accessType: "public"
   },
   {
     name: "Whistling Straits",
@@ -82,7 +83,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.7",
     description: "Pete Dye links-style course along Lake Michigan",
     website: "https://destinationkohler.com",
-    phone: "(855) 444-2838"
+    phone: "(855) 444-2838",
+    accessType: "public"
   },
   {
     name: "TPC Sawgrass (Stadium)",
@@ -105,7 +107,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.6",
     description: "Authentic links golf on the Oregon coast",
     website: "https://bandondunesgolf.com",
-    phone: "(541) 347-4380"
+    phone: "(541) 347-4380",
+    accessType: "public"
   },
   {
     name: "Spyglass Hill",
@@ -138,7 +141,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.6",
     description: "Tom Doak links design at Bandon Dunes Resort",
     website: "https://bandondunesgolf.com",
-    phone: "(541) 347-4380"
+    phone: "(541) 347-4380",
+    accessType: "public"
   },
   {
     name: "Harbour Town Golf Links",
@@ -215,7 +219,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.5",
     description: "Tom Doak tribute to C.B. Macdonald's classic holes",
     website: "https://bandondunesgolf.com",
-    phone: "(541) 347-4380"
+    phone: "(541) 347-4380",
+    accessType: "public"
   },
   {
     name: "Shinnecock Hills",
@@ -226,7 +231,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.8",
     description: "Historic links course, multiple US Open host",
     website: "https://shinnecockhills.com",
-    phone: "(631) 283-3525"
+    phone: "(631) 283-3525",
+    accessType: "private"
   },
   {
     name: "Oakmont Country Club",
@@ -249,7 +255,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.6",
     description: "A.W. Tillinghast masterpiece, multiple US Open venue",
     website: "https://wfgc.org",
-    phone: "(914) 698-8400"
+    phone: "(914) 698-8400",
+    accessType: "private"
   },
   {
     name: "Congressional Country Club",
@@ -260,7 +267,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.4",
     description: "Historic championship course near Washington D.C.",
     website: "https://ccclub.org",
-    phone: "(301) 469-2000"
+    phone: "(301) 469-2000",
+    accessType: "private"
   },
   {
     name: "Merion Golf Club (East)",
@@ -283,7 +291,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.5",
     description: "George Thomas Jr. design, host of Genesis Invitational",
     website: "https://therivieracountryclub.com",
-    phone: "(310) 454-6591"
+    phone: "(310) 454-6591",
+    accessType: "private"
   },
   {
     name: "Seminole Golf Club",
@@ -428,7 +437,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.2",
     description: "Desert course famous for raucous 16th hole",
     website: "https://tpc.com/scottsdale",
-    phone: "(480) 585-4334"
+    phone: "(480) 585-4334",
+    accessType: "public"
   },
   {
     name: "Medinah Country Club (No. 3)",
@@ -571,7 +581,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.5",
     description: "A.W. Tillinghast's companion course to the West",
     website: "https://wfgc.org",
-    phone: "(914) 698-8400"
+    phone: "(914) 698-8400",
+    accessType: "private"
   },
   {
     name: "Plainfield Country Club",
@@ -615,7 +626,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.2",
     description: "Devereux Emmet original with modern updates",
     website: "https://ccclub.org",
-    phone: "(301) 469-2000"
+    phone: "(301) 469-2000",
+    accessType: "private"
   },
   {
     name: "Saucon Valley Country Club (Old)",
@@ -681,7 +693,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.0",
     description: "Pete Dye design hosting Zurich Classic",
     website: "https://tpc.com/louisiana",
-    phone: "(504) 436-8721"
+    phone: "(504) 436-8721",
+    accessType: "public"
   },
   {
     name: "TPC River Highlands",
@@ -692,7 +705,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.1",
     description: "Pete Dye/Bobby Weed design hosting Travelers Championship",
     website: "https://tpc.com/river-highlands",
-    phone: "(860) 635-5000"
+    phone: "(860) 635-5000",
+    accessType: "public"
   },
   {
     name: "Harbour Town Golf Links",
@@ -879,7 +893,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.0",
     description: "Arnold Palmer/Ed Seay design hosting Deutsche Bank Championship",
     website: "https://tpc.com/boston",
-    phone: "(508) 384-4300"
+    phone: "(508) 384-4300",
+    accessType: "public"
   },
   {
     name: "Ocean Edge Golf Course",
@@ -912,7 +927,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "3.9",
     description: "D.A. Weibring design hosting John Deere Classic",
     website: "https://tpc.com/deere-run",
-    phone: "(309) 796-4653"
+    phone: "(309) 796-4653",
+    accessType: "public"
   },
   {
     name: "Cog Hill Golf & Country Club (Dubsdread)",
@@ -934,7 +950,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "3.8",
     description: "Arnold Palmer design hosting 3M Open",
     website: "https://tpc.com/twin-cities",
-    phone: "(763) 785-2000"
+    phone: "(763) 785-2000",
+    accessType: "public"
   },
   {
     name: "Blackwolf Run (River)",
