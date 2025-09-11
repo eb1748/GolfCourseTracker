@@ -11,7 +11,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.8",
     description: "Iconic oceanfront course with dramatic cliffs and stunning Pacific views",
     website: "https://pebblebeach.com",
-    phone: "(831) 624-3811"
+    phone: "(831) 624-3811",
+    accessType: "public"
   },
   {
     name: "Pinehurst No. 2",
@@ -22,7 +23,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.7",
     description: "Historic Donald Ross design, host to multiple US Opens",
     website: "https://pinehurst.com",
-    phone: "(855) 235-8507"
+    phone: "(855) 235-8507",
+    accessType: "public"
   },
   {
     name: "Bethpage Black",
@@ -33,7 +35,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.6",
     description: "Challenging A.W. Tillinghast design, former US Open venue",
     website: "https://bethpagegolf.com",
-    phone: "(516) 249-0700"
+    phone: "(516) 249-0700",
+    accessType: "public"
   },
   {
     name: "Kiawah Island Ocean Course",
@@ -44,7 +47,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.5",
     description: "Pete Dye masterpiece along the Atlantic Ocean",
     website: "https://kiawahresort.com",
-    phone: "(843) 266-4670"
+    phone: "(843) 266-4670",
+    accessType: "public"
   },
   {
     name: "Torrey Pines South",
@@ -55,7 +59,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.4",
     description: "Clifftop municipal course overlooking the Pacific",
     website: "https://sandiego.gov/park-and-recreation/golf",
-    phone: "(858) 581-7171"
+    phone: "(858) 581-7171",
+    accessType: "public"
   },
   {
     name: "Chambers Bay",
@@ -88,7 +93,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.5",
     description: "Home of THE PLAYERS Championship and famous island 17th",
     website: "https://tpc.com/sawgrass",
-    phone: "(904) 273-3230"
+    phone: "(904) 273-3230",
+    accessType: "public"
   },
   {
     name: "Bandon Dunes",
@@ -231,7 +237,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.7",
     description: "Legendary championship course with church pew bunkers",
     website: "https://oakmont-countryclub.com",
-    phone: "(412) 828-8000"
+    phone: "(412) 828-8000",
+    accessType: "private"
   },
   {
     name: "Winged Foot Golf Club (West)",
@@ -264,7 +271,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.8",
     description: "Classic Hugh Wilson design with wicker baskets instead of flags",
     website: "https://meriongolfclub.com",
-    phone: "(610) 642-5600"
+    phone: "(610) 642-5600",
+    accessType: "private"
   },
   {
     name: "Riviera Country Club",
@@ -341,7 +349,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.9",
     description: "George Crump's heathland masterpiece",
     website: "https://pinevalley.org",
-    phone: "(856) 783-3000"
+    phone: "(856) 783-3000",
+    accessType: "private"
   },
   {
     name: "Augusta National Golf Club",
@@ -352,7 +361,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.8",
     description: "Home of the Masters Tournament",
     website: "https://masters.com",
-    phone: "(706) 667-6000"
+    phone: "(706) 667-6000",
+    accessType: "private"
   },
   {
     name: "Muirfield Village Golf Club",

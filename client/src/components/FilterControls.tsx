@@ -3,11 +3,13 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Search, Filter } from 'lucide-react';
-import type { CourseStatus } from '@shared/schema';
+import type { CourseStatus, AccessType } from '@shared/schema';
 
 interface FilterControlsProps {
   activeFilter: CourseStatus | 'all';
   onFilterChange: (filter: CourseStatus | 'all') => void;
+  activeAccessFilter: AccessType | 'all';
+  onAccessFilterChange: (filter: AccessType | 'all') => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
   stats: {
@@ -15,12 +17,16 @@ interface FilterControlsProps {
     played: number;
     wantToPlay: number;
     notPlayed: number;
+    public: number;
+    private: number;
   };
 }
 
 export default function FilterControls({ 
   activeFilter, 
-  onFilterChange, 
+  onFilterChange,
+  activeAccessFilter,
+  onAccessFilterChange,
   searchQuery, 
   onSearchChange, 
   stats 
@@ -32,13 +38,28 @@ export default function FilterControls({
     { key: 'not-played' as const, label: 'Not Played', count: stats.notPlayed },
   ];
 
+  const accessFilters = [
+    { key: 'all' as const, label: 'All Access', count: stats.total },
+    { key: 'public' as const, label: 'Public', count: stats.public },
+    { key: 'private' as const, label: 'Private', count: stats.private },
+  ];
+
   const getFilterVariant = (filterKey: CourseStatus | 'all') => {
     return activeFilter === filterKey ? 'default' : 'outline';
+  };
+
+  const getAccessFilterVariant = (filterKey: AccessType | 'all') => {
+    return activeAccessFilter === filterKey ? 'default' : 'outline';
   };
 
   const handleFilterClick = (filter: CourseStatus | 'all') => {
     onFilterChange(filter);
     console.log(`Filter changed to: ${filter}`);
+  };
+
+  const handleAccessFilterClick = (filter: AccessType | 'all') => {
+    onAccessFilterChange(filter);
+    console.log(`Access filter changed to: ${filter}`);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,6 +99,32 @@ export default function FilterControls({
                 onClick={() => handleFilterClick(filter.key)}
                 className="justify-between"
                 data-testid={`button-filter-${filter.key}`}
+              >
+                <span>{filter.label}</span>
+                <Badge variant="secondary" className="ml-2">
+                  {filter.count}
+                </Badge>
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        {/* Access Type Filter */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Filter by Access</span>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-2">
+            {accessFilters.map((filter) => (
+              <Button
+                key={filter.key}
+                variant={getAccessFilterVariant(filter.key)}
+                size="sm"
+                onClick={() => handleAccessFilterClick(filter.key)}
+                className="justify-between"
+                data-testid={`button-access-filter-${filter.key}`}
               >
                 <span>{filter.label}</span>
                 <Badge variant="secondary" className="ml-2">

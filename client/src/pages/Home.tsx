@@ -14,10 +14,11 @@ import CourseListCard from '@/components/CourseListCard';
 import ThemeToggle from '@/components/ThemeToggle';
 
 import { api } from '@/lib/api';
-import type { GolfCourseWithStatus, CourseStatus } from '@shared/schema';
+import type { GolfCourseWithStatus, CourseStatus, AccessType } from '@shared/schema';
 
 export default function Home() {
   const [activeFilter, setActiveFilter] = useState<CourseStatus | 'all'>('all');
+  const [activeAccessFilter, setActiveAccessFilter] = useState<AccessType | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('hero');
   
@@ -66,6 +67,11 @@ export default function Home() {
       filtered = filtered.filter(course => course.status === activeFilter);
     }
 
+    // Apply access type filter
+    if (activeAccessFilter !== 'all') {
+      filtered = filtered.filter(course => course.accessType === activeAccessFilter);
+    }
+
     // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -77,19 +83,26 @@ export default function Home() {
     }
 
     return filtered;
-  }, [courses, activeFilter, searchQuery]);
+  }, [courses, activeFilter, activeAccessFilter, searchQuery]);
 
   // Calculate default stats if API stats not available
   const calculatedStats = useMemo(() => {
-    if (stats) return stats;
-    
     const total = courses.length;
     const played = courses.filter(c => c.status === 'played').length;
     const wantToPlay = courses.filter(c => c.status === 'want-to-play').length;
     const notPlayed = courses.filter(c => c.status === 'not-played').length;
+    const publicCourses = courses.filter(c => c.accessType === 'public').length;
+    const privateCourses = courses.filter(c => c.accessType === 'private').length;
 
-    return { total, played, wantToPlay, notPlayed };
-  }, [courses, stats]);
+    return { 
+      total, 
+      played, 
+      wantToPlay, 
+      notPlayed, 
+      public: publicCourses, 
+      private: privateCourses 
+    };
+  }, [courses]);
 
   const handleStatusChange = (courseId: string, status: CourseStatus) => {
     statusMutation.mutate({ courseId, status });
@@ -144,7 +157,7 @@ export default function Home() {
             </div>
             <div>
               <h1 className="font-poppins font-bold text-lg">Golf Tracker</h1>
-              <p className="text-xs text-muted-foreground">Top 100 US Courses</p>
+              <p className="text-xs text-muted-foreground">Top 100 Golf Courses</p>
             </div>
           </div>
           
@@ -212,6 +225,8 @@ export default function Home() {
                 <FilterControls
                   activeFilter={activeFilter}
                   onFilterChange={setActiveFilter}
+                  activeAccessFilter={activeAccessFilter}
+                  onAccessFilterChange={setActiveAccessFilter}
                   searchQuery={searchQuery}
                   onSearchChange={setSearchQuery}
                   stats={calculatedStats}
@@ -240,6 +255,8 @@ export default function Home() {
                 <FilterControls
                   activeFilter={activeFilter}
                   onFilterChange={setActiveFilter}
+                  activeAccessFilter={activeAccessFilter}
+                  onAccessFilterChange={setActiveAccessFilter}
                   searchQuery={searchQuery}
                   onSearchChange={setSearchQuery}
                   stats={calculatedStats}

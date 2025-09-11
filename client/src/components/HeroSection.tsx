@@ -32,7 +32,7 @@ export default function HeroSection({ totalCourses, coursesPlayed, onGetStarted 
           {/* Badge */}
           <Badge variant="outline" className="bg-white/20 border-white/30 text-white backdrop-blur-sm">
             <MapPin className="w-4 h-4 mr-2" />
-            America's Top 100 Public Golf Courses
+            America's Top 100 Golf Courses
           </Badge>
 
           {/* Main Heading */}
@@ -44,7 +44,7 @@ export default function HeroSection({ totalCourses, coursesPlayed, onGetStarted 
             </h1>
             
             <p className="text-lg md:text-xl text-white/90 leading-relaxed">
-              Discover, explore, and conquer the greatest public golf courses across America.
+              Discover, explore, and conquer the greatest golf courses across America.
               Mark your progress and plan your next golf adventure.
             </p>
           </div>
