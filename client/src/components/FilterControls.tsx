@@ -101,7 +101,7 @@ export default function FilterControls({
                 data-testid={`button-filter-${filter.key}`}
               >
                 <span>{filter.label}</span>
-                <Badge variant="secondary" className="ml-2">
+                <Badge variant="secondary">
                   {filter.count}
                 </Badge>
               </Button>
@@ -127,7 +127,7 @@ export default function FilterControls({
                 data-testid={`button-access-filter-${filter.key}`}
               >
                 <span>{filter.label}</span>
-                <Badge variant="secondary" className="ml-2">
+                <Badge variant="secondary">
                   {filter.count}
                 </Badge>
               </Button>
