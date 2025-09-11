@@ -119,7 +119,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.4",
     description: "Robert Trent Jones Sr. design through Del Monte Forest",
     website: "https://pebblebeach.com",
-    phone: "(831) 624-3811"
+    phone: "(831) 624-3811",
+    accessType: "public"
   },
   {
     name: "Arcadia Bluffs",
@@ -130,7 +131,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.5",
     description: "Clifftop course overlooking Lake Michigan",
     website: "https://arcadiabluffs.com", 
-    phone: "(231) 889-3001"
+    phone: "(231) 889-3001",
+    accessType: "public"
   },
   {
     name: "Pacific Dunes",
@@ -153,7 +155,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.3",
     description: "Pete Dye design with iconic lighthouse finish",
     website: "https://harbortowngolf.com",
-    phone: "(843) 363-4485"
+    phone: "(843) 363-4485",
+    accessType: "public"
   },
   {
     name: "Streamsong Red",
@@ -164,7 +167,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.4",
     description: "Bill Coore & Ben Crenshaw design in reclaimed phosphate mine",
     website: "https://streamsongresort.com",
-    phone: "(863) 428-1000"
+    phone: "(863) 428-1000",
+    accessType: "public"
   },
   {
     name: "Sand Hills Golf Club",
@@ -175,7 +179,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.8",
     description: "Ben Crenshaw & Bill Coore links in the Sandhills",
     website: "https://sandhillsgolfclub.com",
-    phone: "(308) 546-4653"
+    phone: "(308) 546-4653",
+    accessType: "public"
   },
   {
     name: "Cabot Links",
@@ -197,7 +202,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.2",
     description: "Links-style course by Robert Trent Jones Jr.",
     website: "https://pebblebeach.com",
-    phone: "(831) 624-3811"
+    phone: "(831) 624-3811",
+    accessType: "public"
   },
   {
     name: "Erin Hills",
@@ -208,7 +214,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.5",
     description: "2017 US Open venue with rolling Wisconsin landscape",
     website: "https://erinhills.com", 
-    phone: "(262) 670-8600"
+    phone: "(262) 670-8600",
+    accessType: "public"
   },
   {
     name: "Old Macdonald", 
@@ -717,7 +724,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.3",
     description: "Pete Dye design with iconic lighthouse finish",
     website: "https://harbortowngolf.com",
-    phone: "(843) 363-4485"
+    phone: "(843) 363-4485",
+    accessType: "public"
   },
   {
     name: "Bay Hill Club & Lodge",
@@ -739,7 +747,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.3",
     description: "Pete Dye desert course with famous island green",
     website: "https://pgawest.com",
-    phone: "(760) 564-7170"
+    phone: "(760) 564-7170",
+    accessType: "public"
   },
   {
     name: "Doral Golf Resort (Blue Monster)",
@@ -860,7 +869,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.1",
     description: "Pete Dye design companion course to River course",
     website: "https://destinationkohler.com",
-    phone: "(855) 444-2838"
+    phone: "(855) 444-2838",
+    accessType: "public"
   },
   {
     name: "The National Golf Club of Canada",
@@ -962,7 +972,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.2",
     description: "Pete Dye design along the Sheboygan River",
     website: "https://destinationkohler.com",
-    phone: "(855) 444-2838"
+    phone: "(855) 444-2838",
+    accessType: "public"
   },
   {
     name: "Sand Ridge Golf Club",
@@ -995,7 +1006,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.0",
     description: "William Langford/Theodore Moreau links design",
     website: "https://lawsonialinks.com",
-    phone: "(920) 294-3320"
+    phone: "(920) 294-3320",
+    accessType: "public"
   },
   {
     name: "Sand Valley Golf Resort",
@@ -1028,7 +1040,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.2",
     description: "Mike Strantz wild and creative design",
     website: "https://tobaccoroadgolf.com",
-    phone: "(919) 775-1940"
+    phone: "(919) 775-1940",
+    accessType: "public"
   },
   {
     name: "Mid Pines Inn & Golf Club",
@@ -1039,7 +1052,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.0",
     description: "Donald Ross classic in the Sandhills",
     website: "https://midpines.com",
-    phone: "(910) 692-2114"
+    phone: "(910) 692-2114",
+    accessType: "public"
   },
   {
     name: "Pine Needles Lodge & Golf Club",
@@ -1050,7 +1064,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.1",
     description: "Donald Ross design, multiple US Women's Open venue",
     website: "https://pineneedles-midpines.com",
-    phone: "(910) 692-7111"
+    phone: "(910) 692-7111",
+    accessType: "public"
   },
   {
     name: "Forest Highlands Golf Club (Canyon)",
