@@ -116,22 +116,48 @@ export default function FilterControls({
             <span className="text-sm font-medium">Filter by Access</span>
           </div>
           
-          <div className="grid grid-cols-3 gap-2">
-            {accessFilters.map((filter) => (
+          <div className="space-y-2">
+            {/* All Access - First Row */}
+            <Button
+              variant={getAccessFilterVariant('all')}
+              size="sm"
+              onClick={() => handleAccessFilterClick('all')}
+              className="justify-between w-full"
+              data-testid="button-access-filter-all"
+            >
+              <span>All Access</span>
+              <Badge variant="secondary">
+                {stats.total}
+              </Badge>
+            </Button>
+            
+            {/* Public and Private - Second Row */}
+            <div className="grid grid-cols-2 gap-2">
               <Button
-                key={filter.key}
-                variant={getAccessFilterVariant(filter.key)}
+                variant={getAccessFilterVariant('public')}
                 size="sm"
-                onClick={() => handleAccessFilterClick(filter.key)}
+                onClick={() => handleAccessFilterClick('public')}
                 className="justify-between"
-                data-testid={`button-access-filter-${filter.key}`}
+                data-testid="button-access-filter-public"
               >
-                <span>{filter.label}</span>
+                <span>Public</span>
                 <Badge variant="secondary">
-                  {filter.count}
+                  {stats.public}
                 </Badge>
               </Button>
-            ))}
+              <Button
+                variant={getAccessFilterVariant('private')}
+                size="sm"
+                onClick={() => handleAccessFilterClick('private')}
+                className="justify-between"
+                data-testid="button-access-filter-private"
+              >
+                <span>Private</span>
+                <Badge variant="secondary">
+                  {stats.private}
+                </Badge>
+              </Button>
+            </div>
           </div>
         </div>
 
