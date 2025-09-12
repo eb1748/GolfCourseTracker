@@ -191,7 +191,7 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
       };
     }
     
-    // For selected buttons, use default variant and disable elevation utilities
+    // For selected buttons, use the golf colors with Tailwind classes
     const baseStyle = {
       variant: 'default' as const,
       className: 'text-xs pointer-events-auto cursor-pointer no-default-hover-elevate no-default-active-elevate hover:opacity-90',
@@ -202,29 +202,17 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
       case 'played':
         return {
           ...baseStyle,
-          style: { 
-            backgroundColor: '#1a5f3f', 
-            borderColor: '#1a5f3f',
-            color: 'white'
-          }
+          className: 'text-xs pointer-events-auto cursor-pointer bg-golf-played text-white border-golf-played no-default-hover-elevate no-default-active-elevate hover:opacity-90'
         };
       case 'want-to-play':
         return {
           ...baseStyle,
-          style: { 
-            backgroundColor: '#ca8a04', 
-            borderColor: '#ca8a04',
-            color: 'black'
-          }
+          className: 'text-xs pointer-events-auto cursor-pointer bg-golf-want text-black border-golf-want no-default-hover-elevate no-default-active-elevate hover:opacity-90'
         };
       case 'not-played':
         return {
           ...baseStyle,
-          style: { 
-            backgroundColor: '#6b7280', 
-            borderColor: '#6b7280',
-            color: 'white'
-          }
+          className: 'text-xs pointer-events-auto cursor-pointer bg-golf-not-played text-white border-golf-not-played no-default-hover-elevate no-default-active-elevate hover:opacity-90'
         };
     }
   };
