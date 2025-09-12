@@ -55,10 +55,10 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus, scale: 
         <svg width="${scaledSize}" height="${scaledSize}" viewBox="0 0 24 24" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25));">
           <!-- Golf ball body with gradient -->
           <defs>
-            <radialGradient id="ballGradient-${status}" cx="0.35" cy="0.35" r="0.8">
+            <radialGradient id="ballGradient-${status}" cx="0.4" cy="0.4" r="0.9">
               <stop offset="0%" stop-color="${color}" stop-opacity="1"/>
-              <stop offset="70%" stop-color="${color}" stop-opacity="0.95"/>
-              <stop offset="100%" stop-color="rgba(0,0,0,0.15)" stop-opacity="1"/>
+              <stop offset="80%" stop-color="${color}" stop-opacity="0.98"/>
+              <stop offset="100%" stop-color="${color}" stop-opacity="1"/>
             </radialGradient>
           </defs>
           <circle cx="12" cy="12" r="11" fill="url(#ballGradient-${status})" stroke="rgba(0,0,0,0.3)" stroke-width="0.4"/>
