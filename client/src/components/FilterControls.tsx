@@ -99,7 +99,7 @@ export default function FilterControls({
                 variant={getFilterVariant(filter.key)}
                 size="sm"
                 onClick={() => handleFilterClick(filter.key)}
-                className="justify-between"
+                className="justify-between gap-2"
                 data-testid={`button-filter-${filter.key}`}
               >
                 <span>{filter.label}</span>
@@ -125,7 +125,7 @@ export default function FilterControls({
                 variant={getAccessFilterVariant(filter.key)}
                 size="sm"
                 onClick={() => handleAccessFilterClick(filter.key)}
-                className="justify-between"
+                className="justify-between gap-2"
                 data-testid={`button-access-filter-${filter.key}`}
               >
                 <span>{filter.label}</span>
