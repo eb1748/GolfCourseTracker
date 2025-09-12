@@ -192,6 +192,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "True links golf on the coast of Cape Breton",
     website: "https://cabotlinks.com",
     phone: "+1 (902) 258-4653"
+    accessType: "public"
   },
   {
     name: "The Links at Spanish Bay",
@@ -311,6 +312,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Donald Ross seaside masterpiece in Florida",
     website: "https://seminolegolfclub.com",
     phone: "(561) 626-2004"
+    accessType: "private"
   },
   {
     name: "Cypress Point Club",
@@ -322,6 +324,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Alister MacKenzie coastal masterpiece",
     website: "https://cypresspointclub.com",
     phone: "(831) 624-2223"
+    accessType: "private"
   },
   {
     name: "National Golf Links of America",
@@ -333,6 +336,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "C.B. Macdonald's template hole masterpiece",
     website: "https://ngla.org",
     phone: "(631) 283-0410"
+    accessType: "private"
   },
   {
     name: "Fishers Island Club",
@@ -344,6 +348,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Seth Raynor links-style design on Long Island Sound",
     website: "https://fishersislandclub.com",
     phone: "(631) 788-7221"
+    accessType: "private"
   },
   {
     name: "Chicago Golf Club",
@@ -355,6 +360,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "First 18-hole course in America, C.B. Macdonald design",
     website: "https://chicagogolfclub.org",
     phone: "(630) 665-2988"
+    accessType: "private"
   },
   {
     name: "Pine Valley Golf Club",
@@ -390,6 +396,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Jack Nicklaus design, host of Memorial Tournament",
     website: "https://muirfieldvillage.com",
     phone: "(614) 889-6800"
+    accessType: "private"
   },
   {
     name: "Baltusrol Golf Club (Lower)",
@@ -401,6 +408,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "A.W. Tillinghast design, multiple major championship venue",
     website: "https://baltusrol.org",
     phone: "(973) 376-1900"
+    accessType: "private"
   },
   {
     name: "Hazeltine National Golf Club",
@@ -412,6 +420,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Robert Trent Jones Sr. design, major championship venue",
     website: "https://hazeltine.com",
     phone: "(952) 448-4628"
+    accessType: "private"
   },
   {
     name: "Quail Hollow Club",
@@ -423,6 +432,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Host of PGA Championship and Presidents Cup",
     website: "https://quailhollowclub.com",
     phone: "(704) 552-1500"
+    accessType: "private"
   },
   {
     name: "East Lake Golf Club",
@@ -434,6 +444,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Historic course, home of TOUR Championship",
     website: "https://eastlakegolfclub.com",
     phone: "(404) 377-5313"
+    accessType: "private"
   },
   {
     name: "TPC Scottsdale (Stadium)",
@@ -457,6 +468,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Monster course, multiple major championship venue",
     website: "https://medinahcc.org",
     phone: "(630) 773-1700"
+    accessType: "private"
   },
   {
     name: "The Olympic Club (Lake)",
@@ -468,6 +480,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Demanding parkland course with cypress trees",
     website: "https://olyclub.com",
     phone: "(415) 587-5200"
+    accessType: "private"
   },
   {
     name: "Southern Hills Country Club",
@@ -479,6 +492,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Perry Maxwell design, multiple major venue",
     website: "https://southernhillscc.com",
     phone: "(918) 492-3351"
+    accessType: "private"
   },
   {
     name: "Valhalla Golf Club",
@@ -490,6 +504,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Jack Nicklaus design, PGA Championship venue",
     website: "https://valhalla.com",
     phone: "(502) 245-4475"
+    accessType: "private"
   },
   {
     name: "Oak Hill Country Club (East)",
@@ -501,6 +516,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Donald Ross design with tree-lined fairways",
     website: "https://oakhillcc.com",
     phone: "(585) 586-1660"
+    accessType: "private"
   },
   {
     name: "Bellerive Country Club",
@@ -512,6 +528,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Robert Trent Jones Sr. design, PGA Championship venue",
     website: "https://bellerivecc.com",
     phone: "(314) 965-3472"
+    accessType: "private"
   },
   {
     name: "Aronimink Golf Club",
@@ -523,6 +540,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Donald Ross classic outside Philadelphia",
     website: "https://aronimink.org",
     phone: "(610) 356-1385"
+    accessType: "private"
   },
   {
     name: "Inverness Club",
@@ -534,6 +552,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Donald Ross design with storied major championship history",
     website: "https://invernessclub.com",
     phone: "(419) 578-9951"
+    accessType: "private"
   },
   {
     name: "Cherry Hills Country Club",
@@ -545,6 +564,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "William Flynn design at high altitude",
     website: "https://cherryhillscc.org",
     phone: "(303) 761-9610"
+    accessType: "private"
   },
   {
     name: "Interlachen Country Club",
@@ -556,6 +576,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Willie Watson design, host of 1930 US Open",
     website: "https://interlachen.com",
     phone: "(952) 920-2351"
+    accessType: "private"
   },
   {
     name: "Colonial Country Club",
@@ -567,6 +588,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "John Bredemus design, host of Charles Schwab Challenge",
     website: "https://colonialcc.com",
     phone: "(817) 927-4200"
+    accessType: "private"
   },
   {
     name: "Ridgewood Country Club",
@@ -578,6 +600,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "A.W. Tillinghast design with challenging layout",
     website: "https://ridgewoodcc.org",
     phone: "(201) 444-7629"
+    accessType: "private"
   },
   {
     name: "Winged Foot Golf Club (East)",
@@ -601,6 +624,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Donald Ross design with strategic bunkering",
     website: "https://plainfieldcc.org",
     phone: "(908) 757-1800"
+    accessType: "private"
   },
   {
     name: "Scioto Country Club",
@@ -612,6 +636,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Donald Ross design, Jack Nicklaus's home course",
     website: "https://sciotocc.com",
     phone: "(614) 486-4341"
+    accessType: "private"
   },
   {
     name: "Olympia Fields Country Club (North)",
@@ -623,6 +648,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Willie Park Jr. design with championship pedigree",
     website: "https://olympiafields.org",
     phone: "(708) 748-0495"
+    accessType: "private"
   },
   {
     name: "Congressional Country Club (Blue)",
@@ -646,6 +672,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "William Flynn design with rolling terrain",
     website: "https://sauconvalley.org",
     phone: "(610) 838-7851"
+    accessType: "private"
   },
   {
     name: "Firestone Country Club (South)",
@@ -657,6 +684,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Robert Trent Jones Sr. 'monster' track",
     website: "https://firestonecc.com",
     phone: "(330) 644-2299"
+    accessType: "private"
   },
   {
     name: "Canterbury Golf Club",
@@ -668,6 +696,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Herbert Strong design with challenging layout",
     website: "https://canterburygc.com",
     phone: "(216) 831-7373"
+    accessType: "private"
   },
   {
     name: "Kearney Hill Golf Links",
