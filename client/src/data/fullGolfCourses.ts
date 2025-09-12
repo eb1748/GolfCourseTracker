@@ -707,7 +707,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "3.9",
     description: "Pete Dye public course with challenging design",
     website: "https://kearneyhillgolf.com",
-    phone: "(859) 253-1981"
+    phone: "(859) 253-1981",
+    accessType: "public"
   },
   {
     name: "Teeth of the Dog",
@@ -718,7 +719,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.6",
     description: "Pete Dye oceanfront masterpiece in the Caribbean",
     website: "https://casadecampo.com.do",
-    phone: "+1 (809) 523-3333"
+    phone: "+1 (809) 523-3333",
+    accessType: "resort"
   },
   {
     name: "TPC Louisiana",
@@ -765,7 +767,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.2",
     description: "Arnold Palmer's course hosting API",
     website: "https://bayhill.com",
-    phone: "(407) 876-2429"
+    phone: "(407) 876-2429",
+    accessType: "resort"
   },
   {
     name: "PGA West (Stadium)",
@@ -788,7 +791,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.1",
     description: "Dick Wilson design, former PGA Tour venue",
     website: "https://trumpdoral.com",
-    phone: "(305) 592-2000"
+    phone: "(305) 592-2000",
+    accessType: "private"
   },
   {
     name: "Innisbrook Resort (Copperhead)",
@@ -799,7 +803,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.0",
     description: "Larry Packard design hosting Valspar Championship",
     website: "https://innisbrookgolfresort.com",
-    phone: "(727) 942-2000"
+    phone: "(727) 942-2000",
+    accessType: "resort"
   },
   {
     name: "Glen Abbey Golf Club",
@@ -810,7 +815,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.1",
     description: "Jack Nicklaus design, former Canadian Open venue",
     website: "https://glenabbey.com",
-    phone: "(905) 844-1800"
+    phone: "(905) 844-1800",
+    accessType: "public"
   },
   {
     name: "Hamilton Golf & Country Club",
@@ -821,7 +827,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.2",
     description: "Harry Colt design hosting RBC Canadian Open",
     website: "https://hamiltongolf.com",
-    phone: "(905) 648-4471"
+    phone: "(905) 648-4471",
+    accessType: "private"
   },
   {
     name: "St. George's Golf & Country Club",
@@ -832,7 +839,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.0",
     description: "Stanley Thompson masterpiece in Toronto",
     website: "https://stgeorges.org",
-    phone: "(416) 231-1114"
+    phone: "(416) 231-1114",
+    accessType: "private"
   },
   {
     name: "Capilano Golf & Country Club",
@@ -843,7 +851,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "3.9",
     description: "Stanley Thompson design with mountain views",
     website: "https://capilanogolf.com",
-    phone: "(604) 922-9331"
+    phone: "(604) 922-9331",
+    accessType: "private"
   },
   {
     name: "Highlands Links",
@@ -854,7 +863,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.3",
     description: "Stanley Thompson links in Cape Breton Highlands",
     website: "https://highlandslinks.com",
-    phone: "(902) 285-2600"
+    phone: "(902) 285-2600",
+    accessType: "public"
   },
   {
     name: "Jasper Park Lodge Golf Course",
@@ -865,7 +875,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.2",
     description: "Stanley Thompson mountain course",
     website: "https://fairmont.com/jasper",
-    phone: "(780) 852-6090"
+    phone: "(780) 852-6090",
+    accessType: "resort"
   },
   {
     name: "Banff Springs Golf Course",
@@ -876,7 +887,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.1",
     description: "Stanley Thompson mountain masterpiece",
     website: "https://fairmont.com/banff-springs",
-    phone: "(403) 762-6801"
+    phone: "(403) 762-6801",
+    accessType: "resort"
   },
   {
     name: "Victoria Golf Club",
@@ -887,7 +899,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "3.8",
     description: "Oldest golf club in Canada on Vancouver Island",
     website: "https://victoriagolfclub.com",
-    phone: "(250) 598-4321"
+    phone: "(250) 598-4321",
+    accessType: "private"
   },
   {
     name: "Blackwolf Run (Meadow Valleys)",
@@ -910,7 +923,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.0",
     description: "Tom Fazio design north of Toronto",
     website: "https://nationalgolf.ca",
-    phone: "(905) 832-8900"
+    phone: "(905) 832-8900",
+    accessType: "private"
   },
   {
     name: "Redtail Golf Course",
@@ -921,7 +935,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "3.7",
     description: "Brian Silva design on former military base",
     website: "https://redtailgolf.net",
-    phone: "(978) 772-3273"
+    phone: "(978) 772-3273",
+    accessType: "public"
   },
   {
     name: "TPC Boston",
@@ -933,7 +948,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     description: "Arnold Palmer/Ed Seay design hosting Deutsche Bank Championship",
     website: "https://tpc.com/boston",
     phone: "(508) 384-4300",
-    accessType: "public"
+    accessType: "private"
   },
   {
     name: "Ocean Edge Golf Course",
@@ -944,7 +959,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "3.8",
     description: "Nicklaus Design course on Cape Cod",
     website: "https://oceanedge.com",
-    phone: "(508) 896-5911"
+    phone: "(508) 896-5911",
+    accessType: "resort"
   },
   {
     name: "Sahalee Country Club",
@@ -955,7 +971,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.1",
     description: "Ted Robinson design through Pacific Northwest forest",
     website: "https://sahalee.com",
-    phone: "(425) 392-8200"
+    phone: "(425) 392-8200",
+    accessType: "private"
   },
   {
     name: "TPC Deere Run",
@@ -978,7 +995,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.0",
     description: "Dick Wilson/Joe Lee design, former PGA Tour venue",
     website: "https://coghillgolf.com",
-    phone: "(630) 257-5872"
+    phone: "(630) 257-5872",
+    accessType: "public"
   },
   {
     name: "TPC Twin Cities",
@@ -1013,7 +1031,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "3.9",
     description: "Tom Fazio public course design",
     website: "https://sandridgegolf.com",
-    phone: "(440) 285-8887"
+    phone: "(440) 285-8887",
+    accessType: "private"
   },
   {
     name: "French Lick Resort (Pete Dye Course)",
@@ -1024,7 +1043,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.1",
     description: "Pete Dye mountain design at historic resort",
     website: "https://frenchlick.com",
-    phone: "(812) 936-9300"
+    phone: "(812) 936-9300",
+    accessType: "public"
   },
   {
     name: "Lawsonia Links",
@@ -1047,7 +1067,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.4",
     description: "Bill Coore & Ben Crenshaw links in central Wisconsin",
     website: "https://sandvalley.com",
-    phone: "(888) 651-7263"
+    phone: "(888) 651-7263",
+    accessType: "public"
   },
   {
     name: "Mammoth Dunes",
@@ -1058,7 +1079,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.3",
     description: "David McLay Kidd design at Sand Valley",
     website: "https://sandvalley.com",
-    phone: "(888) 651-7263"
+    phone: "(888) 651-7263",
+    accessType: "resort"
   },
   {
     name: "Tobacco Road Golf Club",
@@ -1105,7 +1127,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.2",
     description: "Tom Weiskopf/Jay Morrish mountain design",
     website: "https://foresthighlands.com",
-    phone: "(928) 525-5200"
+    phone: "(928) 525-5200",
+    accessType: "private"
   },
   {
     name: "We-Ko-Pa Golf Club (Saguaro)",
@@ -1116,7 +1139,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.1",
     description: "Bill Coore & Ben Crenshaw desert design",
     website: "https://wekopa.com",
-    phone: "(480) 836-9000"
+    phone: "(480) 836-9000",
+    accessType: "public"
   },
   {
     name: "Grayhawk Golf Club (Raptor)",
@@ -1127,7 +1151,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.0",
     description: "Tom Fazio desert course design",
     website: "https://grayhawkgolf.com",
-    phone: "(480) 502-1800"
+    phone: "(480) 502-1800",
+    accessType: "public"
   },
   {
     name: "Troon North Golf Club (Monument)",
@@ -1138,7 +1163,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.1",
     description: "Tom Weiskopf/Jay Morrish Sonoran Desert design",
     website: "https://troonnorthgolf.com",
-    phone: "(480) 585-5300"
+    phone: "(480) 585-5300",
+    accessType: "public"
   },
   {
     name: "Desert Forest Golf Club",
@@ -1149,7 +1175,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.3",
     description: "Red Lawrence minimalist desert course",
     website: "https://desertforestgc.com",
-    phone: "(480) 488-5028"
+    phone: "(480) 488-5028",
+    accessType: "private"
   },
   {
     name: "The Quarry at La Quinta",
@@ -1160,7 +1187,8 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "3.9",
     description: "Tom Fazio design through quarry landscape",
     website: "https://laquintaresort.com",
-    phone: "(760) 564-4111"
+    phone: "(760) 564-4111",
+    accessType: "private"
   },
   {
     name: "SilverRock Resort",
@@ -1171,6 +1199,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "3.8",
     description: "Arnold Palmer desert course design",
     website: "https://silverrock.org",
-    phone: "(760) 777-8884"
+    phone: "(760) 777-8884",
+    accessType: "public"
   }
 ];
