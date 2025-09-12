@@ -163,9 +163,6 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
   const popupRef = useRef<HTMLDivElement>(null);
   const [selectedCourse, setSelectedCourse] = useState<GolfCourseWithStatus | null>(null);
   const [iconScale, setIconScale] = useState<number>(1);
-  const [hoveredCourse, setHoveredCourse] = useState<GolfCourseWithStatus | null>(null);
-  const [previewPosition, setPreviewPosition] = useState<{ x: number; y: number } | null>(null);
-  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const filteredCourses = courses.filter(course => 
     filterStatus === 'all' || course.status === filterStatus
@@ -186,40 +183,6 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
     
     const progress = (zoom - baseZoom) / (maxZoom - baseZoom);
     return minScale + (maxScale - minScale) * progress;
-  };
-
-  // Clear hover timeout and hide preview
-  const clearHoverTimeout = () => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-      hoverTimeoutRef.current = null;
-    }
-  };
-
-  // Handle marker hover start
-  const handleMarkerHoverStart = (course: GolfCourseWithStatus, event: L.LeafletMouseEvent) => {
-    clearHoverTimeout();
-    
-    // Set timeout to show preview after 250ms
-    hoverTimeoutRef.current = setTimeout(() => {
-      setHoveredCourse(course);
-      
-      // Calculate preview position relative to map container
-      const containerPoint = mapInstanceRef.current!.containerPointToLatLng(event.containerPoint);
-      const pixelPoint = mapInstanceRef.current!.project(containerPoint, mapInstanceRef.current!.getZoom());
-      
-      setPreviewPosition({ 
-        x: pixelPoint.x + 20, // Offset to the right of marker
-        y: pixelPoint.y - 10   // Offset slightly above marker
-      });
-    }, 250);
-  };
-
-  // Handle marker hover end
-  const handleMarkerHoverEnd = () => {
-    clearHoverTimeout();
-    setHoveredCourse(null);
-    setPreviewPosition(null);
   };
 
   // Function to update all markers with new scale
@@ -284,21 +247,11 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
         setSelectedCourse(course);
         console.log(`Golf course selected: ${course.name}`);
       });
-      
-      // Add hover events
-      marker.on('mouseover', (e) => {
-        handleMarkerHoverStart(course, e);
-      });
-      
-      marker.on('mouseout', () => {
-        handleMarkerHoverEnd();
-      });
 
       markersRef.current.push(marker);
     });
 
     return () => {
-      clearHoverTimeout();
       markersRef.current.forEach(marker => marker.remove());
     };
   }, [filteredCourses, iconScale]);
@@ -526,28 +479,6 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
               </div>
             </CardContent>
           </Card>
-        </div>
-      )}
-      
-      {/* Hover Preview */}
-      {hoveredCourse && previewPosition && (
-        <div 
-          className="absolute z-[999] pointer-events-none bg-background/95 backdrop-blur-sm border rounded-md px-3 py-2 shadow-md text-sm max-w-64"
-          style={{
-            left: `${previewPosition.x}px`,
-            top: `${previewPosition.y}px`,
-            transform: 'translate(-50%, -100%)', // Center horizontally, position above
-          }}
-          data-testid="map-hover-preview"
-        >
-          <div className="font-semibold text-foreground">{hoveredCourse.name}</div>
-          <div className="text-muted-foreground text-xs flex items-center gap-1 mt-1">
-            <MapPin className="w-3 h-3" />
-            {hoveredCourse.location}
-          </div>
-          <div className="text-xs text-muted-foreground mt-1 opacity-80">
-            Hover for preview • Click for full details
-          </div>
         </div>
       )}
     </div>
