@@ -19,7 +19,7 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus, scale: 
   const statusColors = {
     'played': '#1a4d33', // hsl(142, 60%, 25%) - Dark green
     'want-to-play': '#d4af37', // hsl(45, 85%, 55%) - Gold/yellow
-    'not-played': '#8b95a6' // hsl(220, 15%, 65%) - Blue-gray
+    'not-played': '#ffffff' // White
   };
   
   // Access type-based icons (optimized for golf ball shape)
