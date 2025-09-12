@@ -52,74 +52,60 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus, scale: 
   return L.divIcon({
     html: `
       <div style="position: relative;">
-        <svg width="${scaledSize}" height="${scaledSize}" viewBox="0 0 24 24" style="filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3));">
-          <!-- Golf ball body -->
-          <circle cx="12" cy="12" r="11" fill="${color}" stroke="rgba(0,0,0,0.2)" stroke-width="0.5"/>
+        <svg width="${scaledSize}" height="${scaledSize}" viewBox="0 0 24 24" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25));">
+          <!-- Golf ball body with gradient -->
+          <defs>
+            <radialGradient id="ballGradient-${status}" cx="0.35" cy="0.35" r="0.8">
+              <stop offset="0%" stop-color="${color}" stop-opacity="1"/>
+              <stop offset="70%" stop-color="${color}" stop-opacity="0.95"/>
+              <stop offset="100%" stop-color="rgba(0,0,0,0.15)" stop-opacity="1"/>
+            </radialGradient>
+          </defs>
+          <circle cx="12" cy="12" r="11" fill="url(#ballGradient-${status})" stroke="rgba(0,0,0,0.3)" stroke-width="0.4"/>
           
-          <!-- Golf ball dimples - enhanced realistic pattern -->
-          <!-- Outer perimeter dimples -->
-          <circle cx="6.5" cy="9" r="0.7" fill="rgba(0,0,0,0.12)"/>
-          <circle cx="7" cy="12" r="0.8" fill="rgba(0,0,0,0.1)"/>
-          <circle cx="6.8" cy="15" r="0.6" fill="rgba(0,0,0,0.09)"/>
-          <circle cx="9" cy="6.5" r="0.6" fill="rgba(0,0,0,0.11)"/>
-          <circle cx="12" cy="6" r="0.9" fill="rgba(0,0,0,0.13)"/>
-          <circle cx="15" cy="6.5" r="0.7" fill="rgba(0,0,0,0.1)"/>
-          <circle cx="17.5" cy="9" r="0.8" fill="rgba(0,0,0,0.11)"/>
-          <circle cx="18" cy="12" r="0.7" fill="rgba(0,0,0,0.12)"/>
-          <circle cx="17.2" cy="15" r="0.6" fill="rgba(0,0,0,0.09)"/>
-          <circle cx="15" cy="17.5" r="0.7" fill="rgba(0,0,0,0.1)"/>
-          <circle cx="12" cy="18" r="0.8" fill="rgba(0,0,0,0.11)"/>
-          <circle cx="9" cy="17.5" r="0.6" fill="rgba(0,0,0,0.09)"/>
+          <!-- Shadow area at bottom-right -->
+          <path d="M 16.5 16.5 A 11 11 0 0 1 12 23 A 11 11 0 0 1 1 12 A 11 11 0 0 1 7.5 1.8 A 11 11 0 0 0 16.5 16.5" fill="rgba(0,0,0,0.08)"/>
           
-          <!-- Near-perimeter ring dimples -->
-          <circle cx="5.5" cy="10.5" r="0.5" fill="rgba(0,0,0,0.1)"/>
-          <circle cx="5.8" cy="13.5" r="0.6" fill="rgba(0,0,0,0.11)"/>
-          <circle cx="7.5" cy="5.5" r="0.5" fill="rgba(0,0,0,0.09)"/>
-          <circle cx="10.5" cy="5.5" r="0.7" fill="rgba(0,0,0,0.12)"/>
-          <circle cx="13.5" cy="5.5" r="0.5" fill="rgba(0,0,0,0.08)"/>
-          <circle cx="16.5" cy="5.5" r="0.6" fill="rgba(0,0,0,0.1)"/>
-          <circle cx="18.5" cy="10.5" r="0.7" fill="rgba(0,0,0,0.11)"/>
-          <circle cx="18.2" cy="13.5" r="0.5" fill="rgba(0,0,0,0.09)"/>
-          <circle cx="16.5" cy="18.5" r="0.6" fill="rgba(0,0,0,0.1)"/>
-          <circle cx="13.5" cy="18.5" r="0.7" fill="rgba(0,0,0,0.12)"/>
-          <circle cx="10.5" cy="18.5" r="0.5" fill="rgba(0,0,0,0.08)"/>
-          <circle cx="7.5" cy="18.5" r="0.6" fill="rgba(0,0,0,0.1)"/>
-          <circle cx="19" cy="8" r="0.4" fill="rgba(0,0,0,0.08)"/>
-          <circle cx="19" cy="16" r="0.5" fill="rgba(0,0,0,0.09)"/>
-          <circle cx="8" cy="5" r="0.4" fill="rgba(0,0,0,0.07)"/>
-          <circle cx="16" cy="5" r="0.5" fill="rgba(0,0,0,0.08)"/>
-          <circle cx="8" cy="19" r="0.4" fill="rgba(0,0,0,0.07)"/>
-          <circle cx="16" cy="19" r="0.5" fill="rgba(0,0,0,0.08)"/>
-          <circle cx="5" cy="8" r="0.4" fill="rgba(0,0,0,0.07)"/>
-          <circle cx="5" cy="16" r="0.5" fill="rgba(0,0,0,0.08)"/>
+          <!-- Realistic dimples - crescent shapes arranged in curved rows -->
+          <!-- Top arc row -->
+          <path d="M 8.5 5.5 A 0.8 0.8 0 0 1 9.3 6.3 A 0.8 0.8 0 0 1 8.5 7.1" stroke="rgba(0,0,0,0.2)" stroke-width="0.3" fill="none"/>
+          <path d="M 11 5 A 0.9 0.9 0 0 1 11.9 5.9 A 0.9 0.9 0 0 1 11 6.8" stroke="rgba(0,0,0,0.25)" stroke-width="0.3" fill="none"/>
+          <path d="M 13 5 A 0.9 0.9 0 0 1 13.9 5.9 A 0.9 0.9 0 0 1 13 6.8" stroke="rgba(0,0,0,0.25)" stroke-width="0.3" fill="none"/>
+          <path d="M 15.5 5.5 A 0.8 0.8 0 0 1 16.3 6.3 A 0.8 0.8 0 0 1 15.5 7.1" stroke="rgba(0,0,0,0.2)" stroke-width="0.3" fill="none"/>
           
-          <!-- Mid-ring dimples -->
-          <circle cx="8.5" cy="8.5" r="0.8" fill="rgba(0,0,0,0.1)"/>
-          <circle cx="15.5" cy="8.5" r="0.7" fill="rgba(0,0,0,0.11)"/>
-          <circle cx="8.5" cy="15.5" r="0.6" fill="rgba(0,0,0,0.08)"/>
-          <circle cx="15.5" cy="15.5" r="0.8" fill="rgba(0,0,0,0.1)"/>
-          <circle cx="12" cy="8.5" r="0.9" fill="rgba(0,0,0,0.12)"/>
-          <circle cx="12" cy="15.5" r="0.7" fill="rgba(0,0,0,0.09)"/>
-          <circle cx="8.5" cy="12" r="0.6" fill="rgba(0,0,0,0.08)"/>
-          <circle cx="15.5" cy="12" r="0.8" fill="rgba(0,0,0,0.11)"/>
+          <!-- Upper-middle arc row -->
+          <path d="M 6.8 8 A 0.7 0.7 0 0 1 7.5 8.7 A 0.7 0.7 0 0 1 6.8 9.4" stroke="rgba(0,0,0,0.18)" stroke-width="0.3" fill="none"/>
+          <path d="M 9.2 7.5 A 0.8 0.8 0 0 1 10 8.3 A 0.8 0.8 0 0 1 9.2 9.1" stroke="rgba(0,0,0,0.2)" stroke-width="0.3" fill="none"/>
+          <path d="M 11.5 7.2 A 0.9 0.9 0 0 1 12.4 8.1 A 0.9 0.9 0 0 1 11.5 9" stroke="rgba(0,0,0,0.22)" stroke-width="0.3" fill="none"/>
+          <path d="M 14 7.5 A 0.8 0.8 0 0 1 14.8 8.3 A 0.8 0.8 0 0 1 14 9.1" stroke="rgba(0,0,0,0.2)" stroke-width="0.3" fill="none"/>
+          <path d="M 16.5 8.2 A 0.7 0.7 0 0 1 17.2 8.9 A 0.7 0.7 0 0 1 16.5 9.6" stroke="rgba(0,0,0,0.18)" stroke-width="0.3" fill="none"/>
           
-          <!-- Inner core dimples -->
-          <circle cx="10" cy="10" r="0.7" fill="rgba(0,0,0,0.09)"/>
-          <circle cx="14" cy="10" r="0.6" fill="rgba(0,0,0,0.08)"/>
-          <circle cx="10" cy="14" r="0.8" fill="rgba(0,0,0,0.1)"/>
-          <circle cx="14" cy="14" r="0.7" fill="rgba(0,0,0,0.09)"/>
-          <circle cx="12" cy="11" r="0.5" fill="rgba(0,0,0,0.07)"/>
-          <circle cx="12" cy="13" r="0.6" fill="rgba(0,0,0,0.08)"/>
-          <circle cx="10.5" cy="12" r="0.5" fill="rgba(0,0,0,0.07)"/>
-          <circle cx="13.5" cy="12" r="0.6" fill="rgba(0,0,0,0.08)"/>
+          <!-- Middle arc row -->
+          <path d="M 6 11 A 0.8 0.8 0 0 1 6.8 11.8 A 0.8 0.8 0 0 1 6 12.6" stroke="rgba(0,0,0,0.2)" stroke-width="0.3" fill="none"/>
+          <path d="M 8.5 10.2 A 0.9 0.9 0 0 1 9.4 11.1 A 0.9 0.9 0 0 1 8.5 12" stroke="rgba(0,0,0,0.22)" stroke-width="0.3" fill="none"/>
+          <path d="M 11 9.8 A 1 1 0 0 1 12 10.8 A 1 1 0 0 1 11 11.8" stroke="rgba(0,0,0,0.25)" stroke-width="0.3" fill="none"/>
+          <path d="M 13.5 10 A 0.9 0.9 0 0 1 14.4 10.9 A 0.9 0.9 0 0 1 13.5 11.8" stroke="rgba(0,0,0,0.23)" stroke-width="0.3" fill="none"/>
+          <path d="M 16 10.8 A 0.8 0.8 0 0 1 16.8 11.6 A 0.8 0.8 0 0 1 16 12.4" stroke="rgba(0,0,0,0.21)" stroke-width="0.3" fill="none"/>
           
-          <!-- Additional scattered dimples for realism -->
-          <circle cx="9.5" cy="11" r="0.4" fill="rgba(0,0,0,0.06)"/>
-          <circle cx="14.5" cy="11" r="0.5" fill="rgba(0,0,0,0.07)"/>
-          <circle cx="11" cy="9.5" r="0.4" fill="rgba(0,0,0,0.06)"/>
-          <circle cx="13" cy="14.5" r="0.5" fill="rgba(0,0,0,0.07)"/>
-          <circle cx="10.2" cy="13.2" r="0.4" fill="rgba(0,0,0,0.06)"/>
-          <circle cx="13.8" cy="10.8" r="0.4" fill="rgba(0,0,0,0.06)"/>
+          <!-- Lower-middle arc row -->
+          <path d="M 6.2 14 A 0.7 0.7 0 0 1 6.9 14.7 A 0.7 0.7 0 0 1 6.2 15.4" stroke="rgba(0,0,0,0.18)" stroke-width="0.3" fill="none"/>
+          <path d="M 8.8 13.2 A 0.8 0.8 0 0 1 9.6 14 A 0.8 0.8 0 0 1 8.8 14.8" stroke="rgba(0,0,0,0.2)" stroke-width="0.3" fill="none"/>
+          <path d="M 11.2 12.8 A 0.9 0.9 0 0 1 12.1 13.7 A 0.9 0.9 0 0 1 11.2 14.6" stroke="rgba(0,0,0,0.22)" stroke-width="0.3" fill="none"/>
+          <path d="M 13.8 13 A 0.8 0.8 0 0 1 14.6 13.8 A 0.8 0.8 0 0 1 13.8 14.6" stroke="rgba(0,0,0,0.21)" stroke-width="0.3" fill="none"/>
+          <path d="M 16.2 13.5 A 0.7 0.7 0 0 1 16.9 14.2 A 0.7 0.7 0 0 1 16.2 14.9" stroke="rgba(0,0,0,0.19)" stroke-width="0.3" fill="none"/>
+          
+          <!-- Bottom arc row -->
+          <path d="M 8 16.5 A 0.7 0.7 0 0 1 8.7 17.2 A 0.7 0.7 0 0 1 8 17.9" stroke="rgba(0,0,0,0.17)" stroke-width="0.3" fill="none"/>
+          <path d="M 10.5 16.8 A 0.8 0.8 0 0 1 11.3 17.6 A 0.8 0.8 0 0 1 10.5 18.4" stroke="rgba(0,0,0,0.19)" stroke-width="0.3" fill="none"/>
+          <path d="M 13 17 A 0.8 0.8 0 0 1 13.8 17.8 A 0.8 0.8 0 0 1 13 18.6" stroke="rgba(0,0,0,0.18)" stroke-width="0.3" fill="none"/>
+          <path d="M 15.2 17.2 A 0.7 0.7 0 0 1 15.9 17.9 A 0.7 0.7 0 0 1 15.2 18.6" stroke="rgba(0,0,0,0.16)" stroke-width="0.3" fill="none"/>
+          
+          <!-- Additional scattered dimples for density -->
+          <path d="M 7.5 12.5 A 0.5 0.5 0 0 1 8 13 A 0.5 0.5 0 0 1 7.5 13.5" stroke="rgba(0,0,0,0.15)" stroke-width="0.25" fill="none"/>
+          <path d="M 9.8 15.2 A 0.6 0.6 0 0 1 10.4 15.8 A 0.6 0.6 0 0 1 9.8 16.4" stroke="rgba(0,0,0,0.16)" stroke-width="0.25" fill="none"/>
+          <path d="M 12.5 15.8 A 0.5 0.5 0 0 1 13 16.3 A 0.5 0.5 0 0 1 12.5 16.8" stroke="rgba(0,0,0,0.15)" stroke-width="0.25" fill="none"/>
+          <path d="M 15.8 11.2 A 0.5 0.5 0 0 1 16.3 11.7 A 0.5 0.5 0 0 1 15.8 12.2" stroke="rgba(0,0,0,0.14)" stroke-width="0.25" fill="none"/>
+          <path d="M 10.2 12.8 A 0.4 0.4 0 0 1 10.6 13.2 A 0.4 0.4 0 0 1 10.2 13.6" stroke="rgba(0,0,0,0.13)" stroke-width="0.25" fill="none"/>
           
           <!-- Access type icon -->
           ${icon}
