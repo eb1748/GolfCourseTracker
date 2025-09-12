@@ -54,7 +54,7 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus, scale: 
       <div style="position: relative;">
         <svg width="${scaledSize}" height="${scaledSize}" viewBox="0 0 24 24" style="filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3));">
           <!-- Golf ball body -->
-          <circle cx="12" cy="12" r="11" fill="${color}" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+          <circle cx="12" cy="12" r="11" fill="${color}" stroke="rgba(0,0,0,0.2)" stroke-width="0.5"/>
           
           <!-- Golf ball dimples - enhanced realistic pattern -->
           <!-- Outer perimeter dimples -->
@@ -70,6 +70,28 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus, scale: 
           <circle cx="15" cy="17.5" r="0.7" fill="rgba(0,0,0,0.1)"/>
           <circle cx="12" cy="18" r="0.8" fill="rgba(0,0,0,0.11)"/>
           <circle cx="9" cy="17.5" r="0.6" fill="rgba(0,0,0,0.09)"/>
+          
+          <!-- Near-perimeter ring dimples -->
+          <circle cx="5.5" cy="10.5" r="0.5" fill="rgba(0,0,0,0.1)"/>
+          <circle cx="5.8" cy="13.5" r="0.6" fill="rgba(0,0,0,0.11)"/>
+          <circle cx="7.5" cy="5.5" r="0.5" fill="rgba(0,0,0,0.09)"/>
+          <circle cx="10.5" cy="5.5" r="0.7" fill="rgba(0,0,0,0.12)"/>
+          <circle cx="13.5" cy="5.5" r="0.5" fill="rgba(0,0,0,0.08)"/>
+          <circle cx="16.5" cy="5.5" r="0.6" fill="rgba(0,0,0,0.1)"/>
+          <circle cx="18.5" cy="10.5" r="0.7" fill="rgba(0,0,0,0.11)"/>
+          <circle cx="18.2" cy="13.5" r="0.5" fill="rgba(0,0,0,0.09)"/>
+          <circle cx="16.5" cy="18.5" r="0.6" fill="rgba(0,0,0,0.1)"/>
+          <circle cx="13.5" cy="18.5" r="0.7" fill="rgba(0,0,0,0.12)"/>
+          <circle cx="10.5" cy="18.5" r="0.5" fill="rgba(0,0,0,0.08)"/>
+          <circle cx="7.5" cy="18.5" r="0.6" fill="rgba(0,0,0,0.1)"/>
+          <circle cx="19" cy="8" r="0.4" fill="rgba(0,0,0,0.08)"/>
+          <circle cx="19" cy="16" r="0.5" fill="rgba(0,0,0,0.09)"/>
+          <circle cx="8" cy="5" r="0.4" fill="rgba(0,0,0,0.07)"/>
+          <circle cx="16" cy="5" r="0.5" fill="rgba(0,0,0,0.08)"/>
+          <circle cx="8" cy="19" r="0.4" fill="rgba(0,0,0,0.07)"/>
+          <circle cx="16" cy="19" r="0.5" fill="rgba(0,0,0,0.08)"/>
+          <circle cx="5" cy="8" r="0.4" fill="rgba(0,0,0,0.07)"/>
+          <circle cx="5" cy="16" r="0.5" fill="rgba(0,0,0,0.08)"/>
           
           <!-- Mid-ring dimples -->
           <circle cx="8.5" cy="8.5" r="0.8" fill="rgba(0,0,0,0.1)"/>
