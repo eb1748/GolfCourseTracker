@@ -20,7 +20,7 @@ export const golfCourses = pgTable("golf_courses", {
   description: text("description"),
   website: text("website"),
   phone: text("phone"),
-  accessType: text("access_type", { enum: ['public', 'private'] }).notNull().default('public'),
+  accessType: text("access_type", { enum: ['public', 'private', 'resort'] }).notNull().default('public'),
 });
 
 export const userCourseStatus = pgTable("user_course_status", {
@@ -53,7 +53,7 @@ export type UserCourseStatus = typeof userCourseStatus.$inferSelect;
 export type InsertUserCourseStatus = z.infer<typeof insertUserCourseStatusSchema>;
 
 export type CourseStatus = 'played' | 'want-to-play' | 'not-played';
-export type AccessType = 'public' | 'private';
+export type AccessType = 'public' | 'private' | 'resort';
 
 export interface GolfCourseWithStatus extends GolfCourse {
   status?: CourseStatus;
