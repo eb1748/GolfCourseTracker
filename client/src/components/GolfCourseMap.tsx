@@ -15,11 +15,11 @@ interface GolfCourseMapProps {
 
 // Custom golf pin icon SVG based on access type and status
 const createGolfPinIcon = (accessType: AccessType, status: CourseStatus) => {
-  // Status-based colors (matching golf theme colors exactly)
-  const statusColors = {
-    'played': '#1a4c33', // hsl(142, 60%, 25%) - Dark green
-    'want-to-play': '#d4af37', // hsl(45, 85%, 55%) - Gold/yellow
-    'not-played': '#9ba4b5' // hsl(220, 15%, 65%) - Blue-gray
+  // Course type-based colors (matching course type button colors)
+  const courseTypeColors = {
+    'public': '#dbeafe', // blue-100
+    'private': '#f3e8ff', // purple-100
+    'resort': '#fef2f2' // red-100
   };
   
   // Access type-based icons (optimized for golf ball shape)
@@ -31,21 +31,21 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus) => {
     'private': `
       <!-- Key symbol (simplified) -->
       <circle cx="12" cy="9.5" r="3" fill="white"/>
-      <circle cx="12" cy="9.5" r="1.5" fill="${statusColors[status]}"/>
+      <circle cx="12" cy="9.5" r="1.5" fill="${courseTypeColors[accessType]}"/>
       <rect x="11.25" y="12.5" width="1.5" height="3" fill="white"/>
       <rect x="12.75" y="14" width="1.5" height="0.75" fill="white"/>`,
     'resort': `
       <!-- Resort/Hotel building (simplified) -->
       <rect x="7.5" y="7" width="9" height="7.5" fill="white"/>
-      <rect x="8.5" y="8.25" width="1.5" height="1.5" fill="${statusColors[status]}"/>
-      <rect x="10.75" y="8.25" width="1.5" height="1.5" fill="${statusColors[status]}"/>
-      <rect x="13" y="8.25" width="1.5" height="1.5" fill="${statusColors[status]}"/>
-      <rect x="8.5" y="10.5" width="1.5" height="1.5" fill="${statusColors[status]}"/>
-      <rect x="13" y="10.5" width="1.5" height="1.5" fill="${statusColors[status]}"/>
-      <rect x="10.75" y="12" width="1.5" height="2.25" fill="${statusColors[status]}"/>`
+      <rect x="8.5" y="8.25" width="1.5" height="1.5" fill="${courseTypeColors[accessType]}"/>
+      <rect x="10.75" y="8.25" width="1.5" height="1.5" fill="${courseTypeColors[accessType]}"/>
+      <rect x="13" y="8.25" width="1.5" height="1.5" fill="${courseTypeColors[accessType]}"/>
+      <rect x="8.5" y="10.5" width="1.5" height="1.5" fill="${courseTypeColors[accessType]}"/>
+      <rect x="13" y="10.5" width="1.5" height="1.5" fill="${courseTypeColors[accessType]}"/>
+      <rect x="10.75" y="12" width="1.5" height="2.25" fill="${courseTypeColors[accessType]}"/>`
   };
   
-  const color = statusColors[status];
+  const color = courseTypeColors[accessType];
   const icon = accessTypeIcons[accessType];
   
   return L.divIcon({
