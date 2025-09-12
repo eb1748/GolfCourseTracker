@@ -63,7 +63,7 @@ export default function HeroSection({ totalCourses, coursesPlayed, onGetStarted 
             
             <div className="text-center">
               <div className="flex items-center gap-2 justify-center">
-                <Trophy className="w-5 h-5 text-golf-played" />
+                <Trophy className="w-5 h-5 text-golf-want" />
                 <span className="text-2xl font-bold">{coursesPlayed}</span>
               </div>
               <p className="text-sm text-white/80">Courses Played</p>
