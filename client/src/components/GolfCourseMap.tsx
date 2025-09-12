@@ -161,14 +161,8 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
   const popupRef = useRef<HTMLDivElement>(null);
-  const hoverTimeoutRef = useRef<number | null>(null);
   const [selectedCourse, setSelectedCourse] = useState<GolfCourseWithStatus | null>(null);
   const [iconScale, setIconScale] = useState<number>(1);
-  const [hoverPreview, setHoverPreview] = useState<{
-    course: GolfCourseWithStatus;
-    x: number;
-    y: number;
-  } | null>(null);
 
   const filteredCourses = courses.filter(course => 
     filterStatus === 'all' || course.status === filterStatus
@@ -229,23 +223,6 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
         updateMarkersScale(newScale);
       });
 
-      // Clear hover preview on map interactions to prevent stale positioning
-      mapInstanceRef.current.on('zoomstart', () => {
-        if (hoverTimeoutRef.current) {
-          clearTimeout(hoverTimeoutRef.current);
-          hoverTimeoutRef.current = null;
-        }
-        setHoverPreview(null);
-      });
-
-      mapInstanceRef.current.on('movestart', () => {
-        if (hoverTimeoutRef.current) {
-          clearTimeout(hoverTimeoutRef.current);
-          hoverTimeoutRef.current = null;
-        }
-        setHoverPreview(null);
-      });
-
       // Set initial scale based on initial zoom
       const initialZoom = mapInstanceRef.current.getZoom();
       const initialScale = calculateIconScale(initialZoom);
@@ -266,52 +243,9 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
       marker.addTo(mapInstanceRef.current!);
       
       marker.on('click', () => {
-        // Hide any existing hover preview
-        if (hoverTimeoutRef.current) {
-          clearTimeout(hoverTimeoutRef.current);
-          hoverTimeoutRef.current = null;
-        }
-        setHoverPreview(null);
-        
         playClickSound();
         setSelectedCourse(course);
         console.log(`Golf course selected: ${course.name}`);
-      });
-
-      // Add hover event listeners for preview
-      marker.on('mouseover', (e) => {
-        // Clear any existing timeout
-        if (hoverTimeoutRef.current) {
-          clearTimeout(hoverTimeoutRef.current);
-        }
-
-        // Set timeout for preview with 175ms delay (middle of 150-200ms range)
-        hoverTimeoutRef.current = window.setTimeout(() => {
-          // Use marker position instead of mouse for more stable positioning
-          const markerLatLng = marker.getLatLng();
-          const containerPoint = mapInstanceRef.current!.latLngToContainerPoint(markerLatLng);
-          
-          // Add bounds checking to prevent offscreen rendering
-          const container = mapRef.current!.getBoundingClientRect();
-          const clampedX = Math.max(10, Math.min(containerPoint.x, container.width - 200));
-          const clampedY = Math.max(10, containerPoint.y);
-          
-          setHoverPreview({
-            course,
-            x: clampedX,
-            y: clampedY
-          });
-        }, 175);
-      });
-
-      marker.on('mouseout', () => {
-        // Cancel pending timeout
-        if (hoverTimeoutRef.current) {
-          clearTimeout(hoverTimeoutRef.current);
-          hoverTimeoutRef.current = null;
-        }
-        // Hide preview
-        setHoverPreview(null);
       });
 
       markersRef.current.push(marker);
@@ -319,12 +253,6 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
 
     return () => {
       markersRef.current.forEach(marker => marker.remove());
-      // Clear any pending hover timeout and preview
-      if (hoverTimeoutRef.current) {
-        clearTimeout(hoverTimeoutRef.current);
-        hoverTimeoutRef.current = null;
-      }
-      setHoverPreview(null);
     };
   }, [filteredCourses, iconScale]);
 
@@ -427,43 +355,6 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
   return (
     <div className="relative w-full h-full">
       <div ref={mapRef} className="w-full h-full rounded-md" />
-      
-      {/* Hover Preview */}
-      {hoverPreview && (
-        <div 
-          className="absolute z-[1001] pointer-events-none"
-          style={{
-            left: hoverPreview.x + 15,
-            top: hoverPreview.y - 10,
-            transform: 'translateY(-100%)',
-          }}
-          data-testid={`hover-preview-${hoverPreview.course.id}`}
-        >
-          <div className="bg-background border border-border rounded-md shadow-lg p-3 max-w-xs">
-            <div className="space-y-2">
-              <h4 className="font-poppins font-semibold text-sm leading-tight">{hoverPreview.course.name}</h4>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <MapPin className="w-3 h-3" />
-                {hoverPreview.course.location}
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge className={`text-xs px-2 py-0.5 ${getCourseTypeColor(hoverPreview.course.accessType)}`}>
-                  {getCourseTypeLabel(hoverPreview.course.accessType)}
-                </Badge>
-                <Badge 
-                  className="text-xs px-2 py-0.5"
-                  style={getStatusColor(hoverPreview.course.status || 'not-played')}
-                >
-                  {getStatusLabel(hoverPreview.course.status || 'not-played')}
-                </Badge>
-              </div>
-              <div className="text-xs text-muted-foreground pt-1 border-t border-border">
-                Hover preview • Click for full details
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
       
       {/* Course Details Popup */}
       {selectedCourse && (
