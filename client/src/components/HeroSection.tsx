@@ -32,7 +32,7 @@ export default function HeroSection({ totalCourses, coursesPlayed, onGetStarted 
           {/* Badge */}
           <Badge variant="outline" className="bg-white/20 border-white/30 text-white backdrop-blur-sm">
             <MapPin className="w-4 h-4 mr-2" />
-            America's Top 100 Golf Courses
+            America's Best Golf Courses
           </Badge>
 
           {/* Main Heading */}
