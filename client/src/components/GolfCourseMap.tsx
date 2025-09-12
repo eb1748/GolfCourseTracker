@@ -123,15 +123,15 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
     filterStatus === 'all' || course.status === filterStatus
   );
 
-  // Calculate scale factor based on zoom level (max 300%)
+  // Calculate scale factor based on zoom level (max 450%)
   const calculateIconScale = (zoom: number): number => {
-    // Base zoom is 4, scale linearly up to max 3x at higher zooms
+    // Base zoom is 4, scale linearly up to max 4.5x at higher zooms
     // At zoom 4: scale = 1.0
-    // At zoom 10 and above: scale = 3.0 (300%)
+    // At zoom 10 and above: scale = 4.5 (450%)
     const baseZoom = 4;
     const maxZoom = 10;
     const minScale = 1.0;
-    const maxScale = 3.0;
+    const maxScale = 4.5;
     
     if (zoom <= baseZoom) return minScale;
     if (zoom >= maxZoom) return maxScale;
