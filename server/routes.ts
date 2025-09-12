@@ -88,7 +88,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         total: courses.length,
         played: courses.filter(c => c.status === 'played').length,
         wantToPlay: courses.filter(c => c.status === 'want-to-play').length,
-        notPlayed: courses.filter(c => c.status === 'not-played').length,
+        notPlayed: courses.length - courses.filter(c => c.status === 'played').length,
       };
 
       res.json(stats);

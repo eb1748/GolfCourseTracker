@@ -90,7 +90,7 @@ export default function Home() {
     const total = courses.length;
     const played = courses.filter(c => c.status === 'played').length;
     const wantToPlay = courses.filter(c => c.status === 'want-to-play').length;
-    const notPlayed = courses.filter(c => c.status === 'not-played').length;
+    const notPlayed = total - played; // Not played = total - played (includes want-to-play courses)
     const publicCourses = courses.filter(c => c.accessType === 'public').length;
     const privateCourses = courses.filter(c => c.accessType === 'private').length;
     const resortCourses = courses.filter(c => c.accessType === 'resort').length;
