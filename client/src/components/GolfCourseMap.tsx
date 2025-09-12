@@ -26,23 +26,23 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus) => {
   const accessTypeIcons = {
     'public': `
       <!-- Golf flag (simplified) -->
-      <rect x="11" y="7" width="1" height="6" fill="white"/>
-      <path d="M12 7 L17 8 L12 10 Z" fill="white"/>`,
+      <rect x="10.25" y="6" width="1.5" height="9" fill="white"/>
+      <path d="M11.75 6 L18.25 7.5 L11.75 10.5 Z" fill="white"/>`,
     'private': `
       <!-- Key symbol (simplified) -->
-      <circle cx="12" cy="10" r="2" fill="white"/>
-      <circle cx="12" cy="10" r="1" fill="${statusColors[status]}"/>
-      <rect x="11.5" y="12" width="1" height="2" fill="white"/>
-      <rect x="12.5" y="13" width="1" height="0.5" fill="white"/>`,
+      <circle cx="12" cy="9.5" r="3" fill="white"/>
+      <circle cx="12" cy="9.5" r="1.5" fill="${statusColors[status]}"/>
+      <rect x="11.25" y="12.5" width="1.5" height="3" fill="white"/>
+      <rect x="12.75" y="14" width="1.5" height="0.75" fill="white"/>`,
     'resort': `
       <!-- Resort/Hotel building (simplified) -->
-      <rect x="9" y="8" width="6" height="5" fill="white"/>
-      <rect x="10" y="9" width="1" height="1" fill="${statusColors[status]}"/>
-      <rect x="11.5" y="9" width="1" height="1" fill="${statusColors[status]}"/>
-      <rect x="13" y="9" width="1" height="1" fill="${statusColors[status]}"/>
-      <rect x="10" y="10.5" width="1" height="1" fill="${statusColors[status]}"/>
-      <rect x="13" y="10.5" width="1" height="1" fill="${statusColors[status]}"/>
-      <rect x="11.5" y="11.5" width="1" height="1.5" fill="${statusColors[status]}"/>`
+      <rect x="7.5" y="7" width="9" height="7.5" fill="white"/>
+      <rect x="8.5" y="8.25" width="1.5" height="1.5" fill="${statusColors[status]}"/>
+      <rect x="10.75" y="8.25" width="1.5" height="1.5" fill="${statusColors[status]}"/>
+      <rect x="13" y="8.25" width="1.5" height="1.5" fill="${statusColors[status]}"/>
+      <rect x="8.5" y="10.5" width="1.5" height="1.5" fill="${statusColors[status]}"/>
+      <rect x="13" y="10.5" width="1.5" height="1.5" fill="${statusColors[status]}"/>
+      <rect x="10.75" y="12" width="1.5" height="2.25" fill="${statusColors[status]}"/>`
   };
   
   const color = statusColors[status];
