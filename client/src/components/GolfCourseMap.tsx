@@ -141,6 +141,22 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
     }
   };
 
+  const getCourseTypeLabel = (accessType: AccessType) => {
+    switch (accessType) {
+      case 'public': return 'Public';
+      case 'private': return 'Private';
+      case 'resort': return 'Resort';
+    }
+  };
+
+  const getCourseTypeColor = (accessType: AccessType) => {
+    switch (accessType) {
+      case 'public': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'private': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case 'resort': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+    }
+  };
+
   return (
     <div className="relative w-full h-full">
       <div ref={mapRef} className="w-full h-full rounded-md" />
@@ -203,6 +219,13 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
               </div>
 
               <div className="space-y-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-medium">Course Type:</span>
+                  <Badge className={getCourseTypeColor(selectedCourse.accessType)}>
+                    {getCourseTypeLabel(selectedCourse.accessType)}
+                  </Badge>
+                </div>
+                
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">Status:</span>
                   <Badge className={getStatusColor(selectedCourse.status || 'not-played')}>

@@ -2,7 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Star, Phone, Globe } from 'lucide-react';
-import type { GolfCourseWithStatus, CourseStatus } from '@shared/schema';
+import type { GolfCourseWithStatus, CourseStatus, AccessType } from '@shared/schema';
 
 interface CourseListCardProps {
   course: GolfCourseWithStatus;
@@ -24,6 +24,22 @@ export default function CourseListCard({ course, onStatusChange, onLocationClick
       case 'played': return 'Played';
       case 'want-to-play': return 'Want to Play';
       case 'not-played': return 'Not Played';
+    }
+  };
+
+  const getCourseTypeLabel = (accessType: AccessType) => {
+    switch (accessType) {
+      case 'public': return 'Public';
+      case 'private': return 'Private';
+      case 'resort': return 'Resort';
+    }
+  };
+
+  const getCourseTypeColor = (accessType: AccessType) => {
+    switch (accessType) {
+      case 'public': return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'private': return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+      case 'resort': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
     }
   };
 
@@ -54,9 +70,14 @@ export default function CourseListCard({ course, onStatusChange, onLocationClick
             </button>
           </div>
           
-          <Badge className={getStatusColor(course.status || 'not-played')}>
-            {getStatusLabel(course.status || 'not-played')}
-          </Badge>
+          <div className="flex gap-2 flex-wrap">
+            <Badge className={getCourseTypeColor(course.accessType)}>
+              {getCourseTypeLabel(course.accessType)}
+            </Badge>
+            <Badge className={getStatusColor(course.status || 'not-played')}>
+              {getStatusLabel(course.status || 'not-played')}
+            </Badge>
+          </div>
         </div>
 
         {/* Rating */}

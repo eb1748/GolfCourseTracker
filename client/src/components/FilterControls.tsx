@@ -40,7 +40,7 @@ export default function FilterControls({
   ];
 
   const accessFilters = [
-    { key: 'all' as const, label: 'All Access', count: stats.total },
+    { key: 'all' as const, label: 'All Courses', count: stats.total },
     { key: 'public' as const, label: 'Public', count: stats.public },
     { key: 'private' as const, label: 'Private', count: stats.private },
     { key: 'resort' as const, label: 'Resort', count: stats.resort },
@@ -115,7 +115,7 @@ export default function FilterControls({
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Filter by Access</span>
+            <span className="text-sm font-medium">Filter by Course Type</span>
           </div>
           
           <div className="grid grid-cols-2 gap-2">
