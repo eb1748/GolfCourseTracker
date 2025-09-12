@@ -67,6 +67,28 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus, scale: 
           <path d="M 16.5 16.5 A 11 11 0 0 1 12 23 A 11 11 0 0 1 1 12 A 11 11 0 0 1 7.5 1.8 A 11 11 0 0 0 16.5 16.5" fill="rgba(0,0,0,0.08)"/>
           
           <!-- Realistic dimples - crescent shapes arranged in curved rows -->
+          <!-- Outermost perimeter row - very close to edge -->
+          <path d="M 6 4.8 A 0.6 0.6 0 0 1 6.6 5.4 A 0.6 0.6 0 0 1 6 6" stroke="rgba(0,0,0,0.15)" stroke-width="0.25" fill="none"/>
+          <path d="M 9 3.5 A 0.7 0.7 0 0 1 9.7 4.2 A 0.7 0.7 0 0 1 9 4.9" stroke="rgba(0,0,0,0.18)" stroke-width="0.25" fill="none"/>
+          <path d="M 12 3 A 0.8 0.8 0 0 1 12.8 3.8 A 0.8 0.8 0 0 1 12 4.6" stroke="rgba(0,0,0,0.2)" stroke-width="0.25" fill="none"/>
+          <path d="M 15 3.5 A 0.7 0.7 0 0 1 15.7 4.2 A 0.7 0.7 0 0 1 15 4.9" stroke="rgba(0,0,0,0.18)" stroke-width="0.25" fill="none"/>
+          <path d="M 18 4.8 A 0.6 0.6 0 0 1 18.6 5.4 A 0.6 0.6 0 0 1 18 6" stroke="rgba(0,0,0,0.15)" stroke-width="0.25" fill="none"/>
+          
+          <!-- Left and right edge dimples -->
+          <path d="M 3.5 9 A 0.7 0.7 0 0 1 4.2 9.7 A 0.7 0.7 0 0 1 3.5 10.4" stroke="rgba(0,0,0,0.16)" stroke-width="0.25" fill="none"/>
+          <path d="M 3 12 A 0.8 0.8 0 0 1 3.8 12.8 A 0.8 0.8 0 0 1 3 13.6" stroke="rgba(0,0,0,0.18)" stroke-width="0.25" fill="none"/>
+          <path d="M 3.5 15 A 0.7 0.7 0 0 1 4.2 15.7 A 0.7 0.7 0 0 1 3.5 16.4" stroke="rgba(0,0,0,0.16)" stroke-width="0.25" fill="none"/>
+          <path d="M 20.5 9 A 0.7 0.7 0 0 1 21.2 9.7 A 0.7 0.7 0 0 1 20.5 10.4" stroke="rgba(0,0,0,0.14)" stroke-width="0.25" fill="none"/>
+          <path d="M 21 12 A 0.8 0.8 0 0 1 21.8 12.8 A 0.8 0.8 0 0 1 21 13.6" stroke="rgba(0,0,0,0.16)" stroke-width="0.25" fill="none"/>
+          <path d="M 20.5 15 A 0.7 0.7 0 0 1 21.2 15.7 A 0.7 0.7 0 0 1 20.5 16.4" stroke="rgba(0,0,0,0.14)" stroke-width="0.25" fill="none"/>
+          
+          <!-- Bottom perimeter row -->
+          <path d="M 6 18 A 0.6 0.6 0 0 1 6.6 18.6 A 0.6 0.6 0 0 1 6 19.2" stroke="rgba(0,0,0,0.13)" stroke-width="0.25" fill="none"/>
+          <path d="M 9 19.5 A 0.7 0.7 0 0 1 9.7 20.2 A 0.7 0.7 0 0 1 9 20.9" stroke="rgba(0,0,0,0.15)" stroke-width="0.25" fill="none"/>
+          <path d="M 12 21 A 0.8 0.8 0 0 1 12.8 21.8 A 0.8 0.8 0 0 1 12 22.6" stroke="rgba(0,0,0,0.16)" stroke-width="0.25" fill="none"/>
+          <path d="M 15 19.5 A 0.7 0.7 0 0 1 15.7 20.2 A 0.7 0.7 0 0 1 15 20.9" stroke="rgba(0,0,0,0.15)" stroke-width="0.25" fill="none"/>
+          <path d="M 18 18 A 0.6 0.6 0 0 1 18.6 18.6 A 0.6 0.6 0 0 1 18 19.2" stroke="rgba(0,0,0,0.13)" stroke-width="0.25" fill="none"/>
+          
           <!-- Top arc row -->
           <path d="M 8.5 5.5 A 0.8 0.8 0 0 1 9.3 6.3 A 0.8 0.8 0 0 1 8.5 7.1" stroke="rgba(0,0,0,0.2)" stroke-width="0.3" fill="none"/>
           <path d="M 11 5 A 0.9 0.9 0 0 1 11.9 5.9 A 0.9 0.9 0 0 1 11 6.8" stroke="rgba(0,0,0,0.25)" stroke-width="0.3" fill="none"/>
@@ -106,6 +128,12 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus, scale: 
           <path d="M 12.5 15.8 A 0.5 0.5 0 0 1 13 16.3 A 0.5 0.5 0 0 1 12.5 16.8" stroke="rgba(0,0,0,0.15)" stroke-width="0.25" fill="none"/>
           <path d="M 15.8 11.2 A 0.5 0.5 0 0 1 16.3 11.7 A 0.5 0.5 0 0 1 15.8 12.2" stroke="rgba(0,0,0,0.14)" stroke-width="0.25" fill="none"/>
           <path d="M 10.2 12.8 A 0.4 0.4 0 0 1 10.6 13.2 A 0.4 0.4 0 0 1 10.2 13.6" stroke="rgba(0,0,0,0.13)" stroke-width="0.25" fill="none"/>
+          
+          <!-- Near-edge corner dimples -->
+          <path d="M 4.5 6.5 A 0.5 0.5 0 0 1 5 7 A 0.5 0.5 0 0 1 4.5 7.5" stroke="rgba(0,0,0,0.14)" stroke-width="0.25" fill="none"/>
+          <path d="M 19.5 6.5 A 0.5 0.5 0 0 1 20 7 A 0.5 0.5 0 0 1 19.5 7.5" stroke="rgba(0,0,0,0.12)" stroke-width="0.25" fill="none"/>
+          <path d="M 4.5 17.5 A 0.5 0.5 0 0 1 5 18 A 0.5 0.5 0 0 1 4.5 18.5" stroke="rgba(0,0,0,0.12)" stroke-width="0.25" fill="none"/>
+          <path d="M 19.5 17.5 A 0.5 0.5 0 0 1 20 18 A 0.5 0.5 0 0 1 19.5 18.5" stroke="rgba(0,0,0,0.11)" stroke-width="0.25" fill="none"/>
           
           <!-- Access type icon -->
           ${icon}
