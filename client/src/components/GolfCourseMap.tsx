@@ -29,20 +29,16 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus) => {
       <rect x="10.25" y="6" width="1.5" height="9" fill="white"/>
       <path d="M11.75 6 L18.25 7.5 L11.75 10.5 Z" fill="white"/>`,
     'private': `
-      <!-- Key symbol (simplified) -->
-      <circle cx="12" cy="9.5" r="3" fill="white"/>
-      <circle cx="12" cy="9.5" r="1.5" fill="${statusColors[status]}"/>
-      <rect x="11.25" y="12.5" width="1.5" height="3" fill="white"/>
-      <rect x="12.75" y="14" width="1.5" height="0.75" fill="white"/>`,
+      <!-- Padlock symbol (simplified) -->
+      <rect x="9.5" y="11" width="5" height="4.5" rx="0.5" fill="white"/>
+      <path d="M10.5 11 L10.5 9.5 Q10.5 8 12 8 Q13.5 8 13.5 9.5 L13.5 11" stroke="white" stroke-width="1.2" fill="none"/>
+      <circle cx="12" cy="13" r="0.8" fill="${statusColors[status]}"/>`,
     'resort': `
-      <!-- Resort/Hotel building (simplified) -->
-      <rect x="7.5" y="7" width="9" height="7.5" fill="white"/>
-      <rect x="8.5" y="8.25" width="1.5" height="1.5" fill="${statusColors[status]}"/>
-      <rect x="10.75" y="8.25" width="1.5" height="1.5" fill="${statusColors[status]}"/>
-      <rect x="13" y="8.25" width="1.5" height="1.5" fill="${statusColors[status]}"/>
-      <rect x="8.5" y="10.5" width="1.5" height="1.5" fill="${statusColors[status]}"/>
-      <rect x="13" y="10.5" width="1.5" height="1.5" fill="${statusColors[status]}"/>
-      <rect x="10.75" y="12" width="1.5" height="2.25" fill="${statusColors[status]}"/>`
+      <!-- Umbrella symbol (simplified) -->
+      <path d="M7.5 10 Q9 7 12 7 Q15 7 16.5 10" stroke="white" stroke-width="1.8" fill="none"/>
+      <path d="M7.5 10 Q9.75 9 12 9 Q14.25 9 16.5 10" stroke="${statusColors[status]}" stroke-width="1" fill="none"/>
+      <rect x="11.7" y="10" width="0.6" height="4.5" fill="white"/>
+      <path d="M12.3 14.5 Q12.3 15 11.7 15" stroke="white" stroke-width="0.6" fill="none"/>`
   };
   
   const color = statusColors[status];
