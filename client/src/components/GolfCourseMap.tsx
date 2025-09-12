@@ -37,11 +37,18 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus, scale: 
       <path d="M10.5 11 L10.5 9.5 Q10.5 8 12 8 Q13.5 8 13.5 9.5 L13.5 11" stroke="${iconColor}" stroke-width="1.2" fill="none"/>
       <circle cx="12" cy="13" r="0.8" fill="${statusColors[status]}"/>`,
     'resort': `
-      <!-- Umbrella symbol (simplified) -->
-      <path d="M7.5 10 Q9 7 12 7 Q15 7 16.5 10" stroke="${iconColor}" stroke-width="1.8" fill="none"/>
-      <path d="M7.5 10 Q9.75 9 12 9 Q14.25 9 16.5 10" stroke="${statusColors[status]}" stroke-width="1" fill="none"/>
-      <rect x="11.7" y="10" width="0.6" height="4.5" fill="${iconColor}"/>
-      <path d="M12.3 14.5 Q12.3 15 11.7 15" stroke="${iconColor}" stroke-width="0.6" fill="none"/>`
+      <!-- Beach umbrella with segments -->
+      <g transform="translate(12,12)">
+        <!-- Umbrella segments -->
+        <path d="M -4.5 -4 Q -3 -6 0 -6 Q 1.5 -5.5 3 -4 Q 1.5 -2.5 0 -2.5 Q -1.5 -2.5 -4.5 -4" fill="${iconColor}" stroke="none"/>
+        <path d="M 0 -6 Q 1.5 -6 4.5 -4 Q 3 -2.5 0 -2.5 Q -1.5 -2.5 0 -6" fill="${iconColor}" stroke="none"/>
+        <path d="M -4.5 -4 Q -1.5 -2.5 0 -2.5 Q -1.5 -1 -4.5 -2.5 Q -4.5 -3.25 -4.5 -4" fill="${iconColor}" stroke="none"/>
+        <path d="M 4.5 -4 Q 1.5 -2.5 0 -2.5 Q 1.5 -1 4.5 -2.5 Q 4.5 -3.25 4.5 -4" fill="${iconColor}" stroke="none"/>
+        <!-- Umbrella pole -->
+        <rect x="-0.3" y="-2.5" width="0.6" height="5" fill="${iconColor}"/>
+        <!-- Ground base -->
+        <ellipse cx="0" cy="2.8" rx="2" ry="0.4" fill="${iconColor}"/>
+      </g>`
   };
   
   const color = statusColors[status];
@@ -55,7 +62,7 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus, scale: 
   return L.divIcon({
     html: `
       <div style="position: relative;">
-        <svg width="${scaledSize}" height="${scaledSize}" viewBox="0 0 24 24" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25));">
+        <svg width="${scaledSize}" height="${scaledSize}" viewBox="0 0 24 24" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));">
           <!-- Golf ball body with gradient -->
           <defs>
             <radialGradient id="ballGradient-${status}" cx="0.35" cy="0.35" r="0.8">
@@ -68,65 +75,65 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus, scale: 
           
           <!-- Realistic dimples - crescent shapes arranged in curved rows -->
           <!-- Outermost perimeter row - very close to edge -->
-          <path d="M 6 4.8 A 0.6 0.6 0 0 1 6.6 5.4 A 0.6 0.6 0 0 1 6 6" stroke="rgba(0,0,0,0.15)" stroke-width="0.25" fill="none"/>
-          <path d="M 9 3.5 A 0.7 0.7 0 0 1 9.7 4.2 A 0.7 0.7 0 0 1 9 4.9" stroke="rgba(0,0,0,0.18)" stroke-width="0.25" fill="none"/>
-          <path d="M 12 3 A 0.8 0.8 0 0 1 12.8 3.8 A 0.8 0.8 0 0 1 12 4.6" stroke="rgba(0,0,0,0.2)" stroke-width="0.25" fill="none"/>
-          <path d="M 15 3.5 A 0.7 0.7 0 0 1 15.7 4.2 A 0.7 0.7 0 0 1 15 4.9" stroke="rgba(0,0,0,0.18)" stroke-width="0.25" fill="none"/>
-          <path d="M 18 4.8 A 0.6 0.6 0 0 1 18.6 5.4 A 0.6 0.6 0 0 1 18 6" stroke="rgba(0,0,0,0.15)" stroke-width="0.25" fill="none"/>
+          <path d="M 6 4.8 A 0.6 0.6 0 0 1 6.6 5.4 A 0.6 0.6 0 0 1 6 6" stroke="rgba(0,0,0,0.35)" stroke-width="0.25" fill="none"/>
+          <path d="M 9 3.5 A 0.7 0.7 0 0 1 9.7 4.2 A 0.7 0.7 0 0 1 9 4.9" stroke="rgba(0,0,0,0.38)" stroke-width="0.25" fill="none"/>
+          <path d="M 12 3 A 0.8 0.8 0 0 1 12.8 3.8 A 0.8 0.8 0 0 1 12 4.6" stroke="rgba(0,0,0,0.4)" stroke-width="0.25" fill="none"/>
+          <path d="M 15 3.5 A 0.7 0.7 0 0 1 15.7 4.2 A 0.7 0.7 0 0 1 15 4.9" stroke="rgba(0,0,0,0.38)" stroke-width="0.25" fill="none"/>
+          <path d="M 18 4.8 A 0.6 0.6 0 0 1 18.6 5.4 A 0.6 0.6 0 0 1 18 6" stroke="rgba(0,0,0,0.35)" stroke-width="0.25" fill="none"/>
           
           <!-- Left and right edge dimples -->
-          <path d="M 3.5 9 A 0.7 0.7 0 0 1 4.2 9.7 A 0.7 0.7 0 0 1 3.5 10.4" stroke="rgba(0,0,0,0.16)" stroke-width="0.25" fill="none"/>
-          <path d="M 3 12 A 0.8 0.8 0 0 1 3.8 12.8 A 0.8 0.8 0 0 1 3 13.6" stroke="rgba(0,0,0,0.18)" stroke-width="0.25" fill="none"/>
-          <path d="M 3.5 15 A 0.7 0.7 0 0 1 4.2 15.7 A 0.7 0.7 0 0 1 3.5 16.4" stroke="rgba(0,0,0,0.16)" stroke-width="0.25" fill="none"/>
-          <path d="M 20.5 9 A 0.7 0.7 0 0 1 21.2 9.7 A 0.7 0.7 0 0 1 20.5 10.4" stroke="rgba(0,0,0,0.14)" stroke-width="0.25" fill="none"/>
-          <path d="M 21 12 A 0.8 0.8 0 0 1 21.8 12.8 A 0.8 0.8 0 0 1 21 13.6" stroke="rgba(0,0,0,0.16)" stroke-width="0.25" fill="none"/>
-          <path d="M 20.5 15 A 0.7 0.7 0 0 1 21.2 15.7 A 0.7 0.7 0 0 1 20.5 16.4" stroke="rgba(0,0,0,0.14)" stroke-width="0.25" fill="none"/>
+          <path d="M 3.5 9 A 0.7 0.7 0 0 1 4.2 9.7 A 0.7 0.7 0 0 1 3.5 10.4" stroke="rgba(0,0,0,0.36)" stroke-width="0.25" fill="none"/>
+          <path d="M 3 12 A 0.8 0.8 0 0 1 3.8 12.8 A 0.8 0.8 0 0 1 3 13.6" stroke="rgba(0,0,0,0.38)" stroke-width="0.25" fill="none"/>
+          <path d="M 3.5 15 A 0.7 0.7 0 0 1 4.2 15.7 A 0.7 0.7 0 0 1 3.5 16.4" stroke="rgba(0,0,0,0.36)" stroke-width="0.25" fill="none"/>
+          <path d="M 20.5 9 A 0.7 0.7 0 0 1 21.2 9.7 A 0.7 0.7 0 0 1 20.5 10.4" stroke="rgba(0,0,0,0.34)" stroke-width="0.25" fill="none"/>
+          <path d="M 21 12 A 0.8 0.8 0 0 1 21.8 12.8 A 0.8 0.8 0 0 1 21 13.6" stroke="rgba(0,0,0,0.36)" stroke-width="0.25" fill="none"/>
+          <path d="M 20.5 15 A 0.7 0.7 0 0 1 21.2 15.7 A 0.7 0.7 0 0 1 20.5 16.4" stroke="rgba(0,0,0,0.34)" stroke-width="0.25" fill="none"/>
           
           <!-- Bottom perimeter row -->
-          <path d="M 6 18 A 0.6 0.6 0 0 1 6.6 18.6 A 0.6 0.6 0 0 1 6 19.2" stroke="rgba(0,0,0,0.13)" stroke-width="0.25" fill="none"/>
-          <path d="M 9 19.5 A 0.7 0.7 0 0 1 9.7 20.2 A 0.7 0.7 0 0 1 9 20.9" stroke="rgba(0,0,0,0.15)" stroke-width="0.25" fill="none"/>
-          <path d="M 12 21 A 0.8 0.8 0 0 1 12.8 21.8 A 0.8 0.8 0 0 1 12 22.6" stroke="rgba(0,0,0,0.16)" stroke-width="0.25" fill="none"/>
-          <path d="M 15 19.5 A 0.7 0.7 0 0 1 15.7 20.2 A 0.7 0.7 0 0 1 15 20.9" stroke="rgba(0,0,0,0.15)" stroke-width="0.25" fill="none"/>
-          <path d="M 18 18 A 0.6 0.6 0 0 1 18.6 18.6 A 0.6 0.6 0 0 1 18 19.2" stroke="rgba(0,0,0,0.13)" stroke-width="0.25" fill="none"/>
+          <path d="M 6 18 A 0.6 0.6 0 0 1 6.6 18.6 A 0.6 0.6 0 0 1 6 19.2" stroke="rgba(0,0,0,0.33)" stroke-width="0.25" fill="none"/>
+          <path d="M 9 19.5 A 0.7 0.7 0 0 1 9.7 20.2 A 0.7 0.7 0 0 1 9 20.9" stroke="rgba(0,0,0,0.35)" stroke-width="0.25" fill="none"/>
+          <path d="M 12 21 A 0.8 0.8 0 0 1 12.8 21.8 A 0.8 0.8 0 0 1 12 22.6" stroke="rgba(0,0,0,0.36)" stroke-width="0.25" fill="none"/>
+          <path d="M 15 19.5 A 0.7 0.7 0 0 1 15.7 20.2 A 0.7 0.7 0 0 1 15 20.9" stroke="rgba(0,0,0,0.35)" stroke-width="0.25" fill="none"/>
+          <path d="M 18 18 A 0.6 0.6 0 0 1 18.6 18.6 A 0.6 0.6 0 0 1 18 19.2" stroke="rgba(0,0,0,0.33)" stroke-width="0.25" fill="none"/>
           
           <!-- Top arc row -->
-          <path d="M 8.5 5.5 A 0.8 0.8 0 0 1 9.3 6.3 A 0.8 0.8 0 0 1 8.5 7.1" stroke="rgba(0,0,0,0.2)" stroke-width="0.3" fill="none"/>
-          <path d="M 11 5 A 0.9 0.9 0 0 1 11.9 5.9 A 0.9 0.9 0 0 1 11 6.8" stroke="rgba(0,0,0,0.25)" stroke-width="0.3" fill="none"/>
-          <path d="M 13 5 A 0.9 0.9 0 0 1 13.9 5.9 A 0.9 0.9 0 0 1 13 6.8" stroke="rgba(0,0,0,0.25)" stroke-width="0.3" fill="none"/>
-          <path d="M 15.5 5.5 A 0.8 0.8 0 0 1 16.3 6.3 A 0.8 0.8 0 0 1 15.5 7.1" stroke="rgba(0,0,0,0.2)" stroke-width="0.3" fill="none"/>
+          <path d="M 8.5 5.5 A 0.8 0.8 0 0 1 9.3 6.3 A 0.8 0.8 0 0 1 8.5 7.1" stroke="rgba(0,0,0,0.4)" stroke-width="0.3" fill="none"/>
+          <path d="M 11 5 A 0.9 0.9 0 0 1 11.9 5.9 A 0.9 0.9 0 0 1 11 6.8" stroke="rgba(0,0,0,0.45)" stroke-width="0.3" fill="none"/>
+          <path d="M 13 5 A 0.9 0.9 0 0 1 13.9 5.9 A 0.9 0.9 0 0 1 13 6.8" stroke="rgba(0,0,0,0.45)" stroke-width="0.3" fill="none"/>
+          <path d="M 15.5 5.5 A 0.8 0.8 0 0 1 16.3 6.3 A 0.8 0.8 0 0 1 15.5 7.1" stroke="rgba(0,0,0,0.4)" stroke-width="0.3" fill="none"/>
           
           <!-- Upper-middle arc row -->
-          <path d="M 6.8 8 A 0.7 0.7 0 0 1 7.5 8.7 A 0.7 0.7 0 0 1 6.8 9.4" stroke="rgba(0,0,0,0.18)" stroke-width="0.3" fill="none"/>
-          <path d="M 9.2 7.5 A 0.8 0.8 0 0 1 10 8.3 A 0.8 0.8 0 0 1 9.2 9.1" stroke="rgba(0,0,0,0.2)" stroke-width="0.3" fill="none"/>
-          <path d="M 11.5 7.2 A 0.9 0.9 0 0 1 12.4 8.1 A 0.9 0.9 0 0 1 11.5 9" stroke="rgba(0,0,0,0.22)" stroke-width="0.3" fill="none"/>
-          <path d="M 14 7.5 A 0.8 0.8 0 0 1 14.8 8.3 A 0.8 0.8 0 0 1 14 9.1" stroke="rgba(0,0,0,0.2)" stroke-width="0.3" fill="none"/>
-          <path d="M 16.5 8.2 A 0.7 0.7 0 0 1 17.2 8.9 A 0.7 0.7 0 0 1 16.5 9.6" stroke="rgba(0,0,0,0.18)" stroke-width="0.3" fill="none"/>
+          <path d="M 6.8 8 A 0.7 0.7 0 0 1 7.5 8.7 A 0.7 0.7 0 0 1 6.8 9.4" stroke="rgba(0,0,0,0.38)" stroke-width="0.3" fill="none"/>
+          <path d="M 9.2 7.5 A 0.8 0.8 0 0 1 10 8.3 A 0.8 0.8 0 0 1 9.2 9.1" stroke="rgba(0,0,0,0.4)" stroke-width="0.3" fill="none"/>
+          <path d="M 11.5 7.2 A 0.9 0.9 0 0 1 12.4 8.1 A 0.9 0.9 0 0 1 11.5 9" stroke="rgba(0,0,0,0.42)" stroke-width="0.3" fill="none"/>
+          <path d="M 14 7.5 A 0.8 0.8 0 0 1 14.8 8.3 A 0.8 0.8 0 0 1 14 9.1" stroke="rgba(0,0,0,0.4)" stroke-width="0.3" fill="none"/>
+          <path d="M 16.5 8.2 A 0.7 0.7 0 0 1 17.2 8.9 A 0.7 0.7 0 0 1 16.5 9.6" stroke="rgba(0,0,0,0.38)" stroke-width="0.3" fill="none"/>
           
           <!-- Middle arc row -->
-          <path d="M 6 11 A 0.8 0.8 0 0 1 6.8 11.8 A 0.8 0.8 0 0 1 6 12.6" stroke="rgba(0,0,0,0.2)" stroke-width="0.3" fill="none"/>
-          <path d="M 8.5 10.2 A 0.9 0.9 0 0 1 9.4 11.1 A 0.9 0.9 0 0 1 8.5 12" stroke="rgba(0,0,0,0.22)" stroke-width="0.3" fill="none"/>
-          <path d="M 11 9.8 A 1 1 0 0 1 12 10.8 A 1 1 0 0 1 11 11.8" stroke="rgba(0,0,0,0.25)" stroke-width="0.3" fill="none"/>
-          <path d="M 13.5 10 A 0.9 0.9 0 0 1 14.4 10.9 A 0.9 0.9 0 0 1 13.5 11.8" stroke="rgba(0,0,0,0.23)" stroke-width="0.3" fill="none"/>
-          <path d="M 16 10.8 A 0.8 0.8 0 0 1 16.8 11.6 A 0.8 0.8 0 0 1 16 12.4" stroke="rgba(0,0,0,0.21)" stroke-width="0.3" fill="none"/>
+          <path d="M 6 11 A 0.8 0.8 0 0 1 6.8 11.8 A 0.8 0.8 0 0 1 6 12.6" stroke="rgba(0,0,0,0.4)" stroke-width="0.3" fill="none"/>
+          <path d="M 8.5 10.2 A 0.9 0.9 0 0 1 9.4 11.1 A 0.9 0.9 0 0 1 8.5 12" stroke="rgba(0,0,0,0.42)" stroke-width="0.3" fill="none"/>
+          <path d="M 11 9.8 A 1 1 0 0 1 12 10.8 A 1 1 0 0 1 11 11.8" stroke="rgba(0,0,0,0.45)" stroke-width="0.3" fill="none"/>
+          <path d="M 13.5 10 A 0.9 0.9 0 0 1 14.4 10.9 A 0.9 0.9 0 0 1 13.5 11.8" stroke="rgba(0,0,0,0.43)" stroke-width="0.3" fill="none"/>
+          <path d="M 16 10.8 A 0.8 0.8 0 0 1 16.8 11.6 A 0.8 0.8 0 0 1 16 12.4" stroke="rgba(0,0,0,0.41)" stroke-width="0.3" fill="none"/>
           
           <!-- Lower-middle arc row -->
-          <path d="M 6.2 14 A 0.7 0.7 0 0 1 6.9 14.7 A 0.7 0.7 0 0 1 6.2 15.4" stroke="rgba(0,0,0,0.18)" stroke-width="0.3" fill="none"/>
-          <path d="M 8.8 13.2 A 0.8 0.8 0 0 1 9.6 14 A 0.8 0.8 0 0 1 8.8 14.8" stroke="rgba(0,0,0,0.2)" stroke-width="0.3" fill="none"/>
-          <path d="M 11.2 12.8 A 0.9 0.9 0 0 1 12.1 13.7 A 0.9 0.9 0 0 1 11.2 14.6" stroke="rgba(0,0,0,0.22)" stroke-width="0.3" fill="none"/>
-          <path d="M 13.8 13 A 0.8 0.8 0 0 1 14.6 13.8 A 0.8 0.8 0 0 1 13.8 14.6" stroke="rgba(0,0,0,0.21)" stroke-width="0.3" fill="none"/>
-          <path d="M 16.2 13.5 A 0.7 0.7 0 0 1 16.9 14.2 A 0.7 0.7 0 0 1 16.2 14.9" stroke="rgba(0,0,0,0.19)" stroke-width="0.3" fill="none"/>
+          <path d="M 6.2 14 A 0.7 0.7 0 0 1 6.9 14.7 A 0.7 0.7 0 0 1 6.2 15.4" stroke="rgba(0,0,0,0.38)" stroke-width="0.3" fill="none"/>
+          <path d="M 8.8 13.2 A 0.8 0.8 0 0 1 9.6 14 A 0.8 0.8 0 0 1 8.8 14.8" stroke="rgba(0,0,0,0.4)" stroke-width="0.3" fill="none"/>
+          <path d="M 11.2 12.8 A 0.9 0.9 0 0 1 12.1 13.7 A 0.9 0.9 0 0 1 11.2 14.6" stroke="rgba(0,0,0,0.42)" stroke-width="0.3" fill="none"/>
+          <path d="M 13.8 13 A 0.8 0.8 0 0 1 14.6 13.8 A 0.8 0.8 0 0 1 13.8 14.6" stroke="rgba(0,0,0,0.41)" stroke-width="0.3" fill="none"/>
+          <path d="M 16.2 13.5 A 0.7 0.7 0 0 1 16.9 14.2 A 0.7 0.7 0 0 1 16.2 14.9" stroke="rgba(0,0,0,0.39)" stroke-width="0.3" fill="none"/>
           
           <!-- Bottom arc row -->
-          <path d="M 8 16.5 A 0.7 0.7 0 0 1 8.7 17.2 A 0.7 0.7 0 0 1 8 17.9" stroke="rgba(0,0,0,0.17)" stroke-width="0.3" fill="none"/>
-          <path d="M 10.5 16.8 A 0.8 0.8 0 0 1 11.3 17.6 A 0.8 0.8 0 0 1 10.5 18.4" stroke="rgba(0,0,0,0.19)" stroke-width="0.3" fill="none"/>
-          <path d="M 13 17 A 0.8 0.8 0 0 1 13.8 17.8 A 0.8 0.8 0 0 1 13 18.6" stroke="rgba(0,0,0,0.18)" stroke-width="0.3" fill="none"/>
-          <path d="M 15.2 17.2 A 0.7 0.7 0 0 1 15.9 17.9 A 0.7 0.7 0 0 1 15.2 18.6" stroke="rgba(0,0,0,0.16)" stroke-width="0.3" fill="none"/>
+          <path d="M 8 16.5 A 0.7 0.7 0 0 1 8.7 17.2 A 0.7 0.7 0 0 1 8 17.9" stroke="rgba(0,0,0,0.37)" stroke-width="0.3" fill="none"/>
+          <path d="M 10.5 16.8 A 0.8 0.8 0 0 1 11.3 17.6 A 0.8 0.8 0 0 1 10.5 18.4" stroke="rgba(0,0,0,0.39)" stroke-width="0.3" fill="none"/>
+          <path d="M 13 17 A 0.8 0.8 0 0 1 13.8 17.8 A 0.8 0.8 0 0 1 13 18.6" stroke="rgba(0,0,0,0.38)" stroke-width="0.3" fill="none"/>
+          <path d="M 15.2 17.2 A 0.7 0.7 0 0 1 15.9 17.9 A 0.7 0.7 0 0 1 15.2 18.6" stroke="rgba(0,0,0,0.36)" stroke-width="0.3" fill="none"/>
           
           <!-- Additional scattered dimples for density -->
-          <path d="M 7.5 12.5 A 0.5 0.5 0 0 1 8 13 A 0.5 0.5 0 0 1 7.5 13.5" stroke="rgba(0,0,0,0.15)" stroke-width="0.25" fill="none"/>
-          <path d="M 9.8 15.2 A 0.6 0.6 0 0 1 10.4 15.8 A 0.6 0.6 0 0 1 9.8 16.4" stroke="rgba(0,0,0,0.16)" stroke-width="0.25" fill="none"/>
-          <path d="M 12.5 15.8 A 0.5 0.5 0 0 1 13 16.3 A 0.5 0.5 0 0 1 12.5 16.8" stroke="rgba(0,0,0,0.15)" stroke-width="0.25" fill="none"/>
-          <path d="M 15.8 11.2 A 0.5 0.5 0 0 1 16.3 11.7 A 0.5 0.5 0 0 1 15.8 12.2" stroke="rgba(0,0,0,0.14)" stroke-width="0.25" fill="none"/>
+          <path d="M 7.5 12.5 A 0.5 0.5 0 0 1 8 13 A 0.5 0.5 0 0 1 7.5 13.5" stroke="rgba(0,0,0,0.35)" stroke-width="0.25" fill="none"/>
+          <path d="M 9.8 15.2 A 0.6 0.6 0 0 1 10.4 15.8 A 0.6 0.6 0 0 1 9.8 16.4" stroke="rgba(0,0,0,0.36)" stroke-width="0.25" fill="none"/>
+          <path d="M 12.5 15.8 A 0.5 0.5 0 0 1 13 16.3 A 0.5 0.5 0 0 1 12.5 16.8" stroke="rgba(0,0,0,0.35)" stroke-width="0.25" fill="none"/>
+          <path d="M 15.8 11.2 A 0.5 0.5 0 0 1 16.3 11.7 A 0.5 0.5 0 0 1 15.8 12.2" stroke="rgba(0,0,0,0.34)" stroke-width="0.25" fill="none"/>
           <path d="M 10.2 12.8 A 0.4 0.4 0 0 1 10.6 13.2 A 0.4 0.4 0 0 1 10.2 13.6" stroke="rgba(0,0,0,0.13)" stroke-width="0.25" fill="none"/>
           
           <!-- Near-edge corner dimples -->
