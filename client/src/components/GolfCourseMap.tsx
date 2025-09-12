@@ -211,7 +211,7 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
       });
 
       // Create a solid color background instead of map tiles
-      mapInstanceRef.current.getContainer().style.backgroundColor = '#1E3A5F';
+      mapInstanceRef.current.getContainer().style.backgroundColor = '#2C3E2D';
 
       // Add zoom event listener to update icon sizes
       mapInstanceRef.current.on('zoomend', () => {
