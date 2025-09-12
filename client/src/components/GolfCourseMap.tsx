@@ -122,6 +122,12 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
 
   const handleStatusChange = (courseId: string, newStatus: CourseStatus) => {
     onStatusChange(courseId, newStatus);
+    
+    // Update the selectedCourse state immediately for instant UI feedback
+    if (selectedCourse && selectedCourse.id === courseId) {
+      setSelectedCourse({ ...selectedCourse, status: newStatus });
+    }
+    
     console.log(`Status changed for course ${courseId}: ${newStatus}`);
   };
 
