@@ -157,14 +157,61 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
     }
   };
 
+  const getStatusButtonProps = (status: CourseStatus, isSelected: boolean) => {
+    if (!isSelected) {
+      return {
+        variant: 'outline' as const,
+        className: 'text-xs pointer-events-auto cursor-pointer bg-background text-foreground border-input no-default-hover-elevate no-default-active-elevate',
+        style: {}
+      };
+    }
+    
+    // For selected buttons, use default variant and disable elevation utilities
+    const baseStyle = {
+      variant: 'default' as const,
+      className: 'text-xs pointer-events-auto cursor-pointer no-default-hover-elevate no-default-active-elevate hover:opacity-90',
+      style: {} as React.CSSProperties
+    };
+    
+    switch (status) {
+      case 'played':
+        return {
+          ...baseStyle,
+          style: { 
+            backgroundColor: '#1a5f3f', 
+            borderColor: '#1a5f3f',
+            color: 'white'
+          }
+        };
+      case 'want-to-play':
+        return {
+          ...baseStyle,
+          style: { 
+            backgroundColor: '#ca8a04', 
+            borderColor: '#ca8a04',
+            color: 'black'
+          }
+        };
+      case 'not-played':
+        return {
+          ...baseStyle,
+          style: { 
+            backgroundColor: '#6b7280', 
+            borderColor: '#6b7280',
+            color: 'white'
+          }
+        };
+    }
+  };
+
   return (
     <div className="relative w-full h-full">
       <div ref={mapRef} className="w-full h-full rounded-md" />
       
       {/* Course Details Popup */}
       {selectedCourse && (
-        <div className="absolute top-4 right-4 w-80 z-[1000]">
-          <Card className="shadow-lg">
+        <div className="absolute top-4 right-4 w-80 z-[1000] pointer-events-auto">
+          <Card className="shadow-lg pointer-events-auto">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div>
@@ -233,34 +280,52 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
                   </Badge>
                 </div>
                 
-                <div className="grid grid-cols-3 gap-2">
-                  <Button
-                    size="sm"
-                    variant={selectedCourse.status === 'played' ? 'default' : 'outline'}
-                    onClick={() => handleStatusChange(selectedCourse.id, 'played')}
-                    className="text-xs"
-                    data-testid={`button-status-played-${selectedCourse.id}`}
-                  >
-                    Played
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={selectedCourse.status === 'want-to-play' ? 'default' : 'outline'}
-                    onClick={() => handleStatusChange(selectedCourse.id, 'want-to-play')}
-                    className="text-xs"
-                    data-testid={`button-status-want-${selectedCourse.id}`}
-                  >
-                    Want to Play
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={selectedCourse.status === 'not-played' ? 'default' : 'outline'}
-                    onClick={() => handleStatusChange(selectedCourse.id, 'not-played')}
-                    className="text-xs"
-                    data-testid={`button-status-not-played-${selectedCourse.id}`}
-                  >
-                    Not Played
-                  </Button>
+                <div className="grid grid-cols-3 gap-2 pointer-events-auto">
+                  {(() => {
+                    const playedProps = getStatusButtonProps('played', selectedCourse.status === 'played');
+                    return (
+                      <Button
+                        size="sm"
+                        variant={playedProps.variant}
+                        onClick={() => handleStatusChange(selectedCourse.id, 'played')}
+                        className={playedProps.className}
+                        style={playedProps.style}
+                        data-testid={`button-status-played-${selectedCourse.id}`}
+                      >
+                        Played
+                      </Button>
+                    );
+                  })()}
+                  {(() => {
+                    const wantProps = getStatusButtonProps('want-to-play', selectedCourse.status === 'want-to-play');
+                    return (
+                      <Button
+                        size="sm"
+                        variant={wantProps.variant}
+                        onClick={() => handleStatusChange(selectedCourse.id, 'want-to-play')}
+                        className={wantProps.className}
+                        style={wantProps.style}
+                        data-testid={`button-status-want-${selectedCourse.id}`}
+                      >
+                        Want to Play
+                      </Button>
+                    );
+                  })()}
+                  {(() => {
+                    const notPlayedProps = getStatusButtonProps('not-played', selectedCourse.status === 'not-played');
+                    return (
+                      <Button
+                        size="sm"
+                        variant={notPlayedProps.variant}
+                        onClick={() => handleStatusChange(selectedCourse.id, 'not-played')}
+                        className={notPlayedProps.className}
+                        style={notPlayedProps.style}
+                        data-testid={`button-status-not-played-${selectedCourse.id}`}
+                      >
+                        Not Played
+                      </Button>
+                    );
+                  })()}
                 </div>
               </div>
             </CardContent>
