@@ -71,6 +71,7 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
+  const popupRef = useRef<HTMLDivElement>(null);
   const [selectedCourse, setSelectedCourse] = useState<GolfCourseWithStatus | null>(null);
 
   const filteredCourses = courses.filter(course => 
@@ -119,6 +120,24 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
       markersRef.current.forEach(marker => marker.remove());
     };
   }, [filteredCourses]);
+
+  // Handle outside clicks to close popup
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (selectedCourse && popupRef.current && !popupRef.current.contains(event.target as Node)) {
+        setSelectedCourse(null);
+        console.log('Popup closed by clicking outside');
+      }
+    };
+
+    if (selectedCourse) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [selectedCourse]);
 
   const handleStatusChange = (courseId: string, newStatus: CourseStatus) => {
     onStatusChange(courseId, newStatus);
@@ -216,7 +235,7 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
       
       {/* Course Details Popup */}
       {selectedCourse && (
-        <div className="absolute top-4 right-4 w-80 z-[1000] pointer-events-auto">
+        <div ref={popupRef} className="absolute top-4 right-4 w-80 z-[1000] pointer-events-auto">
           <Card className="shadow-lg pointer-events-auto">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
