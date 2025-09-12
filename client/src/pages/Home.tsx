@@ -159,7 +159,7 @@ export default function Home() {
             </div>
             <div>
               <h1 className="font-poppins font-bold text-lg">Golf Journey Map</h1>
-              <p className="text-xs text-muted-foreground">Join the Hunt to Play North America's Best Golf Courses</p>
+              <p className="text-xs text-muted-foreground">Play America's Best Golf Courses</p>
             </div>
           </div>
           
