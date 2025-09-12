@@ -56,19 +56,48 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus, scale: 
           <!-- Golf ball body -->
           <circle cx="12" cy="12" r="11" fill="${color}" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
           
-          <!-- Golf ball dimples -->
-          <circle cx="8" cy="8" r="0.8" fill="rgba(0,0,0,0.1)"/>
-          <circle cx="12" cy="7" r="0.8" fill="rgba(0,0,0,0.1)"/>
-          <circle cx="16" cy="8" r="0.8" fill="rgba(0,0,0,0.1)"/>
+          <!-- Golf ball dimples - enhanced realistic pattern -->
+          <!-- Outer perimeter dimples -->
+          <circle cx="6.5" cy="9" r="0.7" fill="rgba(0,0,0,0.12)"/>
           <circle cx="7" cy="12" r="0.8" fill="rgba(0,0,0,0.1)"/>
-          <circle cx="17" cy="12" r="0.8" fill="rgba(0,0,0,0.1)"/>
-          <circle cx="8" cy="16" r="0.8" fill="rgba(0,0,0,0.1)"/>
-          <circle cx="12" cy="17" r="0.8" fill="rgba(0,0,0,0.1)"/>
-          <circle cx="16" cy="16" r="0.8" fill="rgba(0,0,0,0.1)"/>
-          <circle cx="10" cy="12" r="0.6" fill="rgba(0,0,0,0.08)"/>
-          <circle cx="14" cy="12" r="0.6" fill="rgba(0,0,0,0.08)"/>
-          <circle cx="12" cy="10" r="0.6" fill="rgba(0,0,0,0.08)"/>
-          <circle cx="12" cy="14" r="0.6" fill="rgba(0,0,0,0.08)"/>
+          <circle cx="6.8" cy="15" r="0.6" fill="rgba(0,0,0,0.09)"/>
+          <circle cx="9" cy="6.5" r="0.6" fill="rgba(0,0,0,0.11)"/>
+          <circle cx="12" cy="6" r="0.9" fill="rgba(0,0,0,0.13)"/>
+          <circle cx="15" cy="6.5" r="0.7" fill="rgba(0,0,0,0.1)"/>
+          <circle cx="17.5" cy="9" r="0.8" fill="rgba(0,0,0,0.11)"/>
+          <circle cx="18" cy="12" r="0.7" fill="rgba(0,0,0,0.12)"/>
+          <circle cx="17.2" cy="15" r="0.6" fill="rgba(0,0,0,0.09)"/>
+          <circle cx="15" cy="17.5" r="0.7" fill="rgba(0,0,0,0.1)"/>
+          <circle cx="12" cy="18" r="0.8" fill="rgba(0,0,0,0.11)"/>
+          <circle cx="9" cy="17.5" r="0.6" fill="rgba(0,0,0,0.09)"/>
+          
+          <!-- Mid-ring dimples -->
+          <circle cx="8.5" cy="8.5" r="0.8" fill="rgba(0,0,0,0.1)"/>
+          <circle cx="15.5" cy="8.5" r="0.7" fill="rgba(0,0,0,0.11)"/>
+          <circle cx="8.5" cy="15.5" r="0.6" fill="rgba(0,0,0,0.08)"/>
+          <circle cx="15.5" cy="15.5" r="0.8" fill="rgba(0,0,0,0.1)"/>
+          <circle cx="12" cy="8.5" r="0.9" fill="rgba(0,0,0,0.12)"/>
+          <circle cx="12" cy="15.5" r="0.7" fill="rgba(0,0,0,0.09)"/>
+          <circle cx="8.5" cy="12" r="0.6" fill="rgba(0,0,0,0.08)"/>
+          <circle cx="15.5" cy="12" r="0.8" fill="rgba(0,0,0,0.11)"/>
+          
+          <!-- Inner core dimples -->
+          <circle cx="10" cy="10" r="0.7" fill="rgba(0,0,0,0.09)"/>
+          <circle cx="14" cy="10" r="0.6" fill="rgba(0,0,0,0.08)"/>
+          <circle cx="10" cy="14" r="0.8" fill="rgba(0,0,0,0.1)"/>
+          <circle cx="14" cy="14" r="0.7" fill="rgba(0,0,0,0.09)"/>
+          <circle cx="12" cy="11" r="0.5" fill="rgba(0,0,0,0.07)"/>
+          <circle cx="12" cy="13" r="0.6" fill="rgba(0,0,0,0.08)"/>
+          <circle cx="10.5" cy="12" r="0.5" fill="rgba(0,0,0,0.07)"/>
+          <circle cx="13.5" cy="12" r="0.6" fill="rgba(0,0,0,0.08)"/>
+          
+          <!-- Additional scattered dimples for realism -->
+          <circle cx="9.5" cy="11" r="0.4" fill="rgba(0,0,0,0.06)"/>
+          <circle cx="14.5" cy="11" r="0.5" fill="rgba(0,0,0,0.07)"/>
+          <circle cx="11" cy="9.5" r="0.4" fill="rgba(0,0,0,0.06)"/>
+          <circle cx="13" cy="14.5" r="0.5" fill="rgba(0,0,0,0.07)"/>
+          <circle cx="10.2" cy="13.2" r="0.4" fill="rgba(0,0,0,0.06)"/>
+          <circle cx="13.8" cy="10.8" r="0.4" fill="rgba(0,0,0,0.06)"/>
           
           <!-- Access type icon -->
           ${icon}
