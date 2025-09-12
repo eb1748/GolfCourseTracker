@@ -368,8 +368,9 @@
 
 /* Map icon specific effects */
 .map-icon-button {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.15s ease-out, filter 0.15s ease-out;
   cursor: pointer;
+  transform: scale(1);
 }
 
 .map-icon-button:hover {
@@ -393,9 +394,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-.enhanced-button:hover .icon-element {
-  animation: iconPulse 1s infinite;
-}
+/* Removed icon pulse animation from enhanced buttons to prevent blinking */
 
 .enhanced-button:active {
   transform: translateY(0) scale(0.98);
