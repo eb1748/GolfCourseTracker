@@ -161,8 +161,12 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
   const popupRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
   const [selectedCourse, setSelectedCourse] = useState<GolfCourseWithStatus | null>(null);
+  const [previewCourse, setPreviewCourse] = useState<GolfCourseWithStatus | null>(null);
+  const [previewPosition, setPreviewPosition] = useState<{ x: number, y: number } | null>(null);
   const [iconScale, setIconScale] = useState<number>(1);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const filteredCourses = courses.filter(course => 
     filterStatus === 'all' || course.status === filterStatus
@@ -242,10 +246,58 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
 
       marker.addTo(mapInstanceRef.current!);
       
-      marker.on('click', () => {
+      // Click handler for full details popup
+      marker.on('click', (e) => {
+        console.log(`[DEBUG] Marker clicked for course: ${course.name}`);
+        // Clear any hover preview immediately
+        if (hoverTimeoutRef.current) {
+          clearTimeout(hoverTimeoutRef.current);
+          hoverTimeoutRef.current = null;
+        }
+        setPreviewCourse(null);
+        setPreviewPosition(null);
+        
         playClickSound();
         setSelectedCourse(course);
         console.log(`Golf course selected: ${course.name}`);
+        // Stop event propagation to prevent map clicks
+        L.DomEvent.stopPropagation(e);
+      });
+      
+      // Hover handlers for preview
+      marker.on('mouseover', (e) => {
+        // Don't show preview if popup is already open
+        // Using a ref to get current value of selectedCourse to avoid stale closures
+        const isPopupOpen = document.querySelector('.golf-popup-card') !== null;
+        if (isPopupOpen) return;
+        
+        // Clear any existing timeout
+        if (hoverTimeoutRef.current) {
+          clearTimeout(hoverTimeoutRef.current);
+        }
+        
+        // Set timeout for 175ms delay (middle of 150-200ms range)
+        hoverTimeoutRef.current = setTimeout(() => {
+          const containerPoint = e.containerPoint;
+          if (containerPoint) {
+            setPreviewCourse(course);
+            setPreviewPosition({
+              x: containerPoint.x,
+              y: containerPoint.y
+            });
+          }
+        }, 175);
+      });
+      
+      marker.on('mouseout', () => {
+        // Cancel the timeout if mouse leaves before preview shows
+        if (hoverTimeoutRef.current) {
+          clearTimeout(hoverTimeoutRef.current);
+          hoverTimeoutRef.current = null;
+        }
+        // Hide preview if it's showing
+        setPreviewCourse(null);
+        setPreviewPosition(null);
       });
 
       markersRef.current.push(marker);
@@ -254,7 +306,7 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
     return () => {
       markersRef.current.forEach(marker => marker.remove());
     };
-  }, [filteredCourses, iconScale]);
+  }, [filteredCourses, iconScale, selectedCourse, onStatusChange]);
 
   // Handle outside clicks to close popup
   useEffect(() => {
@@ -358,8 +410,8 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
       
       {/* Course Details Popup */}
       {selectedCourse && (
-        <div ref={popupRef} className="absolute top-4 right-4 w-80 z-[1000] pointer-events-auto">
-          <Card className="shadow-lg pointer-events-auto">
+        <div ref={popupRef} className="absolute top-4 right-4 w-80 z-[1000] pointer-events-auto" data-testid="course-details-popup">
+          <Card className="shadow-lg pointer-events-auto golf-popup-card">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div>
@@ -479,6 +531,47 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
               </div>
             </CardContent>
           </Card>
+        </div>
+      )}
+      
+      {/* Hover Preview - Lightweight and non-interactive */}
+      {previewCourse && previewPosition && !selectedCourse && (
+        <div 
+          ref={previewRef}
+          className="absolute z-[999] pointer-events-none"
+          style={{
+            left: `${previewPosition.x + 20}px`,
+            top: `${previewPosition.y - 10}px`,
+            transform: 'translateY(-50%)'
+          }}
+        >
+          <div className="bg-popover text-popover-foreground rounded-md shadow-lg border p-3 max-w-[200px]">
+            <div className="space-y-1">
+              <div className="font-semibold text-sm leading-tight">
+                {previewCourse.name}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {previewCourse.location}
+              </div>
+              <div className="flex items-center gap-1 mt-2">
+                <Badge className={`text-[10px] py-0 px-1 ${getCourseTypeColor(previewCourse.accessType)}`}>
+                  {getCourseTypeLabel(previewCourse.accessType)}
+                </Badge>
+                <Badge className="text-[10px] py-0 px-1" style={getStatusColor(previewCourse.status || 'not-played')}>
+                  {getStatusLabel(previewCourse.status || 'not-played')}
+                </Badge>
+              </div>
+              {previewCourse.rating && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                  <Star className="w-3 h-3 fill-golf-want text-golf-want" />
+                  <span>{previewCourse.rating}</span>
+                </div>
+              )}
+              <div className="text-[10px] text-muted-foreground italic mt-2">
+                Click for full details
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
