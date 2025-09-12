@@ -133,9 +133,9 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
 
   const getStatusColor = (status: CourseStatus) => {
     switch (status) {
-      case 'played': return 'bg-golf-played text-white';
-      case 'want-to-play': return 'bg-golf-want text-black';
-      case 'not-played': return 'bg-golf-not-played text-white';
+      case 'played': return { backgroundColor: '#1a5f3f', color: 'white' };
+      case 'want-to-play': return { backgroundColor: '#ca8a04', color: 'black' };
+      case 'not-played': return { backgroundColor: '#6b7280', color: 'white' };
     }
   };
 
@@ -281,7 +281,7 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
                 
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">Status:</span>
-                  <Badge className={getStatusColor(selectedCourse.status || 'not-played')}>
+                  <Badge style={getStatusColor(selectedCourse.status || 'not-played')}>
                     {getStatusLabel(selectedCourse.status || 'not-played')}
                   </Badge>
                 </div>
