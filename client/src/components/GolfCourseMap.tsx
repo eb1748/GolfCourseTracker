@@ -13,8 +13,8 @@ interface GolfCourseMapProps {
   filterStatus?: CourseStatus | 'all';
 }
 
-// Custom golf pin icon SVG based on access type and status
-const createGolfPinIcon = (accessType: AccessType, status: CourseStatus) => {
+// Custom golf pin icon SVG based on access type, status, and zoom scale
+const createGolfPinIcon = (accessType: AccessType, status: CourseStatus, scale: number = 1) => {
   // Status-based colors (matching golf theme colors)
   const statusColors = {
     'played': '#1a4d33', // hsl(142, 60%, 25%) - Dark green
@@ -44,10 +44,15 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus) => {
   const color = statusColors[status];
   const icon = accessTypeIcons[accessType];
   
+  // Calculate scaled dimensions (base size 24x24)
+  const baseSize = 24;
+  const scaledSize = Math.round(baseSize * scale);
+  const halfSize = Math.round(scaledSize / 2);
+  
   return L.divIcon({
     html: `
       <div style="position: relative;">
-        <svg width="24" height="24" viewBox="0 0 24 24" style="filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3));">
+        <svg width="${scaledSize}" height="${scaledSize}" viewBox="0 0 24 24" style="filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3));">
           <!-- Golf ball body -->
           <circle cx="12" cy="12" r="11" fill="${color}" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
           
@@ -71,9 +76,9 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus) => {
       </div>
     `,
     className: 'golf-ball-icon',
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-    popupAnchor: [0, -12]
+    iconSize: [scaledSize, scaledSize],
+    iconAnchor: [halfSize, halfSize],
+    popupAnchor: [0, -halfSize]
   });
 };
 
@@ -83,10 +88,42 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
   const markersRef = useRef<L.Marker[]>([]);
   const popupRef = useRef<HTMLDivElement>(null);
   const [selectedCourse, setSelectedCourse] = useState<GolfCourseWithStatus | null>(null);
+  const [iconScale, setIconScale] = useState<number>(1);
 
   const filteredCourses = courses.filter(course => 
     filterStatus === 'all' || course.status === filterStatus
   );
+
+  // Calculate scale factor based on zoom level (max 300%)
+  const calculateIconScale = (zoom: number): number => {
+    // Base zoom is 4, scale linearly up to max 3x at higher zooms
+    // At zoom 4: scale = 1.0
+    // At zoom 10 and above: scale = 3.0 (300%)
+    const baseZoom = 4;
+    const maxZoom = 10;
+    const minScale = 1.0;
+    const maxScale = 3.0;
+    
+    if (zoom <= baseZoom) return minScale;
+    if (zoom >= maxZoom) return maxScale;
+    
+    const progress = (zoom - baseZoom) / (maxZoom - baseZoom);
+    return minScale + (maxScale - minScale) * progress;
+  };
+
+  // Function to update all markers with new scale
+  const updateMarkersScale = (scale: number) => {
+    markersRef.current.forEach(marker => {
+      const course = filteredCourses.find(c => 
+        marker.getLatLng().lat === parseFloat(c.latitude) && 
+        marker.getLatLng().lng === parseFloat(c.longitude)
+      );
+      if (course) {
+        const newIcon = createGolfPinIcon(course.accessType, course.status || 'not-played', scale);
+        marker.setIcon(newIcon);
+      }
+    });
+  };
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -103,17 +140,30 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
       }).addTo(mapInstanceRef.current);
+
+      // Add zoom event listener to update icon sizes
+      mapInstanceRef.current.on('zoomend', () => {
+        const currentZoom = mapInstanceRef.current!.getZoom();
+        const newScale = calculateIconScale(currentZoom);
+        setIconScale(newScale);
+        updateMarkersScale(newScale);
+      });
+
+      // Set initial scale based on initial zoom
+      const initialZoom = mapInstanceRef.current.getZoom();
+      const initialScale = calculateIconScale(initialZoom);
+      setIconScale(initialScale);
     }
 
     // Clear existing markers
     markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
 
-    // Add markers for filtered courses
+    // Add markers for filtered courses with current scale
     filteredCourses.forEach(course => {
       const marker = L.marker(
         [parseFloat(course.latitude), parseFloat(course.longitude)],
-        { icon: createGolfPinIcon(course.accessType, course.status || 'not-played') }
+        { icon: createGolfPinIcon(course.accessType, course.status || 'not-played', iconScale) }
       );
 
       marker.addTo(mapInstanceRef.current!);
@@ -129,7 +179,7 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
     return () => {
       markersRef.current.forEach(marker => marker.remove());
     };
-  }, [filteredCourses]);
+  }, [filteredCourses, iconScale]);
 
   // Handle outside clicks to close popup
   useEffect(() => {
