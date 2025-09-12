@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Star, Phone, Globe } from 'lucide-react';
 import type { GolfCourseWithStatus, CourseStatus, AccessType } from '@shared/schema';
+import { handleInteractiveClick } from '@/utils/interactiveEffects';
 
 interface CourseListCardProps {
   course: GolfCourseWithStatus;
@@ -61,11 +62,11 @@ export default function CourseListCard({ course, onStatusChange, onLocationClick
           <div className="flex-1">
             <h3 className="font-poppins font-semibold text-lg leading-tight">{course.name}</h3>
             <button 
-              onClick={handleLocationClick}
-              className="flex items-center gap-1 text-muted-foreground hover:text-primary text-sm mt-1 transition-colors"
+              onClick={(e) => handleInteractiveClick(e, handleLocationClick)}
+              className="flex items-center gap-1 text-muted-foreground hover:text-primary text-sm mt-1 transition-colors enhanced-button"
               data-testid={`button-location-${course.id}`}
             >
-              <MapPin className="w-4 h-4" />
+              <MapPin className="w-4 h-4 icon-element" />
               {course.location}
             </button>
           </div>
@@ -123,8 +124,8 @@ export default function CourseListCard({ course, onStatusChange, onLocationClick
           <Button
             size="sm"
             variant={course.status === 'played' ? 'default' : 'outline'}
-            onClick={() => handleStatusChange('played')}
-            className={course.status === 'played' ? 'text-xs bg-golf-played text-white border-golf-played' : 'text-xs'}
+            onClick={(e) => handleInteractiveClick(e, () => handleStatusChange('played'))}
+            className={course.status === 'played' ? 'text-xs bg-golf-played text-white border-golf-played enhanced-button' : 'text-xs enhanced-button'}
             data-testid={`button-status-played-${course.id}`}
           >
             Played
@@ -132,8 +133,8 @@ export default function CourseListCard({ course, onStatusChange, onLocationClick
           <Button
             size="sm"
             variant={course.status === 'want-to-play' ? 'default' : 'outline'}
-            onClick={() => handleStatusChange('want-to-play')}
-            className={course.status === 'want-to-play' ? 'text-xs bg-golf-want text-black border-golf-want' : 'text-xs'}
+            onClick={(e) => handleInteractiveClick(e, () => handleStatusChange('want-to-play'))}
+            className={course.status === 'want-to-play' ? 'text-xs bg-golf-want text-black border-golf-want enhanced-button' : 'text-xs enhanced-button'}
             data-testid={`button-status-want-${course.id}`}
           >
             Want to Play
@@ -141,8 +142,8 @@ export default function CourseListCard({ course, onStatusChange, onLocationClick
           <Button
             size="sm"
             variant={course.status === 'not-played' ? 'default' : 'outline'}
-            onClick={() => handleStatusChange('not-played')}
-            className={course.status === 'not-played' ? 'text-xs bg-golf-not-played text-white border-golf-not-played' : 'text-xs'}
+            onClick={(e) => handleInteractiveClick(e, () => handleStatusChange('not-played'))}
+            className={course.status === 'not-played' ? 'text-xs bg-golf-not-played text-white border-golf-not-played enhanced-button' : 'text-xs enhanced-button'}
             data-testid={`button-status-not-played-${course.id}`}
           >
             Not Played

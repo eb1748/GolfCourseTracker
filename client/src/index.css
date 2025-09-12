@@ -327,3 +327,82 @@
     inset: -1px;
   }
 }
+
+/* Interactive Button Effects */
+.interactive-button {
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  transform-origin: center;
+}
+
+.interactive-button:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+}
+
+.interactive-button:hover .icon-pulse {
+  animation: iconPulse 1s infinite;
+}
+
+.interactive-button:active {
+  transform: scale(0.98);
+}
+
+/* Icon pulse animation */
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Ripple effect */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  animation: ripple 0.6s linear;
+  pointer-events: none;
+  z-index: 10;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Map icon specific effects */
+.map-icon-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.map-icon-button:hover {
+  transform: scale(1.15);
+  filter: drop-shadow(0 6px 20px rgba(0, 0, 0, 0.25));
+}
+
+.map-icon-button:active {
+  transform: scale(1.05);
+}
+
+/* List and popup button effects */
+.enhanced-button {
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.enhanced-button:hover {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.enhanced-button:hover .icon-element {
+  animation: iconPulse 1s infinite;
+}
+
+.enhanced-button:active {
+  transform: translateY(0) scale(0.98);
+}

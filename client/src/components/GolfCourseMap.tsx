@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin, Star, Phone, Globe } from 'lucide-react';
+import { playClickSound, handleInteractiveClick } from '@/utils/interactiveEffects';
 
 interface GolfCourseMapProps {
   courses: GolfCourseWithStatus[];
@@ -62,7 +63,7 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus, scale: 
   
   return L.divIcon({
     html: `
-      <div style="position: relative;">
+      <div class="map-icon-button" style="position: relative;">
         <svg width="${scaledSize}" height="${scaledSize}" viewBox="0 0 24 24" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5));">
           <!-- Golf ball body with gradient -->
           <defs>
@@ -242,6 +243,7 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
       marker.addTo(mapInstanceRef.current!);
       
       marker.on('click', () => {
+        playClickSound();
         setSelectedCourse(course);
         console.log(`Golf course selected: ${course.name}`);
       });
@@ -370,10 +372,11 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  onClick={() => setSelectedCourse(null)}
+                  className="enhanced-button"
+                  onClick={(e) => handleInteractiveClick(e, () => setSelectedCourse(null))}
                   data-testid="button-close-popup"
                 >
-                  ×
+                  <span className="icon-element">×</span>
                 </Button>
               </div>
             </CardHeader>
@@ -433,8 +436,8 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
                       <Button
                         size="sm"
                         variant={playedProps.variant}
-                        onClick={() => handleStatusChange(selectedCourse.id, 'played')}
-                        className={playedProps.className}
+                        onClick={(e) => handleInteractiveClick(e, () => handleStatusChange(selectedCourse.id, 'played'))}
+                        className={`${playedProps.className} enhanced-button`}
                         style={playedProps.style}
                         data-testid={`button-status-played-${selectedCourse.id}`}
                       >
@@ -448,8 +451,8 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
                       <Button
                         size="sm"
                         variant={wantProps.variant}
-                        onClick={() => handleStatusChange(selectedCourse.id, 'want-to-play')}
-                        className={wantProps.className}
+                        onClick={(e) => handleInteractiveClick(e, () => handleStatusChange(selectedCourse.id, 'want-to-play'))}
+                        className={`${wantProps.className} enhanced-button`}
                         style={wantProps.style}
                         data-testid={`button-status-want-${selectedCourse.id}`}
                       >
@@ -463,8 +466,8 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
                       <Button
                         size="sm"
                         variant={notPlayedProps.variant}
-                        onClick={() => handleStatusChange(selectedCourse.id, 'not-played')}
-                        className={notPlayedProps.className}
+                        onClick={(e) => handleInteractiveClick(e, () => handleStatusChange(selectedCourse.id, 'not-played'))}
+                        className={`${notPlayedProps.className} enhanced-button`}
                         style={notPlayedProps.style}
                         data-testid={`button-status-not-played-${selectedCourse.id}`}
                       >
