@@ -158,8 +158,8 @@ export default function Home() {
               <Map className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="font-poppins font-bold text-lg">Golf Tracker</h1>
-              <p className="text-xs text-muted-foreground">Top 100 Golf Courses</p>
+              <h1 className="font-poppins font-bold text-lg">Golf Journey Map</h1>
+              <p className="text-xs text-muted-foreground">Join the Hunt to Play North America's Best Golf Courses</p>
             </div>
           </div>
           
