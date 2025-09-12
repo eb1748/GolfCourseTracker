@@ -37,13 +37,14 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus, scale: 
       <path d="M10.5 11 L10.5 9.5 Q10.5 8 12 8 Q13.5 8 13.5 9.5 L13.5 11" stroke="${iconColor}" stroke-width="1.2" fill="none"/>
       <circle cx="12" cy="13" r="0.8" fill="${statusColors[status]}"/>`,
     'resort': `
-      <!-- Beach umbrella with segments -->
-      <g transform="translate(12,12)">
-        <!-- Umbrella segments -->
-        <path d="M -4.5 -4 Q -3 -6 0 -6 Q 1.5 -5.5 3 -4 Q 1.5 -2.5 0 -2.5 Q -1.5 -2.5 -4.5 -4" fill="${iconColor}" stroke="none"/>
-        <path d="M 0 -6 Q 1.5 -6 4.5 -4 Q 3 -2.5 0 -2.5 Q -1.5 -2.5 0 -6" fill="${iconColor}" stroke="none"/>
-        <path d="M -4.5 -4 Q -1.5 -2.5 0 -2.5 Q -1.5 -1 -4.5 -2.5 Q -4.5 -3.25 -4.5 -4" fill="${iconColor}" stroke="none"/>
-        <path d="M 4.5 -4 Q 1.5 -2.5 0 -2.5 Q 1.5 -1 4.5 -2.5 Q 4.5 -3.25 4.5 -4" fill="${iconColor}" stroke="none"/>
+      <!-- Beach umbrella with segments, leaning at angle -->
+      <g transform="translate(12,12) rotate(15)">
+        <!-- Left segment -->
+        <path d="M -4.5 -3.5 Q -3 -5.5 -1 -5.8 Q -2 -2.8 -4.5 -2.2 Z" fill="${iconColor}" stroke="none"/>
+        <!-- Left-center segment -->
+        <path d="M -1.2 -5.8 Q 0 -6 1.2 -5.8 Q 0 -2.8 -1.2 -2.8 Z" fill="${iconColor}" stroke="none"/>
+        <!-- Right-center segment -->
+        <path d="M 1 -5.8 Q 3 -5.5 4.5 -3.5 Q 2 -2.8 1 -2.8 Z" fill="${iconColor}" stroke="none"/>
         <!-- Umbrella pole -->
         <rect x="-0.3" y="-2.5" width="0.6" height="5" fill="${iconColor}"/>
         <!-- Ground base -->
