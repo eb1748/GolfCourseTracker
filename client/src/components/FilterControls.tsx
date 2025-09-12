@@ -19,6 +19,7 @@ interface FilterControlsProps {
     notPlayed: number;
     public: number;
     private: number;
+    resort: number;
   };
 }
 
@@ -42,6 +43,7 @@ export default function FilterControls({
     { key: 'all' as const, label: 'All Access', count: stats.total },
     { key: 'public' as const, label: 'Public', count: stats.public },
     { key: 'private' as const, label: 'Private', count: stats.private },
+    { key: 'resort' as const, label: 'Resort', count: stats.resort },
   ];
 
   const getFilterVariant = (filterKey: CourseStatus | 'all') => {
@@ -131,8 +133,8 @@ export default function FilterControls({
               </Badge>
             </Button>
             
-            {/* Public and Private - Second Row */}
-            <div className="grid grid-cols-2 gap-2">
+            {/* Public, Private, and Resort - Second Row */}
+            <div className="grid grid-cols-3 gap-2">
               <Button
                 variant={getAccessFilterVariant('public')}
                 size="sm"
@@ -155,6 +157,18 @@ export default function FilterControls({
                 <span>Private</span>
                 <Badge variant="secondary">
                   {stats.private}
+                </Badge>
+              </Button>
+              <Button
+                variant={getAccessFilterVariant('resort')}
+                size="sm"
+                onClick={() => handleAccessFilterClick('resort')}
+                className="justify-between"
+                data-testid="button-access-filter-resort"
+              >
+                <span>Resort</span>
+                <Badge variant="secondary">
+                  {stats.resort}
                 </Badge>
               </Button>
             </div>
