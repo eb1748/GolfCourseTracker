@@ -191,7 +191,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.7", 
     description: "True links golf on the coast of Cape Breton",
     website: "https://cabotlinks.com",
-    phone: "+1 (902) 258-4653"
+    phone: "+1 (902) 258-4653",
     accessType: "public"
   },
   {
@@ -311,7 +311,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.7",
     description: "Donald Ross seaside masterpiece in Florida",
     website: "https://seminolegolfclub.com",
-    phone: "(561) 626-2004"
+    phone: "(561) 626-2004",
     accessType: "private"
   },
   {
@@ -323,7 +323,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.9",
     description: "Alister MacKenzie coastal masterpiece",
     website: "https://cypresspointclub.com",
-    phone: "(831) 624-2223"
+    phone: "(831) 624-2223",
     accessType: "private"
   },
   {
@@ -335,7 +335,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.6",
     description: "C.B. Macdonald's template hole masterpiece",
     website: "https://ngla.org",
-    phone: "(631) 283-0410"
+    phone: "(631) 283-0410",
     accessType: "private"
   },
   {
@@ -347,7 +347,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.5",
     description: "Seth Raynor links-style design on Long Island Sound",
     website: "https://fishersislandclub.com",
-    phone: "(631) 788-7221"
+    phone: "(631) 788-7221",
     accessType: "private"
   },
   {
@@ -359,7 +359,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.6",
     description: "First 18-hole course in America, C.B. Macdonald design",
     website: "https://chicagogolfclub.org",
-    phone: "(630) 665-2988"
+    phone: "(630) 665-2988",
     accessType: "private"
   },
   {
@@ -395,7 +395,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.4",
     description: "Jack Nicklaus design, host of Memorial Tournament",
     website: "https://muirfieldvillage.com",
-    phone: "(614) 889-6800"
+    phone: "(614) 889-6800",
     accessType: "private"
   },
   {
@@ -407,7 +407,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.5",
     description: "A.W. Tillinghast design, multiple major championship venue",
     website: "https://baltusrol.org",
-    phone: "(973) 376-1900"
+    phone: "(973) 376-1900",
     accessType: "private"
   },
   {
@@ -419,7 +419,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.3",
     description: "Robert Trent Jones Sr. design, major championship venue",
     website: "https://hazeltine.com",
-    phone: "(952) 448-4628"
+    phone: "(952) 448-4628",
     accessType: "private"
   },
   {
@@ -431,7 +431,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.4",
     description: "Host of PGA Championship and Presidents Cup",
     website: "https://quailhollowclub.com",
-    phone: "(704) 552-1500"
+    phone: "(704) 552-1500",
     accessType: "private"
   },
   {
@@ -443,7 +443,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.3",
     description: "Historic course, home of TOUR Championship",
     website: "https://eastlakegolfclub.com",
-    phone: "(404) 377-5313"
+    phone: "(404) 377-5313",
     accessType: "private"
   },
   {
@@ -467,7 +467,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.5",
     description: "Monster course, multiple major championship venue",
     website: "https://medinahcc.org",
-    phone: "(630) 773-1700"
+    phone: "(630) 773-1700",
     accessType: "private"
   },
   {
@@ -479,7 +479,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.4",
     description: "Demanding parkland course with cypress trees",
     website: "https://olyclub.com",
-    phone: "(415) 587-5200"
+    phone: "(415) 587-5200",
     accessType: "private"
   },
   {
@@ -491,7 +491,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.3",
     description: "Perry Maxwell design, multiple major venue",
     website: "https://southernhillscc.com",
-    phone: "(918) 492-3351"
+    phone: "(918) 492-3351",
     accessType: "private"
   },
   {
@@ -503,7 +503,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.2",
     description: "Jack Nicklaus design, PGA Championship venue",
     website: "https://valhalla.com",
-    phone: "(502) 245-4475"
+    phone: "(502) 245-4475",
     accessType: "private"
   },
   {
@@ -515,7 +515,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.4",
     description: "Donald Ross design with tree-lined fairways",
     website: "https://oakhillcc.com",
-    phone: "(585) 586-1660"
+    phone: "(585) 586-1660",
     accessType: "private"
   },
   {
@@ -527,7 +527,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.1",
     description: "Robert Trent Jones Sr. design, PGA Championship venue",
     website: "https://bellerivecc.com",
-    phone: "(314) 965-3472"
+    phone: "(314) 965-3472",
     accessType: "private"
   },
   {
@@ -539,7 +539,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.3",
     description: "Donald Ross classic outside Philadelphia",
     website: "https://aronimink.org",
-    phone: "(610) 356-1385"
+    phone: "(610) 356-1385",
     accessType: "private"
   },
   {
@@ -551,7 +551,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.2",
     description: "Donald Ross design with storied major championship history",
     website: "https://invernessclub.com",
-    phone: "(419) 578-9951"
+    phone: "(419) 578-9951",
     accessType: "private"
   },
   {
@@ -563,7 +563,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.3",
     description: "William Flynn design at high altitude",
     website: "https://cherryhillscc.org",
-    phone: "(303) 761-9610"
+    phone: "(303) 761-9610",
     accessType: "private"
   },
   {
@@ -575,7 +575,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.1",
     description: "Willie Watson design, host of 1930 US Open",
     website: "https://interlachen.com",
-    phone: "(952) 920-2351"
+    phone: "(952) 920-2351",
     accessType: "private"
   },
   {
@@ -587,7 +587,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.2",
     description: "John Bredemus design, host of Charles Schwab Challenge",
     website: "https://colonialcc.com",
-    phone: "(817) 927-4200"
+    phone: "(817) 927-4200",
     accessType: "private"
   },
   {
@@ -599,7 +599,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.0",
     description: "A.W. Tillinghast design with challenging layout",
     website: "https://ridgewoodcc.org",
-    phone: "(201) 444-7629"
+    phone: "(201) 444-7629",
     accessType: "private"
   },
   {
@@ -623,7 +623,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.2",
     description: "Donald Ross design with strategic bunkering",
     website: "https://plainfieldcc.org",
-    phone: "(908) 757-1800"
+    phone: "(908) 757-1800",
     accessType: "private"
   },
   {
@@ -635,7 +635,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.1",
     description: "Donald Ross design, Jack Nicklaus's home course",
     website: "https://sciotocc.com",
-    phone: "(614) 486-4341"
+    phone: "(614) 486-4341",
     accessType: "private"
   },
   {
@@ -647,7 +647,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.3",
     description: "Willie Park Jr. design with championship pedigree",
     website: "https://olympiafields.org",
-    phone: "(708) 748-0495"
+    phone: "(708) 748-0495",
     accessType: "private"
   },
   {
@@ -671,7 +671,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.0",
     description: "William Flynn design with rolling terrain",
     website: "https://sauconvalley.org",
-    phone: "(610) 838-7851"
+    phone: "(610) 838-7851",
     accessType: "private"
   },
   {
@@ -683,7 +683,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.1",
     description: "Robert Trent Jones Sr. 'monster' track",
     website: "https://firestonecc.com",
-    phone: "(330) 644-2299"
+    phone: "(330) 644-2299",
     accessType: "private"
   },
   {
@@ -695,7 +695,7 @@ export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
     rating: "4.0",
     description: "Herbert Strong design with challenging layout",
     website: "https://canterburygc.com",
-    phone: "(216) 831-7373"
+    phone: "(216) 831-7373",
     accessType: "private"
   },
   {
