@@ -341,19 +341,13 @@
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
 }
 
-.interactive-button:hover .icon-pulse {
-  animation: iconPulse 1s infinite;
-}
+/* Removed icon pulse animation to prevent blinking effect */
 
 .interactive-button:active {
   transform: scale(0.98);
 }
 
-/* Icon pulse animation */
-@keyframes iconPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-}
+/* Icon pulse animation removed - icons now just scale and stay scaled on hover */
 
 /* Ripple effect */
 .ripple {
