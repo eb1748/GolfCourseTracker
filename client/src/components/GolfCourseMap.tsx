@@ -210,7 +210,13 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
         scrollWheelZoom: true
       });
 
-      // Create a solid color background instead of map tiles
+      // Add map tiles back with charcoal green tint filter
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(mapInstanceRef.current);
+
+      // Apply charcoal green aesthetic filter while preserving geographic details
+      mapInstanceRef.current.getContainer().style.filter = 'sepia(0.3) hue-rotate(80deg) saturate(0.8) brightness(0.7) contrast(1.1)';
       mapInstanceRef.current.getContainer().style.backgroundColor = '#2C3E2D';
 
       // Add zoom event listener to update icon sizes
