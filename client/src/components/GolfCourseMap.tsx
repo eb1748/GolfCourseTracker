@@ -15,55 +15,57 @@ interface GolfCourseMapProps {
 
 // Custom golf pin icon SVG based on access type and status
 const createGolfPinIcon = (accessType: AccessType, status: CourseStatus) => {
-  // Status-based colors (matching golf theme colors)
-  const statusColors = {
-    'played': '#1a4d33', // hsl(142, 60%, 25%) - Dark green
-    'want-to-play': '#d4af37', // hsl(45, 85%, 55%) - Gold/yellow
-    'not-played': '#8b95a6' // hsl(220, 15%, 65%) - Blue-gray
-  };
+  // Unified magenta color for all icons (24x24px with background circle)
+  const magenta = '#CC00CC';
   
-  // Access type-based icons (keeping new unique icons)
+  // Access type-based icons with white background circle
   const accessTypeIcons = {
     'public': `
+      <!-- Background circle -->
+      <circle cx="12" cy="12" r="11" fill="white" opacity="0.8" stroke="${magenta}" stroke-width="1"/>
       <!-- Golf flag -->
-      <rect x="14" y="8" width="2" height="8" fill="white"/>
-      <path d="M16 8 L24 10 L16 14 Z" fill="white"/>
+      <rect x="11" y="5" width="2" height="10" fill="${magenta}"/>
+      <path d="M13 5 L19 7 L13 10 Z" fill="${magenta}"/>
       <!-- Hole -->
-      <circle cx="16" cy="20" r="2" fill="white"/>`,
+      <circle cx="12" cy="17" r="1.5" fill="${magenta}"/>`,
     'private': `
-      <!-- Key symbol -->
-      <circle cx="16" cy="14" r="3" fill="white"/>
-      <circle cx="16" cy="14" r="1.5" fill="${statusColors[status]}"/>
-      <rect x="15" y="17" width="2" height="4" fill="white"/>
-      <rect x="17" y="19" width="2" height="1" fill="white"/>`,
+      <!-- Background circle -->
+      <circle cx="12" cy="12" r="11" fill="white" opacity="0.8" stroke="${magenta}" stroke-width="1"/>
+      <!-- Key body -->
+      <circle cx="12" cy="9" r="3" fill="${magenta}"/>
+      <circle cx="12" cy="9" r="1.5" fill="white"/>
+      <!-- Key teeth -->
+      <rect x="11" y="12" width="2" height="4" fill="${magenta}"/>
+      <rect x="13" y="14" width="2" height="1" fill="${magenta}"/>`,
     'resort': `
-      <!-- Resort/Hotel building -->
-      <rect x="12" y="12" width="8" height="8" fill="white"/>
-      <rect x="13" y="13" width="2" height="2" fill="${statusColors[status]}"/>
-      <rect x="15" y="13" width="2" height="2" fill="${statusColors[status]}"/>
-      <rect x="17" y="13" width="2" height="2" fill="${statusColors[status]}"/>
-      <rect x="13" y="15" width="2" height="2" fill="${statusColors[status]}"/>
-      <rect x="17" y="15" width="2" height="2" fill="${statusColors[status]}"/>
-      <rect x="15" y="17" width="2" height="3" fill="${statusColors[status]}"/>`
+      <!-- Background circle -->
+      <circle cx="12" cy="12" r="11" fill="white" opacity="0.8" stroke="${magenta}" stroke-width="1"/>
+      <!-- Building -->
+      <rect x="7" y="8" width="10" height="8" fill="${magenta}"/>
+      <!-- Windows -->
+      <rect x="8" y="9" width="1.5" height="1.5" fill="white"/>
+      <rect x="10.5" y="9" width="1.5" height="1.5" fill="white"/>
+      <rect x="13" y="9" width="1.5" height="1.5" fill="white"/>
+      <rect x="8" y="11" width="1.5" height="1.5" fill="white"/>
+      <rect x="13" y="11" width="1.5" height="1.5" fill="white"/>
+      <!-- Door -->
+      <rect x="10.5" y="13" width="1.5" height="3" fill="white"/>`
   };
   
-  const color = statusColors[status];
   const icon = accessTypeIcons[accessType];
   
   return L.divIcon({
     html: `
       <div style="position: relative;">
-        <svg width="32" height="40" viewBox="0 0 32 40" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
-          <!-- Pin body -->
-          <path d="M16 0C7.2 0 0 7.2 0 16c0 12 16 24 16 24s16-12 16-24C32 7.2 24.8 0 16 0z" fill="${color}"/>
+        <svg width="24" height="24" viewBox="0 0 24 24" style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));">
           ${icon}
         </svg>
       </div>
     `,
     className: 'golf-pin-icon',
-    iconSize: [32, 40],
-    iconAnchor: [16, 40],
-    popupAnchor: [0, -40]
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -12]
   });
 };
 
