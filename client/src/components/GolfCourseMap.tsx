@@ -266,11 +266,6 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
       
       // Hover handlers for preview
       marker.on('mouseover', (e) => {
-        // Don't show preview if popup is already open
-        // Using a ref to get current value of selectedCourse to avoid stale closures
-        const isPopupOpen = document.querySelector('.golf-popup-card') !== null;
-        if (isPopupOpen) return;
-        
         // Clear any existing timeout
         if (hoverTimeoutRef.current) {
           clearTimeout(hoverTimeoutRef.current);
@@ -278,6 +273,10 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
         
         // Set timeout for 175ms delay (middle of 150-200ms range)
         hoverTimeoutRef.current = setTimeout(() => {
+          // Check if popup is open at the time of showing preview, not when hovering starts
+          const isPopupOpen = document.querySelector('.golf-popup-card') !== null;
+          if (isPopupOpen) return;
+          
           const containerPoint = e.containerPoint;
           if (containerPoint) {
             setPreviewCourse(course);
@@ -306,7 +305,7 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
     return () => {
       markersRef.current.forEach(marker => marker.remove());
     };
-  }, [filteredCourses, iconScale, selectedCourse, onStatusChange]);
+  }, [filteredCourses, iconScale]); // Removed selectedCourse and onStatusChange to prevent marker recreation
 
   // Handle outside clicks to close popup
   useEffect(() => {
