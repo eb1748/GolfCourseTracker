@@ -22,23 +22,26 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus, scale: 
     'not-played': '#ffffff' // White
   };
   
+  // Icon color based on status (white for played/want-to-play, black for not-played)
+  const iconColor = status === 'not-played' ? 'black' : 'white';
+  
   // Access type-based icons (optimized for golf ball shape)
   const accessTypeIcons = {
     'public': `
       <!-- Golf flag (simplified) -->
-      <rect x="10.25" y="6" width="1.5" height="9" fill="white"/>
-      <path d="M11.75 6 L18.25 7.5 L11.75 10.5 Z" fill="white"/>`,
+      <rect x="10.25" y="6" width="1.5" height="9" fill="${iconColor}"/>
+      <path d="M11.75 6 L18.25 7.5 L11.75 10.5 Z" fill="${iconColor}"/>`,
     'private': `
       <!-- Padlock symbol (simplified) -->
-      <rect x="9.5" y="11" width="5" height="4.5" rx="0.5" fill="white"/>
-      <path d="M10.5 11 L10.5 9.5 Q10.5 8 12 8 Q13.5 8 13.5 9.5 L13.5 11" stroke="white" stroke-width="1.2" fill="none"/>
+      <rect x="9.5" y="11" width="5" height="4.5" rx="0.5" fill="${iconColor}"/>
+      <path d="M10.5 11 L10.5 9.5 Q10.5 8 12 8 Q13.5 8 13.5 9.5 L13.5 11" stroke="${iconColor}" stroke-width="1.2" fill="none"/>
       <circle cx="12" cy="13" r="0.8" fill="${statusColors[status]}"/>`,
     'resort': `
       <!-- Umbrella symbol (simplified) -->
-      <path d="M7.5 10 Q9 7 12 7 Q15 7 16.5 10" stroke="white" stroke-width="1.8" fill="none"/>
+      <path d="M7.5 10 Q9 7 12 7 Q15 7 16.5 10" stroke="${iconColor}" stroke-width="1.8" fill="none"/>
       <path d="M7.5 10 Q9.75 9 12 9 Q14.25 9 16.5 10" stroke="${statusColors[status]}" stroke-width="1" fill="none"/>
-      <rect x="11.7" y="10" width="0.6" height="4.5" fill="white"/>
-      <path d="M12.3 14.5 Q12.3 15 11.7 15" stroke="white" stroke-width="0.6" fill="none"/>`
+      <rect x="11.7" y="10" width="0.6" height="4.5" fill="${iconColor}"/>
+      <path d="M12.3 14.5 Q12.3 15 11.7 15" stroke="${iconColor}" stroke-width="0.6" fill="none"/>`
   };
   
   const color = statusColors[status];
