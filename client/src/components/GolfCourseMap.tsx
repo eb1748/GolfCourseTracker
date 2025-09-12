@@ -22,29 +22,27 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus) => {
     'not-played': '#8b95a6' // hsl(220, 15%, 65%) - Blue-gray
   };
   
-  // Access type-based icons (keeping new unique icons)
+  // Access type-based icons (optimized for golf ball shape)
   const accessTypeIcons = {
     'public': `
-      <!-- Golf flag -->
-      <rect x="14" y="8" width="2" height="8" fill="white"/>
-      <path d="M16 8 L24 10 L16 14 Z" fill="white"/>
-      <!-- Hole -->
-      <circle cx="16" cy="20" r="2" fill="white"/>`,
+      <!-- Golf flag (simplified) -->
+      <rect x="11" y="7" width="1" height="6" fill="white"/>
+      <path d="M12 7 L17 8 L12 10 Z" fill="white"/>`,
     'private': `
-      <!-- Key symbol -->
-      <circle cx="16" cy="14" r="3" fill="white"/>
-      <circle cx="16" cy="14" r="1.5" fill="${statusColors[status]}"/>
-      <rect x="15" y="17" width="2" height="4" fill="white"/>
-      <rect x="17" y="19" width="2" height="1" fill="white"/>`,
+      <!-- Key symbol (simplified) -->
+      <circle cx="12" cy="10" r="2" fill="white"/>
+      <circle cx="12" cy="10" r="1" fill="${statusColors[status]}"/>
+      <rect x="11.5" y="12" width="1" height="2" fill="white"/>
+      <rect x="12.5" y="13" width="1" height="0.5" fill="white"/>`,
     'resort': `
-      <!-- Resort/Hotel building -->
-      <rect x="12" y="12" width="8" height="8" fill="white"/>
-      <rect x="13" y="13" width="2" height="2" fill="${statusColors[status]}"/>
-      <rect x="15" y="13" width="2" height="2" fill="${statusColors[status]}"/>
-      <rect x="17" y="13" width="2" height="2" fill="${statusColors[status]}"/>
-      <rect x="13" y="15" width="2" height="2" fill="${statusColors[status]}"/>
-      <rect x="17" y="15" width="2" height="2" fill="${statusColors[status]}"/>
-      <rect x="15" y="17" width="2" height="3" fill="${statusColors[status]}"/>`
+      <!-- Resort/Hotel building (simplified) -->
+      <rect x="9" y="8" width="6" height="5" fill="white"/>
+      <rect x="10" y="9" width="1" height="1" fill="${statusColors[status]}"/>
+      <rect x="11.5" y="9" width="1" height="1" fill="${statusColors[status]}"/>
+      <rect x="13" y="9" width="1" height="1" fill="${statusColors[status]}"/>
+      <rect x="10" y="10.5" width="1" height="1" fill="${statusColors[status]}"/>
+      <rect x="13" y="10.5" width="1" height="1" fill="${statusColors[status]}"/>
+      <rect x="11.5" y="11.5" width="1" height="1.5" fill="${statusColors[status]}"/>`
   };
   
   const color = statusColors[status];
@@ -53,17 +51,33 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus) => {
   return L.divIcon({
     html: `
       <div style="position: relative;">
-        <svg width="32" height="40" viewBox="0 0 32 40" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
-          <!-- Pin body -->
-          <path d="M16 0C7.2 0 0 7.2 0 16c0 12 16 24 16 24s16-12 16-24C32 7.2 24.8 0 16 0z" fill="${color}"/>
+        <svg width="24" height="24" viewBox="0 0 24 24" style="filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3));">
+          <!-- Golf ball body -->
+          <circle cx="12" cy="12" r="11" fill="${color}" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+          
+          <!-- Golf ball dimples -->
+          <circle cx="8" cy="8" r="0.8" fill="rgba(0,0,0,0.1)"/>
+          <circle cx="12" cy="7" r="0.8" fill="rgba(0,0,0,0.1)"/>
+          <circle cx="16" cy="8" r="0.8" fill="rgba(0,0,0,0.1)"/>
+          <circle cx="7" cy="12" r="0.8" fill="rgba(0,0,0,0.1)"/>
+          <circle cx="17" cy="12" r="0.8" fill="rgba(0,0,0,0.1)"/>
+          <circle cx="8" cy="16" r="0.8" fill="rgba(0,0,0,0.1)"/>
+          <circle cx="12" cy="17" r="0.8" fill="rgba(0,0,0,0.1)"/>
+          <circle cx="16" cy="16" r="0.8" fill="rgba(0,0,0,0.1)"/>
+          <circle cx="10" cy="12" r="0.6" fill="rgba(0,0,0,0.08)"/>
+          <circle cx="14" cy="12" r="0.6" fill="rgba(0,0,0,0.08)"/>
+          <circle cx="12" cy="10" r="0.6" fill="rgba(0,0,0,0.08)"/>
+          <circle cx="12" cy="14" r="0.6" fill="rgba(0,0,0,0.08)"/>
+          
+          <!-- Access type icon -->
           ${icon}
         </svg>
       </div>
     `,
-    className: 'golf-pin-icon',
-    iconSize: [32, 40],
-    iconAnchor: [16, 40],
-    popupAnchor: [0, -40]
+    className: 'golf-ball-icon',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -12]
   });
 };
 
