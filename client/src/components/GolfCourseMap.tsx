@@ -63,9 +63,6 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus, scale: 
           </defs>
           <circle cx="12" cy="12" r="11" fill="url(#ballGradient-${status})" stroke="rgba(0,0,0,0.3)" stroke-width="0.4"/>
           
-          <!-- Shadow area at bottom-right -->
-          <path d="M 16.5 16.5 A 11 11 0 0 1 12 23 A 11 11 0 0 1 1 12 A 11 11 0 0 1 7.5 1.8 A 11 11 0 0 0 16.5 16.5" fill="rgba(0,0,0,0.08)"/>
-          
           <!-- Realistic dimples - crescent shapes arranged in curved rows -->
           <!-- Outermost perimeter row - very close to edge -->
           <path d="M 6 4.8 A 0.6 0.6 0 0 1 6.6 5.4 A 0.6 0.6 0 0 1 6 6" stroke="rgba(0,0,0,0.15)" stroke-width="0.25" fill="none"/>
