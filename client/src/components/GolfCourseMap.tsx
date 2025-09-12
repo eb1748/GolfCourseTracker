@@ -210,8 +210,15 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
         scrollWheelZoom: true
       });
 
-      // Create a solid color background instead of map tiles
-      mapInstanceRef.current.getContainer().style.backgroundColor = '#2C3E2D';
+      // Add map tiles with custom styling
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(mapInstanceRef.current);
+
+      // Apply custom styling to map tiles
+      const mapContainer = mapInstanceRef.current.getContainer();
+      mapContainer.style.filter = 'hue-rotate(45deg) saturate(0.7) brightness(0.8)';
+      mapContainer.style.backgroundColor = '#87CEEB'; // Light blue for oceans
 
       // Add zoom event listener to update icon sizes
       mapInstanceRef.current.on('zoomend', () => {
