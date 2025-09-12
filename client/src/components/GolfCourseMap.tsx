@@ -15,11 +15,11 @@ interface GolfCourseMapProps {
 
 // Custom golf pin icon SVG based on access type and status
 const createGolfPinIcon = (accessType: AccessType, status: CourseStatus) => {
-  // Status-based colors (restored original functionality)
+  // Status-based colors (matching golf theme colors)
   const statusColors = {
-    'played': '#1a5f3f', // Deep green
-    'want-to-play': '#ca8a04', // Golden yellow  
-    'not-played': '#6b7280' // Gray
+    'played': '#1a4d33', // hsl(142, 60%, 25%) - Dark green
+    'want-to-play': '#d4af37', // hsl(45, 85%, 55%) - Gold/yellow
+    'not-played': '#8b95a6' // hsl(220, 15%, 65%) - Blue-gray
   };
   
   // Access type-based icons (keeping new unique icons)
@@ -152,9 +152,9 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
 
   const getStatusColor = (status: CourseStatus) => {
     switch (status) {
-      case 'played': return { backgroundColor: '#1a5f3f', color: 'white' };
-      case 'want-to-play': return { backgroundColor: '#ca8a04', color: 'black' };
-      case 'not-played': return { backgroundColor: '#6b7280', color: 'white' };
+      case 'played': return { backgroundColor: '#1a4d33', color: 'white' };
+      case 'want-to-play': return { backgroundColor: '#d4af37', color: 'black' };
+      case 'not-played': return { backgroundColor: '#8b95a6', color: 'white' };
     }
   };
 
