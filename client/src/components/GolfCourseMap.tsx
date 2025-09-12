@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import type { GolfCourseWithStatus, CourseStatus } from '@shared/schema';
+import type { GolfCourseWithStatus, CourseStatus, AccessType } from '@shared/schema';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,27 +13,50 @@ interface GolfCourseMapProps {
   filterStatus?: CourseStatus | 'all';
 }
 
-// Custom golf pin icon SVG
-const createGolfPinIcon = (status: CourseStatus) => {
-  const colors = {
-    'played': '#1a5f3f', // Deep green
-    'want-to-play': '#ca8a04', // Golden yellow  
-    'not-played': '#6b7280' // Gray
+// Custom golf pin icon SVG based on access type
+const createGolfPinIcon = (accessType: AccessType) => {
+  const accessTypeConfig = {
+    'public': {
+      color: '#2563eb', // Blue
+      icon: `
+        <!-- Golf flag -->
+        <rect x="14" y="8" width="2" height="8" fill="white"/>
+        <path d="M16 8 L24 10 L16 14 Z" fill="white"/>
+        <!-- Hole -->
+        <circle cx="16" cy="20" r="2" fill="white"/>`
+    },
+    'private': {
+      color: '#7c3aed', // Purple  
+      icon: `
+        <!-- Key symbol -->
+        <circle cx="16" cy="14" r="3" fill="white"/>
+        <circle cx="16" cy="14" r="1.5" fill="#7c3aed"/>
+        <rect x="15" y="17" width="2" height="4" fill="white"/>
+        <rect x="17" y="19" width="2" height="1" fill="white"/>`
+    },
+    'resort': {
+      color: '#dc2626', // Red
+      icon: `
+        <!-- Resort/Hotel building -->
+        <rect x="12" y="12" width="8" height="8" fill="white"/>
+        <rect x="13" y="13" width="2" height="2" fill="#dc2626"/>
+        <rect x="15" y="13" width="2" height="2" fill="#dc2626"/>
+        <rect x="17" y="13" width="2" height="2" fill="#dc2626"/>
+        <rect x="13" y="15" width="2" height="2" fill="#dc2626"/>
+        <rect x="17" y="15" width="2" height="2" fill="#dc2626"/>
+        <rect x="15" y="17" width="2" height="3" fill="#dc2626"/>`
+    }
   };
   
-  const color = colors[status];
+  const config = accessTypeConfig[accessType];
   
   return L.divIcon({
     html: `
       <div style="position: relative;">
         <svg width="32" height="40" viewBox="0 0 32 40" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
           <!-- Pin body -->
-          <path d="M16 0C7.2 0 0 7.2 0 16c0 12 16 24 16 24s16-12 16-24C32 7.2 24.8 0 16 0z" fill="${color}"/>
-          <!-- Golf flag -->
-          <rect x="14" y="8" width="2" height="8" fill="white"/>
-          <path d="M16 8 L24 10 L16 14 Z" fill="white"/>
-          <!-- Hole -->
-          <circle cx="16" cy="20" r="2" fill="white"/>
+          <path d="M16 0C7.2 0 0 7.2 0 16c0 12 16 24 16 24s16-12 16-24C32 7.2 24.8 0 16 0z" fill="${config.color}"/>
+          ${config.icon}
         </svg>
       </div>
     `,
@@ -79,7 +102,7 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
     filteredCourses.forEach(course => {
       const marker = L.marker(
         [parseFloat(course.latitude), parseFloat(course.longitude)],
-        { icon: createGolfPinIcon(course.status || 'not-played') }
+        { icon: createGolfPinIcon(course.accessType) }
       );
 
       marker.addTo(mapInstanceRef.current!);

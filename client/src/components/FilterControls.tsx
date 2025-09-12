@@ -118,60 +118,22 @@ export default function FilterControls({
             <span className="text-sm font-medium">Filter by Access</span>
           </div>
           
-          <div className="space-y-2">
-            {/* All Access - First Row */}
-            <Button
-              variant={getAccessFilterVariant('all')}
-              size="sm"
-              onClick={() => handleAccessFilterClick('all')}
-              className="justify-between w-full"
-              data-testid="button-access-filter-all"
-            >
-              <span>All Access</span>
-              <Badge variant="secondary">
-                {stats.total}
-              </Badge>
-            </Button>
-            
-            {/* Public, Private, and Resort - Second Row */}
-            <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 gap-2">
+            {accessFilters.map((filter) => (
               <Button
-                variant={getAccessFilterVariant('public')}
+                key={filter.key}
+                variant={getAccessFilterVariant(filter.key)}
                 size="sm"
-                onClick={() => handleAccessFilterClick('public')}
+                onClick={() => handleAccessFilterClick(filter.key)}
                 className="justify-between"
-                data-testid="button-access-filter-public"
+                data-testid={`button-access-filter-${filter.key}`}
               >
-                <span>Public</span>
+                <span>{filter.label}</span>
                 <Badge variant="secondary">
-                  {stats.public}
+                  {filter.count}
                 </Badge>
               </Button>
-              <Button
-                variant={getAccessFilterVariant('private')}
-                size="sm"
-                onClick={() => handleAccessFilterClick('private')}
-                className="justify-between"
-                data-testid="button-access-filter-private"
-              >
-                <span>Private</span>
-                <Badge variant="secondary">
-                  {stats.private}
-                </Badge>
-              </Button>
-              <Button
-                variant={getAccessFilterVariant('resort')}
-                size="sm"
-                onClick={() => handleAccessFilterClick('resort')}
-                className="justify-between"
-                data-testid="button-access-filter-resort"
-              >
-                <span>Resort</span>
-                <Badge variant="secondary">
-                  {stats.resort}
-                </Badge>
-              </Button>
-            </div>
+            ))}
           </div>
         </div>
 
