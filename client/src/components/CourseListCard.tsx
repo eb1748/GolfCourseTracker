@@ -125,6 +125,7 @@ export default function CourseListCard({ course, onStatusChange, onLocationClick
             variant={course.status === 'played' ? 'default' : 'outline'}
             onClick={() => handleStatusChange('played')}
             className="text-xs"
+            style={course.status === 'played' ? { backgroundColor: '#1a5f3f', borderColor: '#1a5f3f', color: 'white' } : undefined}
             data-testid={`button-status-played-${course.id}`}
           >
             Played
@@ -134,6 +135,7 @@ export default function CourseListCard({ course, onStatusChange, onLocationClick
             variant={course.status === 'want-to-play' ? 'default' : 'outline'}
             onClick={() => handleStatusChange('want-to-play')}
             className="text-xs"
+            style={course.status === 'want-to-play' ? { backgroundColor: '#ca8a04', borderColor: '#ca8a04', color: 'black' } : undefined}
             data-testid={`button-status-want-${course.id}`}
           >
             Want to Play
@@ -143,6 +145,7 @@ export default function CourseListCard({ course, onStatusChange, onLocationClick
             variant={course.status === 'not-played' ? 'default' : 'outline'}
             onClick={() => handleStatusChange('not-played')}
             className="text-xs"
+            style={course.status === 'not-played' ? { backgroundColor: '#6b7280', borderColor: '#6b7280', color: 'white' } : undefined}
             data-testid={`button-status-not-played-${course.id}`}
           >
             Not Played
