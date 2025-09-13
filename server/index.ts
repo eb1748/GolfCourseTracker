@@ -11,7 +11,7 @@ app.use(express.urlencoded({ extended: false }));
 // Trust proxy for Replit environment
 app.set('trust proxy', 1);
 
-// Session middleware configuration
+// Session middleware configuration  
 app.use(session({
   store: storage.sessionStore,
   secret: process.env.SESSION_SECRET || 'dev-secret-change-in-production',
@@ -19,7 +19,7 @@ app.use(session({
   saveUninitialized: false,
   name: 'golf-session', // Custom session name
   cookie: {
-    secure: 'auto', // Automatically secure over HTTPS
+    secure: false, // Temporarily disable for debugging
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax'
