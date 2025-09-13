@@ -71,6 +71,9 @@ export const insertUserActivityLogSchema = createInsertSchema(userActivityLogs).
   createdAt: true,
 });
 
+// Activity type union for type safety in analytics tracking
+export type ActivityType = 'login' | 'course_interaction' | 'view';
+
 export const userPreferencesSchema = z.object({
   theme: z.enum(['light', 'dark', 'system']).optional(),
   notifications: z.object({

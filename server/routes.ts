@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserCourseStatusSchema, insertUserSchema, type CourseStatus, type User } from "@shared/schema";
+import { insertUserCourseStatusSchema, insertUserFormSchema, type CourseStatus, type User, type ActivityType } from "@shared/schema";
 import { FULL_TOP_100_GOLF_COURSES } from "../client/src/data/fullGolfCourses";
 
 // Extend session interface for TypeScript
@@ -29,12 +29,28 @@ const requireAuth = (req: any, res: any, next: any) => {
   next();
 };
 
+// Activity tracking middleware for analytics
+const trackUserActivity = (activityType: ActivityType) => {
+  return async (req: any, res: any, next: any) => {
+    try {
+      if (req.session?.userId) {
+        await storage.updateUserLastActive(req.session.userId);
+        await storage.logUserActivity(req.session.userId, activityType);
+      }
+    } catch (error) {
+      // Don't fail the request if activity tracking fails
+      console.warn('Activity tracking failed:', error);
+    }
+    next();
+  };
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize golf courses data on startup
   await initializeGolfCourses();
 
   // Golf Courses Routes
-  app.get("/api/courses", attachUserIfAuthenticated, async (req, res) => {
+  app.get("/api/courses", attachUserIfAuthenticated, trackUserActivity('view'), async (req, res) => {
     try {
       const userId = (req as any).userId; // Optional - from session or undefined
       const courses = await storage.getCoursesWithStatus(userId);
@@ -45,7 +61,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/courses/search", attachUserIfAuthenticated, async (req, res) => {
+  app.get("/api/courses/search", attachUserIfAuthenticated, trackUserActivity('view'), async (req, res) => {
     try {
       const query = req.query.q as string;
       const userId = (req as any).userId; // Optional - from session or undefined
@@ -76,7 +92,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User Course Status Routes
-  app.post("/api/courses/:courseId/status", requireAuth, async (req, res) => {
+  app.post("/api/courses/:courseId/status", requireAuth, trackUserActivity('course_interaction'), async (req, res) => {
     try {
       const { courseId } = req.params;
       const { status } = req.body;
@@ -122,9 +138,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Authentication Routes
   
-  // Helper function to sanitize user object (remove password)
+  // Helper function to sanitize user object (remove password hash)
   const sanitizeUser = (user: User) => {
-    const { password, ...sanitizedUser } = user;
+    const { passwordHash, ...sanitizedUser } = user;
     return sanitizedUser;
   };
 
@@ -132,8 +148,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password, name } = req.body;
 
-      // Validate input
-      const validationResult = insertUserSchema.safeParse({ email, password, name });
+      // Validate input using form schema
+      const validationResult = insertUserFormSchema.safeParse({ email, password, name });
       if (!validationResult.success) {
         return res.status(400).json({ error: "Invalid input data", details: validationResult.error.errors });
       }
@@ -144,17 +160,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "User already exists" });
       }
 
-      // Create user
+      // Create user (storage handles password hashing)
       const user = await storage.createUser(validationResult.data);
       
       // Set session
       req.session.userId = user.id;
 
       // Save session explicitly to ensure it's persisted
-      req.session.save((err) => {
+      req.session.save(async (err) => {
         if (err) {
           console.error("Session save error:", err);
           return res.status(500).json({ error: "Failed to save session" });
+        }
+        // Track login activity for new signup
+        try {
+          await storage.updateUserLastActive(user.id);
+          await storage.logUserActivity(user.id, 'login');
+        } catch (error) {
+          console.warn('Failed to log signup activity:', error);
         }
         res.status(201).json({ user: sanitizeUser(user) });
       });
@@ -179,7 +202,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Verify password
-      const isValidPassword = await storage.comparePassword(password, user.password);
+      const isValidPassword = await storage.comparePassword(password, user.passwordHash);
       if (!isValidPassword) {
         return res.status(401).json({ error: "Invalid credentials" });
       }
@@ -188,10 +211,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       req.session.userId = user.id;
 
       // Save session explicitly to ensure it's persisted
-      req.session.save((err) => {
+      req.session.save(async (err) => {
         if (err) {
           console.error("Session save error:", err);
           return res.status(500).json({ error: "Failed to save session" });
+        }
+        // Track login activity
+        try {
+          await storage.updateUserLastActive(user.id);
+          await storage.logUserActivity(user.id, 'login');
+        } catch (error) {
+          console.warn('Failed to log signin activity:', error);
         }
         res.json({ user: sanitizeUser(user) });
       });

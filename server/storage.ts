@@ -11,6 +11,7 @@ import {
   type InsertUserActivityLog,
   type GolfCourseWithStatus,
   type CourseStatus,
+  type ActivityType,
   users,
   golfCourses,
   userCourseStatus,
@@ -32,13 +33,14 @@ export interface IStorage {
   createUser(user: InsertUserForm): Promise<User>; // Now accepts form data with 'password'
   comparePassword(password: string, hashedPassword: string): Promise<boolean>;
   updateUserActivity(userId: string): Promise<void>; // Update last_active_at
+  updateUserLastActive(userId: string): Promise<void>; // Alias for updateUserActivity
   updateUserPreferences(userId: string, preferences: UserPreferences): Promise<User>;
   
   // Session store for authentication
   sessionStore: any;
   
   // Analytics methods for DAU/MAU tracking (privacy-friendly)
-  logUserActivity(userId: string, activityType: 'login' | 'course_interaction' | 'view'): Promise<void>;
+  logUserActivity(userId: string, activityType: ActivityType): Promise<void>;
   getDailyActiveUsers(date: Date): Promise<number>;
   getMonthlyActiveUsers(year: number, month: number): Promise<number>;
   getActivityStats(startDate: Date, endDate: Date): Promise<{ date: string; activeUsers: number }[]>;
@@ -126,6 +128,16 @@ export class DatabaseStorage implements IStorage {
     await db.update(users)
       .set({ lastActiveAt: new Date() })
       .where(eq(users.id, userId));
+  }
+
+  // Alias for updateUserActivity for clearer naming in middleware
+  async updateUserLastActive(userId: string): Promise<void> {
+    try {
+      await this.updateUserActivity(userId);
+    } catch (error) {
+      console.warn('Failed to update user last active:', error);
+      // Don't throw to avoid breaking the main request
+    }
   }
 
   // Update user preferences
@@ -442,6 +454,11 @@ export class MemStorage implements IStorage {
     if (user) {
       user.lastActiveAt = new Date();
     }
+  }
+
+  // Alias for updateUserActivity for clearer naming in middleware
+  async updateUserLastActive(userId: string): Promise<void> {
+    await this.updateUserActivity(userId);
   }
 
   async updateUserPreferences(userId: string, preferences: UserPreferences): Promise<User> {
