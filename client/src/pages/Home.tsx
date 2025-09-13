@@ -217,7 +217,7 @@ export default function Home() {
           </TabsContent>
 
           <TabsContent value="map" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[calc(100vh-400px)] md:h-[calc(100vh-300px)] lg:h-[calc(100vh-200px)]">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[calc(100vh-200px)]">
               {/* Sidebar with filters */}
               <div className="lg:col-span-1">
                 <FilterControls
