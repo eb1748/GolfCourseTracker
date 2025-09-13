@@ -9,12 +9,19 @@ import {
   type CourseStatus
 } from "@shared/schema";
 import { randomUUID } from "crypto";
+import session from "express-session";
+import createMemoryStore from "memorystore";
+import bcrypt from "bcrypt";
 
 export interface IStorage {
   // User methods
   getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  comparePassword(password: string, hashedPassword: string): Promise<boolean>;
+  
+  // Session store for authentication
+  sessionStore: any;
   
   // Golf course methods
   getAllCourses(): Promise<GolfCourse[]>;
@@ -33,15 +40,21 @@ export interface IStorage {
   getCoursesByStatus(status: CourseStatus, userId: string): Promise<GolfCourseWithStatus[]>;
 }
 
+const MemoryStore = createMemoryStore(session);
+
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
   private courses: Map<string, GolfCourse>;
   private userCourseStatuses: Map<string, UserCourseStatus>;
+  public sessionStore: any; // Using any for compatibility with different session store types
 
   constructor() {
     this.users = new Map();
     this.courses = new Map();
     this.userCourseStatuses = new Map();
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 86400000, // prune expired entries every 24h
+    });
   }
 
   // User methods
@@ -49,17 +62,30 @@ export class MemStorage implements IStorage {
     return this.users.get(id);
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
+  async getUserByEmail(email: string): Promise<User | undefined> {
     return Array.from(this.users.values()).find(
-      (user) => user.username === username,
+      (user) => user.email === email,
     );
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
-    const user: User = { ...insertUser, id };
+    
+    // Hash the password with bcrypt using 12 rounds for security
+    const hashedPassword = await bcrypt.hash(insertUser.password, 12);
+    
+    const user: User = { 
+      ...insertUser,
+      password: hashedPassword, // Store the hashed password
+      id,
+      createdAt: new Date()
+    };
     this.users.set(id, user);
     return user;
+  }
+
+  async comparePassword(password: string, hashedPassword: string): Promise<boolean> {
+    return bcrypt.compare(password, hashedPassword);
   }
 
   // Golf course methods
@@ -79,7 +105,8 @@ export class MemStorage implements IStorage {
       rating: insertCourse.rating || null,
       description: insertCourse.description || null,
       website: insertCourse.website || null,
-      phone: insertCourse.phone || null
+      phone: insertCourse.phone || null,
+      accessType: insertCourse.accessType || 'public'
     };
     this.courses.set(id, course);
     return course;
