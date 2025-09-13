@@ -136,6 +136,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Analytics Routes (for admin/insights dashboard)
+  app.get("/api/analytics/dau", requireAuth, async (req, res) => {
+    try {
+      const dateParam = req.query.date as string;
+      const date = dateParam ? new Date(dateParam) : new Date();
+      
+      const dailyActiveUsers = await storage.getDailyActiveUsers(date);
+      res.json({ date: date.toISOString().split('T')[0], activeUsers: dailyActiveUsers });
+    } catch (error) {
+      console.error("Error fetching DAU:", error);
+      res.status(500).json({ error: "Failed to fetch daily active users" });
+    }
+  });
+
+  app.get("/api/analytics/mau", requireAuth, async (req, res) => {
+    try {
+      const yearParam = req.query.year as string;
+      const monthParam = req.query.month as string;
+      
+      const year = yearParam ? parseInt(yearParam) : new Date().getFullYear();
+      const month = monthParam ? parseInt(monthParam) : new Date().getMonth() + 1;
+      
+      const monthlyActiveUsers = await storage.getMonthlyActiveUsers(year, month);
+      res.json({ year, month, activeUsers: monthlyActiveUsers });
+    } catch (error) {
+      console.error("Error fetching MAU:", error);
+      res.status(500).json({ error: "Failed to fetch monthly active users" });
+    }
+  });
+
+  app.get("/api/analytics/activity-stats", requireAuth, async (req, res) => {
+    try {
+      const startDateParam = req.query.startDate as string;
+      const endDateParam = req.query.endDate as string;
+      
+      const startDate = startDateParam ? new Date(startDateParam) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const endDate = endDateParam ? new Date(endDateParam) : new Date();
+      
+      const activityStats = await storage.getActivityStats(startDate, endDate);
+      res.json(activityStats);
+    } catch (error) {
+      console.error("Error fetching activity stats:", error);
+      res.status(500).json({ error: "Failed to fetch activity statistics" });
+    }
+  });
+
   // Authentication Routes
   
   // Helper function to sanitize user object (remove password hash)
