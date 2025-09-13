@@ -23,12 +23,9 @@ const attachUserIfAuthenticated = (req: any, res: any, next: any) => {
 
 // Authentication middleware
 const requireAuth = (req: any, res: any, next: any) => {
-  console.log(`[DEBUG] Auth check - SessionID: ${req.sessionID}, UserId: ${req.session?.userId}`);
   if (!req.session.userId) {
-    console.log(`[DEBUG] No userId in session, returning 401`);
     return res.status(401).json({ error: "Authentication required" });
   }
-  console.log(`[DEBUG] Auth successful for userId: ${req.session.userId}`);
   next();
 };
 
