@@ -13,7 +13,8 @@ import FilterControls from '@/components/FilterControls';
 import CourseListCard from '@/components/CourseListCard';
 import ThemeToggle from '@/components/ThemeToggle';
 
-import { api } from '@/lib/api';
+import { coursesApi } from '@/lib/coursesApi';
+import { useAuth } from '@/contexts/AuthContext';
 import type { GolfCourseWithStatus, CourseStatus, AccessType } from '@shared/schema';
 
 export default function Home() {
@@ -24,26 +25,27 @@ export default function Home() {
   
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
 
   // Fetch courses data
   const { data: courses = [], isLoading: coursesLoading, error: coursesError } = useQuery({
-    queryKey: ['/api/courses'],
-    queryFn: api.getAllCourses,
+    queryKey: ['courses', { isAuthenticated }],
+    queryFn: () => coursesApi.getAllCourses(isAuthenticated),
   });
 
   // Fetch user stats
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['/api/users/stats'],
-    queryFn: api.getUserStats,
+    queryKey: ['user-stats', { isAuthenticated }],
+    queryFn: () => coursesApi.getUserStats(isAuthenticated),
   });
 
   // Status update mutation
   const statusMutation = useMutation({
     mutationFn: ({ courseId, status }: { courseId: string; status: CourseStatus }) =>
-      api.updateCourseStatus(courseId, status),
+      coursesApi.updateCourseStatus(courseId, status, isAuthenticated),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/courses'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/users/stats'] });
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      queryClient.invalidateQueries({ queryKey: ['user-stats'] });
     },
     onError: () => {
       toast({
