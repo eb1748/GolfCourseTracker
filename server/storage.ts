@@ -1,15 +1,20 @@
 import { 
   type User, 
-  type InsertUser, 
+  type InsertUser,
+  type InsertUserForm,
+  type UserPreferences,
   type GolfCourse, 
   type InsertGolfCourse,
   type UserCourseStatus,
   type InsertUserCourseStatus,
+  type UserActivityLog,
+  type InsertUserActivityLog,
   type GolfCourseWithStatus,
   type CourseStatus,
   users,
   golfCourses,
-  userCourseStatus
+  userCourseStatus,
+  userActivityLogs
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import session from "express-session";
@@ -24,11 +29,19 @@ export interface IStorage {
   // User methods
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  createUser(user: InsertUserForm): Promise<User>; // Now accepts form data with 'password'
   comparePassword(password: string, hashedPassword: string): Promise<boolean>;
+  updateUserActivity(userId: string): Promise<void>; // Update last_active_at
+  updateUserPreferences(userId: string, preferences: UserPreferences): Promise<User>;
   
   // Session store for authentication
   sessionStore: any;
+  
+  // Analytics methods for DAU/MAU tracking (privacy-friendly)
+  logUserActivity(userId: string, activityType: 'login' | 'course_interaction' | 'view'): Promise<void>;
+  getDailyActiveUsers(date: Date): Promise<number>;
+  getMonthlyActiveUsers(year: number, month: number): Promise<number>;
+  getActivityStats(startDate: Date, endDate: Date): Promise<{ date: string; activeUsers: number }[]>;
   
   // Golf course methods
   getAllCourses(): Promise<GolfCourse[]>;
@@ -87,21 +100,116 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
+  async createUser(insertUser: InsertUserForm): Promise<User> {
     // Hash the password with bcrypt using 12 rounds for security
     const hashedPassword = await bcrypt.hash(insertUser.password, 12);
     
     const result = await db.insert(users).values({
       name: insertUser.name,
       email: insertUser.email,
-      password: hashedPassword,
+      passwordHash: hashedPassword,
+      preferences: {}, // Initialize with empty preferences object
     }).returning();
+    
+    // Log initial signup activity
+    await this.logUserActivity(result[0].id, 'login');
     
     return result[0];
   }
 
   async comparePassword(password: string, hashedPassword: string): Promise<boolean> {
     return bcrypt.compare(password, hashedPassword);
+  }
+
+  // Update user's last active timestamp
+  async updateUserActivity(userId: string): Promise<void> {
+    await db.update(users)
+      .set({ lastActiveAt: new Date() })
+      .where(eq(users.id, userId));
+  }
+
+  // Update user preferences
+  async updateUserPreferences(userId: string, preferences: UserPreferences): Promise<User> {
+    const result = await db.update(users)
+      .set({ 
+        preferences: preferences,
+        lastActiveAt: new Date() // Update activity when preferences change
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return result[0];
+  }
+
+  // Privacy-friendly activity logging for DAU/MAU analytics
+  async logUserActivity(userId: string, activityType: 'login' | 'course_interaction' | 'view'): Promise<void> {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    try {
+      await db.insert(userActivityLogs)
+        .values({
+          userId,
+          activityDate: today,
+          activityType
+        })
+        .onConflictDoNothing(); // Ignore if already exists (unique constraint)
+    } catch (error) {
+      // Silently ignore conflicts - this is expected for duplicate activities
+      console.log(`Activity already logged for user ${userId} on ${today} for ${activityType}`);
+    }
+  }
+
+  // Get Daily Active Users count for a specific date
+  async getDailyActiveUsers(date: Date): Promise<number> {
+    const dateStr = date.toISOString().split('T')[0];
+    
+    const result = await db.select({ 
+      count: sql<number>`COUNT(DISTINCT user_id)`.as('count')
+    })
+    .from(userActivityLogs)
+    .where(eq(userActivityLogs.activityDate, dateStr));
+    
+    return result[0]?.count || 0;
+  }
+
+  // Get Monthly Active Users count for a specific month/year
+  async getMonthlyActiveUsers(year: number, month: number): Promise<number> {
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+    const endDate = `${year}-${String(month).padStart(2, '0')}-31`;
+    
+    const result = await db.select({ 
+      count: sql<number>`COUNT(DISTINCT user_id)`.as('count')
+    })
+    .from(userActivityLogs)
+    .where(and(
+      sql`activity_date >= ${startDate}`,
+      sql`activity_date <= ${endDate}`
+    ));
+    
+    return result[0]?.count || 0;
+  }
+
+  // Get activity statistics for a date range (for analytics dashboard)
+  async getActivityStats(startDate: Date, endDate: Date): Promise<{ date: string; activeUsers: number }[]> {
+    const start = startDate.toISOString().split('T')[0];
+    const end = endDate.toISOString().split('T')[0];
+    
+    const result = await db.select({
+      date: userActivityLogs.activityDate,
+      activeUsers: sql<number>`COUNT(DISTINCT user_id)`.as('activeUsers')
+    })
+    .from(userActivityLogs)
+    .where(and(
+      sql`activity_date >= ${start}`,
+      sql`activity_date <= ${end}`
+    ))
+    .groupBy(userActivityLogs.activityDate)
+    .orderBy(userActivityLogs.activityDate);
+    
+    return result.map(row => ({
+      date: row.date,
+      activeUsers: row.activeUsers
+    }));
   }
 
   // Golf course methods
@@ -304,16 +412,19 @@ export class MemStorage implements IStorage {
     );
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
+  async createUser(insertUser: InsertUserForm): Promise<User> {
     const id = randomUUID();
     
     // Hash the password with bcrypt using 12 rounds for security
     const hashedPassword = await bcrypt.hash(insertUser.password, 12);
     
     const user: User = { 
-      ...insertUser,
-      password: hashedPassword, // Store the hashed password
       id,
+      name: insertUser.name,
+      email: insertUser.email,
+      passwordHash: hashedPassword, // Store the hashed password
+      lastActiveAt: new Date(),
+      preferences: {},
       createdAt: new Date()
     };
     this.users.set(id, user);
@@ -322,6 +433,45 @@ export class MemStorage implements IStorage {
 
   async comparePassword(password: string, hashedPassword: string): Promise<boolean> {
     return bcrypt.compare(password, hashedPassword);
+  }
+
+  // Stub implementations for analytics methods (MemStorage doesn't persist analytics)
+  async updateUserActivity(userId: string): Promise<void> {
+    // Update user's lastActiveAt in memory
+    const user = this.users.get(userId);
+    if (user) {
+      user.lastActiveAt = new Date();
+    }
+  }
+
+  async updateUserPreferences(userId: string, preferences: UserPreferences): Promise<User> {
+    const user = this.users.get(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.preferences = preferences;
+    user.lastActiveAt = new Date();
+    return user;
+  }
+
+  async logUserActivity(userId: string, activityType: 'login' | 'course_interaction' | 'view'): Promise<void> {
+    // MemStorage doesn't persist activity logs - this is a no-op
+    console.log(`Activity logged: ${userId} - ${activityType}`);
+  }
+
+  async getDailyActiveUsers(date: Date): Promise<number> {
+    // MemStorage can't provide meaningful analytics
+    return 0;
+  }
+
+  async getMonthlyActiveUsers(year: number, month: number): Promise<number> {
+    // MemStorage can't provide meaningful analytics
+    return 0;
+  }
+
+  async getActivityStats(startDate: Date, endDate: Date): Promise<{ date: string; activeUsers: number }[]> {
+    // MemStorage can't provide meaningful analytics
+    return [];
   }
 
   // Golf course methods
