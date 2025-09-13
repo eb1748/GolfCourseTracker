@@ -146,19 +146,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create user
       const user = await storage.createUser(validationResult.data);
-      console.log(`[DEBUG] User created: ${user.email}, ID: ${user.id}`);
       
       // Set session
       req.session.userId = user.id;
-      console.log(`[DEBUG] Session userId set: ${req.session.userId}`);
 
       // Save session explicitly to ensure it's persisted
       req.session.save((err) => {
         if (err) {
-          console.error("[DEBUG] Session save error:", err);
+          console.error("Session save error:", err);
           return res.status(500).json({ error: "Failed to save session" });
         }
-        console.log("[DEBUG] Session saved successfully");
         res.status(201).json({ user: sanitizeUser(user) });
       });
     } catch (error) {
@@ -170,7 +167,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/signin", async (req, res) => {
     try {
       const { email, password } = req.body;
-      console.log(`[DEBUG] Sign in attempt for email: ${email}`);
 
       if (!email || !password) {
         return res.status(400).json({ error: "Email and password are required" });
@@ -178,29 +174,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get user by email
       const user = await storage.getUserByEmail(email);
-      console.log(`[DEBUG] User found: ${!!user}`);
       if (!user) {
         return res.status(401).json({ error: "Invalid credentials" });
       }
 
       // Verify password
       const isValidPassword = await storage.comparePassword(password, user.password);
-      console.log(`[DEBUG] Password valid: ${isValidPassword}`);
       if (!isValidPassword) {
         return res.status(401).json({ error: "Invalid credentials" });
       }
 
       // Set session
       req.session.userId = user.id;
-      console.log(`[DEBUG] Session userId set: ${req.session.userId}`);
 
       // Save session explicitly to ensure it's persisted
       req.session.save((err) => {
         if (err) {
-          console.error("[DEBUG] Session save error:", err);
+          console.error("Session save error:", err);
           return res.status(500).json({ error: "Failed to save session" });
         }
-        console.log("[DEBUG] Session saved successfully");
         res.json({ user: sanitizeUser(user) });
       });
 
