@@ -1,7 +1,10 @@
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Target, Trophy } from 'lucide-react';
-import heroImage from '@assets/generated_images/Golf_course_hero_image_e087bb08.png';
+import pebbleBeachImage from '@assets/generated_images/Pebble_Beach_ocean_view_4de242ed.png';
+import augustaImage from '@assets/generated_images/Augusta_National_Amen_Corner_9cb1227c.png';
+import pinehurstImage from '@assets/generated_images/Pinehurst_classic_design_60b7ea06.png';
 
 interface HeroSectionProps {
   totalCourses: number;
@@ -12,6 +15,33 @@ interface HeroSectionProps {
 export default function HeroSection({ totalCourses, coursesPlayed, onGetStarted }: HeroSectionProps) {
   const progressPercentage = Math.round((coursesPlayed / totalCourses) * 100);
 
+  // Rotating background images array
+  const backgroundImages = [
+    pebbleBeachImage,
+    augustaImage, 
+    pinehurstImage
+  ];
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [nextImageIndex, setNextImageIndex] = useState(1);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Rotate background images every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsTransitioning(true);
+      
+      setTimeout(() => {
+        setCurrentImageIndex(nextImageIndex);
+        setNextImageIndex((nextImageIndex + 1) % backgroundImages.length);
+        setIsTransitioning(false);
+      }, 1000); // 1 second fade duration
+      
+    }, 5000); // Change image every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [nextImageIndex, backgroundImages.length]);
+
   const handleGetStarted = () => {
     onGetStarted();
     console.log('Get started clicked');
@@ -19,10 +49,20 @@ export default function HeroSection({ totalCourses, coursesPlayed, onGetStarted 
 
   return (
     <div className="relative w-full overflow-hidden rounded-lg min-h-[520px] md:h-[500px]">
-      {/* Background Image with Dark Overlay */}
+      {/* Rotating Background Images */}
       <div 
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${heroImage})` }}
+        className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
+        style={{ 
+          backgroundImage: `url(${backgroundImages[currentImageIndex]})`,
+          opacity: isTransitioning ? 0 : 1
+        }}
+      />
+      <div 
+        className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
+        style={{ 
+          backgroundImage: `url(${backgroundImages[nextImageIndex]})`,
+          opacity: isTransitioning ? 1 : 0
+        }}
       />
       <div className="absolute inset-0 bg-black/50" />
       
