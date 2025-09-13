@@ -12,6 +12,7 @@ import GolfCourseMap from '@/components/GolfCourseMap';
 import FilterControls from '@/components/FilterControls';
 import CourseListCard from '@/components/CourseListCard';
 import ThemeToggle from '@/components/ThemeToggle';
+import { AuthNav } from '@/components/AuthNav';
 
 import { coursesApi } from '@/lib/coursesApi';
 import { useAuth } from '@/contexts/AuthContext';
@@ -165,6 +166,7 @@ export default function Home() {
             <span className="text-sm text-muted-foreground hidden sm:block">
               {calculatedStats.played}/{calculatedStats.total} played
             </span>
+            <AuthNav />
             <ThemeToggle />
           </div>
         </div>
