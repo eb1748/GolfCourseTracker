@@ -8,14 +8,18 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Trust proxy for Replit environment
+app.set('trust proxy', 1);
+
 // Session middleware configuration
 app.use(session({
   store: storage.sessionStore,
   secret: process.env.SESSION_SECRET || 'dev-secret-change-in-production',
   resave: false,
   saveUninitialized: false,
+  name: 'golf-session', // Custom session name
   cookie: {
-    secure: true,
+    secure: 'auto', // Automatically secure over HTTPS
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax'
