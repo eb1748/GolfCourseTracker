@@ -11,6 +11,16 @@ declare module 'express-session' {
   }
 }
 
+// Middleware to attach user ID if authenticated, but never block with 401
+const attachUserIfAuthenticated = (req: any, res: any, next: any) => {
+  const userId = req.session?.userId;
+  if (userId) {
+    req.userId = userId;
+  }
+  // Always continue - no 401 for unauthenticated users
+  next();
+};
+
 // Authentication middleware
 const requireAuth = (req: any, res: any, next: any) => {
   if (!req.session.userId) {
@@ -24,9 +34,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await initializeGolfCourses();
 
   // Golf Courses Routes
-  app.get("/api/courses", requireAuth, async (req, res) => {
+  app.get("/api/courses", attachUserIfAuthenticated, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = (req as any).userId; // Optional - from session or undefined
       const courses = await storage.getCoursesWithStatus(userId);
       res.json(courses);
     } catch (error) {
@@ -35,10 +45,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/courses/search", requireAuth, async (req, res) => {
+  app.get("/api/courses/search", attachUserIfAuthenticated, async (req, res) => {
     try {
       const query = req.query.q as string;
-      const userId = req.session.userId!;
+      const userId = (req as any).userId; // Optional - from session or undefined
       
       if (!query) {
         return res.status(400).json({ error: "Search query is required" });
@@ -100,7 +110,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         total: courses.length,
         played: courses.filter(c => c.status === 'played').length,
         wantToPlay: courses.filter(c => c.status === 'want-to-play').length,
-        notPlayed: courses.length - courses.filter(c => c.status === 'played').length,
+        notPlayed: courses.filter(c => c.status === 'not-played').length,
       };
 
       res.json(stats);
