@@ -18,7 +18,7 @@ export default function HeroSection({ totalCourses, coursesPlayed, onGetStarted 
   };
 
   return (
-    <div className="relative h-[500px] w-full overflow-hidden rounded-lg">
+    <div className="relative w-full overflow-hidden rounded-lg min-h-[520px] md:h-[500px]">
       {/* Background Image with Dark Overlay */}
       <div 
         className="absolute inset-0 bg-cover bg-center"
@@ -27,7 +27,7 @@ export default function HeroSection({ totalCourses, coursesPlayed, onGetStarted 
       <div className="absolute inset-0 bg-black/50" />
       
       {/* Content */}
-      <div className="relative h-full flex items-center justify-center px-6 py-16 md:py-8">
+      <div className="relative flex items-center justify-center px-6 py-8">
         <div className="text-center text-white space-y-6 max-w-2xl">
           {/* Badge */}
           <Badge variant="outline" className="bg-white/20 border-white/30 text-white backdrop-blur-sm">
