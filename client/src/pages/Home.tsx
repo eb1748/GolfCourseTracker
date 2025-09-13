@@ -216,8 +216,8 @@ export default function Home() {
             </div>
           </TabsContent>
 
-          <TabsContent value="map" className="space-y-2 lg:space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 lg:gap-4">
+          <TabsContent value="map" className="lg:space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-1 lg:gap-4">
               {/* Sidebar with filters */}
               <div className="lg:col-span-1">
                 <ScrollArea className="h-[calc(100svh-160px)] md:h-[calc(100dvh-180px)] lg:h-[calc(100vh-200px)]">
