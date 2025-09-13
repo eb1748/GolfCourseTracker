@@ -1,12 +1,13 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, decimal, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, decimal, integer, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
+  email: text("email").notNull().unique(),
   password: text("password").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const golfCourses = pgTable("golf_courses", {
@@ -25,14 +26,16 @@ export const golfCourses = pgTable("golf_courses", {
 
 export const userCourseStatus = pgTable("user_course_status", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull(),
-  courseId: varchar("course_id").notNull(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  courseId: varchar("course_id").notNull().references(() => golfCourses.id),
   status: text("status").notNull(), // 'played', 'want-to-play', 'not-played'
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
+  email: true,
   password: true,
+}).extend({
+  email: z.string().email()
 });
 
 export const insertGolfCourseSchema = createInsertSchema(golfCourses).omit({
