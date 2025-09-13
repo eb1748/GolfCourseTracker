@@ -1,17 +1,32 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserCourseStatusSchema, type CourseStatus } from "@shared/schema";
+import { insertUserCourseStatusSchema, insertUserSchema, type CourseStatus, type User } from "@shared/schema";
 import { FULL_TOP_100_GOLF_COURSES } from "../client/src/data/fullGolfCourses";
+
+// Extend session interface for TypeScript
+declare module 'express-session' {
+  interface SessionData {
+    userId: string;
+  }
+}
+
+// Authentication middleware
+const requireAuth = (req: any, res: any, next: any) => {
+  if (!req.session.userId) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
+  next();
+};
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize golf courses data on startup
   await initializeGolfCourses();
 
   // Golf Courses Routes
-  app.get("/api/courses", async (req, res) => {
+  app.get("/api/courses", requireAuth, async (req, res) => {
     try {
-      const userId = req.query.userId as string;
+      const userId = req.session.userId!;
       const courses = await storage.getCoursesWithStatus(userId);
       res.json(courses);
     } catch (error) {
@@ -20,10 +35,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/courses/search", async (req, res) => {
+  app.get("/api/courses/search", requireAuth, async (req, res) => {
     try {
       const query = req.query.q as string;
-      const userId = req.query.userId as string;
+      const userId = req.session.userId!;
       
       if (!query) {
         return res.status(400).json({ error: "Search query is required" });
@@ -37,14 +52,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/courses/status/:status", async (req, res) => {
+  app.get("/api/courses/status/:status", requireAuth, async (req, res) => {
     try {
       const status = req.params.status as CourseStatus;
-      const userId = req.query.userId as string;
-      
-      if (!userId) {
-        return res.status(400).json({ error: "User ID is required" });
-      }
+      const userId = req.session.userId!;
 
       const courses = await storage.getCoursesByStatus(status, userId);
       res.json(courses);
@@ -55,10 +66,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User Course Status Routes
-  app.post("/api/courses/:courseId/status", async (req, res) => {
+  app.post("/api/courses/:courseId/status", requireAuth, async (req, res) => {
     try {
       const { courseId } = req.params;
-      const { userId, status } = req.body;
+      const { status } = req.body;
+      const userId = req.session.userId!;
 
       // Validate input
       const validationResult = insertUserCourseStatusSchema.safeParse({
@@ -79,9 +91,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/users/:userId/stats", async (req, res) => {
+  app.get("/api/users/me/stats", requireAuth, async (req, res) => {
     try {
-      const { userId } = req.params;
+      const userId = req.session.userId!;
       const courses = await storage.getCoursesWithStatus(userId);
       
       const stats = {
@@ -95,6 +107,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user stats:", error);
       res.status(500).json({ error: "Failed to fetch user stats" });
+    }
+  });
+
+  // Authentication Routes
+  
+  // Helper function to sanitize user object (remove password)
+  const sanitizeUser = (user: User) => {
+    const { password, ...sanitizedUser } = user;
+    return sanitizedUser;
+  };
+
+  app.post("/api/auth/signup", async (req, res) => {
+    try {
+      const { email, password, name } = req.body;
+
+      // Validate input
+      const validationResult = insertUserSchema.safeParse({ email, password, name });
+      if (!validationResult.success) {
+        return res.status(400).json({ error: "Invalid input data", details: validationResult.error.errors });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ error: "User already exists" });
+      }
+
+      // Create user
+      const user = await storage.createUser(validationResult.data);
+      
+      // Set session
+      req.session.userId = user.id;
+
+      res.status(201).json({ user: sanitizeUser(user) });
+    } catch (error) {
+      console.error("Error creating user:", error);
+      res.status(500).json({ error: "Failed to create user" });
+    }
+  });
+
+  app.post("/api/auth/signin", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
+      }
+
+      // Get user by email
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      // Verify password
+      const isValidPassword = await storage.comparePassword(password, user.password);
+      if (!isValidPassword) {
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+
+      // Set session
+      req.session.userId = user.id;
+
+      res.json({ user: sanitizeUser(user) });
+    } catch (error) {
+      console.error("Error signing in:", error);
+      res.status(500).json({ error: "Failed to sign in" });
+    }
+  });
+
+  app.post("/api/auth/signout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Error destroying session:", err);
+        return res.status(500).json({ error: "Failed to sign out" });
+      }
+      res.json({ message: "Successfully signed out" });
+    });
+  });
+
+  app.get("/api/auth/me", async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      res.json({ user: sanitizeUser(user) });
+    } catch (error) {
+      console.error("Error fetching current user:", error);
+      res.status(500).json({ error: "Failed to fetch current user" });
+    }
+  });
+
+  app.post("/api/auth/sync", async (req, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const { courseStatuses } = req.body;
+
+      if (!Array.isArray(courseStatuses)) {
+        return res.status(400).json({ error: "Course statuses must be an array" });
+      }
+
+      // Sync each course status
+      const syncResults = [];
+      for (const courseStatus of courseStatuses) {
+        try {
+          const validationResult = insertUserCourseStatusSchema.safeParse({
+            ...courseStatus,
+            userId
+          });
+
+          if (validationResult.success) {
+            const result = await storage.setUserCourseStatus(validationResult.data);
+            syncResults.push(result);
+          }
+        } catch (error) {
+          console.error("Error syncing course status:", courseStatus, error);
+        }
+      }
+
+      res.json({ syncedCount: syncResults.length, synced: syncResults });
+    } catch (error) {
+      console.error("Error syncing course data:", error);
+      res.status(500).json({ error: "Failed to sync course data" });
     }
   });
 
