@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import type { GolfCourseWithStatus, CourseStatus, AccessType } from '@shared/schema';
@@ -168,8 +168,10 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
   const [iconScale, setIconScale] = useState<number>(1);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const filteredCourses = courses.filter(course => 
-    filterStatus === 'all' || course.status === filterStatus
+  const filteredCourses = useMemo(() =>
+    courses.filter(course => 
+      filterStatus === 'all' || course.status === filterStatus
+    ), [courses, filterStatus]
   );
 
   // Calculate scale factor based on zoom level (max 450%)
