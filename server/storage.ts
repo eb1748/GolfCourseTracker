@@ -164,32 +164,22 @@ export class DatabaseStorage implements IStorage {
   }
 
   async setUserCourseStatus(insertStatus: InsertUserCourseStatus): Promise<UserCourseStatus> {
-    // First, try to update existing status
-    const existing = await this.getUserCourseStatus(insertStatus.userId, insertStatus.courseId);
-    
-    if (existing) {
-      // Update existing record
-      const result = await db.update(userCourseStatus)
-        .set({ status: insertStatus.status })
-        .where(and(
-          eq(userCourseStatus.userId, insertStatus.userId),
-          eq(userCourseStatus.courseId, insertStatus.courseId)
-        ))
-        .returning();
-      
-      return result[0];
-    } else {
-      // Create new record
-      const result = await db.insert(userCourseStatus)
-        .values({
-          userId: insertStatus.userId,
-          courseId: insertStatus.courseId,
+    // Use atomic upsert to handle concurrent requests safely
+    const result = await db.insert(userCourseStatus)
+      .values({
+        userId: insertStatus.userId,
+        courseId: insertStatus.courseId,
+        status: insertStatus.status
+      })
+      .onConflictDoUpdate({
+        target: [userCourseStatus.userId, userCourseStatus.courseId],
+        set: {
           status: insertStatus.status
-        })
-        .returning();
-      
-      return result[0];
-    }
+        }
+      })
+      .returning();
+    
+    return result[0];
   }
 
   async getAllUserCourseStatuses(userId: string): Promise<UserCourseStatus[]> {

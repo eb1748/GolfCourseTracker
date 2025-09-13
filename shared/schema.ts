@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, decimal, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, decimal, integer, timestamp, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -30,7 +30,10 @@ export const userCourseStatus = pgTable("user_course_status", {
   userId: varchar("user_id").notNull().references(() => users.id),
   courseId: varchar("course_id").notNull().references(() => golfCourses.id),
   status: text("status").notNull(), // 'played', 'want-to-play', 'not-played'
-});
+}, (table) => ({
+  // Unique constraint to prevent duplicate user-course combinations
+  userCourseUnique: unique().on(table.userId, table.courseId),
+}));
 
 export const insertUserSchema = createInsertSchema(users).pick({
   name: true,
