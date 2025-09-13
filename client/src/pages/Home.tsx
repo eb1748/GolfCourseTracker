@@ -44,10 +44,6 @@ export default function Home() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/courses'] });
       queryClient.invalidateQueries({ queryKey: ['/api/users/stats'] });
-      toast({
-        title: "Status Updated",
-        description: "Course status has been updated successfully.",
-      });
     },
     onError: () => {
       toast({
