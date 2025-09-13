@@ -217,23 +217,27 @@ export default function Home() {
           </TabsContent>
 
           <TabsContent value="map" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[calc(100vh-80px)] md:h-[calc(100vh-120px)] lg:h-[calc(100vh-200px)]">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
               {/* Sidebar with filters */}
               <div className="lg:col-span-1">
-                <FilterControls
-                  activeFilter={activeFilter}
-                  onFilterChange={setActiveFilter}
-                  activeAccessFilter={activeAccessFilter}
-                  onAccessFilterChange={setActiveAccessFilter}
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  stats={calculatedStats}
-                />
+                <ScrollArea className="h-[calc(100svh-160px)] md:h-[calc(100dvh-180px)] lg:h-[calc(100vh-200px)]">
+                  <div className="pr-4">
+                    <FilterControls
+                      activeFilter={activeFilter}
+                      onFilterChange={setActiveFilter}
+                      activeAccessFilter={activeAccessFilter}
+                      onAccessFilterChange={setActiveAccessFilter}
+                      searchQuery={searchQuery}
+                      onSearchChange={setSearchQuery}
+                      stats={calculatedStats}
+                    />
+                  </div>
+                </ScrollArea>
               </div>
               
               {/* Map */}
               <div className="lg:col-span-3">
-                <Card className="h-full">
+                <Card className="h-[calc(100svh-160px)] md:h-[calc(100dvh-180px)] lg:h-[calc(100vh-200px)]">
                   <CardContent className="p-0 h-full">
                     <GolfCourseMap
                       courses={filteredCourses}
