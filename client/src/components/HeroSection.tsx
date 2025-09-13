@@ -27,7 +27,7 @@ export default function HeroSection({ totalCourses, coursesPlayed, onGetStarted 
       <div className="absolute inset-0 bg-black/50" />
       
       {/* Content */}
-      <div className="relative h-full flex items-center justify-center px-6 py-8 md:py-6">
+      <div className="relative h-full flex items-center justify-center px-6 py-16 md:py-8">
         <div className="text-center text-white space-y-6 max-w-2xl">
           {/* Badge */}
           <Badge variant="outline" className="bg-white/20 border-white/30 text-white backdrop-blur-sm">
