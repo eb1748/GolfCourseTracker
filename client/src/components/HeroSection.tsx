@@ -54,16 +54,18 @@ export default function HeroSection({ totalCourses, coursesPlayed, onGetStarted 
         className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
         style={{ 
           backgroundImage: `url(${backgroundImages[currentImageIndex]})`,
-          opacity: isTransitioning ? 0 : 1
+          opacity: 1
         }}
       />
-      <div 
-        className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
-        style={{ 
-          backgroundImage: `url(${backgroundImages[nextImageIndex]})`,
-          opacity: isTransitioning ? 1 : 0
-        }}
-      />
+      {isTransitioning && (
+        <div 
+          className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
+          style={{ 
+            backgroundImage: `url(${backgroundImages[nextImageIndex]})`,
+            opacity: 1
+          }}
+        />
+      )}
       <div className="absolute inset-0 bg-black/50" />
       
       {/* Content */}
