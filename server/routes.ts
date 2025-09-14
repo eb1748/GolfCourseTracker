@@ -46,8 +46,12 @@ const trackUserActivity = (activityType: ActivityType) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Initialize golf courses data on startup
-  await initializeGolfCourses();
+  // Initialize golf courses data on startup (truly non-blocking)
+  setTimeout(() => {
+    initializeGolfCourses().catch(error => {
+      console.warn("Golf courses initialization failed, server will continue:", error.message);
+    });
+  }, 100);
 
   // Golf Courses Routes
   app.get("/api/courses", attachUserIfAuthenticated, trackUserActivity('view'), async (req, res) => {
@@ -56,8 +60,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const courses = await storage.getCoursesWithStatus(userId);
       res.json(courses);
     } catch (error) {
-      console.error("Error fetching courses:", error);
-      res.status(500).json({ error: "Failed to fetch courses" });
+      console.error("Error fetching courses from database, using static data fallback:", error);
+
+      // Fallback to static course data when database is unavailable
+      const fallbackCourses = FULL_TOP_100_GOLF_COURSES.map(course => ({
+        ...course,
+        id: course.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''), // Generate ID from name
+        status: 'not-played' as const,
+        rating: course.rating || null,
+        description: course.description || null,
+        website: course.website || null,
+        phone: course.phone || null,
+        accessType: course.accessType || 'public'
+      }));
+
+      res.json(fallbackCourses);
     }
   });
 
@@ -65,7 +82,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const query = req.query.q as string;
       const userId = (req as any).userId; // Optional - from session or undefined
-      
+
       if (!query) {
         return res.status(400).json({ error: "Search query is required" });
       }
@@ -73,8 +90,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const courses = await storage.searchCourses(query, userId);
       res.json(courses);
     } catch (error) {
-      console.error("Error searching courses:", error);
-      res.status(500).json({ error: "Failed to search courses" });
+      console.error("Error searching courses in database, using static data fallback:", error);
+
+      // Fallback to static course data for search
+      const query = req.query.q as string;
+      if (!query) {
+        return res.status(400).json({ error: "Search query is required" });
+      }
+
+      const lowerQuery = query.toLowerCase();
+      const fallbackCourses = FULL_TOP_100_GOLF_COURSES
+        .filter(course =>
+          course.name.toLowerCase().includes(lowerQuery) ||
+          course.location.toLowerCase().includes(lowerQuery) ||
+          course.state.toLowerCase().includes(lowerQuery) ||
+          (course.description && course.description.toLowerCase().includes(lowerQuery))
+        )
+        .map(course => ({
+          ...course,
+          id: course.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+          status: 'not-played' as const,
+          rating: course.rating || null,
+          description: course.description || null,
+          website: course.website || null,
+          phone: course.phone || null,
+          accessType: course.accessType || 'public'
+        }));
+
+      res.json(fallbackCourses);
     }
   });
 
@@ -141,8 +184,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(stats);
     } catch (error) {
-      console.error("Error fetching user stats:", error);
-      res.status(500).json({ error: "Failed to fetch user stats" });
+      console.error("Error fetching user stats from database, using static data fallback:", error);
+
+      // Fallback stats for anonymous users when database is unavailable
+      const fallbackStats = {
+        total: FULL_TOP_100_GOLF_COURSES.length,
+        played: 0, // Anonymous users start with no played courses
+        wantToPlay: 0,
+        notPlayed: FULL_TOP_100_GOLF_COURSES.length,
+      };
+
+      res.json(fallbackStats);
     }
   });
 

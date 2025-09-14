@@ -65,30 +65,58 @@ export interface IStorage {
 const MemoryStore = createMemoryStore(session);
 const PgSession = ConnectPgSimple(session);
 
-// Database connection setup
-const sql_conn = neon(process.env.DATABASE_URL!);
-const db = drizzle(sql_conn);
+// Database connection setup (with fallback)
+let sql_conn: any = null;
+let db: any = null;
+
+if (process.env.DATABASE_URL) {
+  try {
+    sql_conn = neon(process.env.DATABASE_URL);
+    db = drizzle(sql_conn);
+  } catch (error) {
+    console.warn("Failed to initialize database connection:", error);
+  }
+} else {
+  console.warn("DATABASE_URL not provided, database features will be unavailable");
+}
 
 export class DatabaseStorage implements IStorage {
   public sessionStore: any;
 
   constructor() {
-    // Use PostgreSQL session store instead of memory
-    this.sessionStore = new PgSession({
-      conString: process.env.DATABASE_URL,
-      tableName: 'session', // Table name for storing sessions
-      createTableIfMissing: true, // Create the session table if it doesn't exist
-    });
+    // Use PostgreSQL session store if DATABASE_URL available, otherwise fallback to memory
+    if (process.env.DATABASE_URL) {
+      try {
+        this.sessionStore = new PgSession({
+          conString: process.env.DATABASE_URL,
+          tableName: 'session', // Table name for storing sessions
+          createTableIfMissing: true, // Create the session table if it doesn't exist
+        });
+      } catch (error) {
+        console.warn("Failed to create PostgreSQL session store, using memory store:", error);
+        this.sessionStore = new MemoryStore({
+          checkPeriod: 86400000, // prune expired entries every 24h
+        });
+      }
+    } else {
+      console.warn("No DATABASE_URL provided, using memory session store");
+      this.sessionStore = new MemoryStore({
+        checkPeriod: 86400000, // prune expired entries every 24h
+      });
+    }
   }
 
   // User methods
   async getUser(id: string): Promise<User | undefined> {
+    if (!db) {
+      throw new Error('Database not available');
+    }
     try {
       const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
       return result[0];
     } catch (error) {
       console.error('Error fetching user:', error);
-      return undefined;
+      throw error;
     }
   }
 
@@ -226,6 +254,9 @@ export class DatabaseStorage implements IStorage {
 
   // Golf course methods
   async getAllCourses(): Promise<GolfCourse[]> {
+    if (!db) {
+      throw new Error('Database not available');
+    }
     return await db.select().from(golfCourses);
   }
 
