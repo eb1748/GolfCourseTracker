@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { insertUserSchema } from '@shared/schema';
+import { insertUserFormSchema } from '@shared/schema';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,7 @@ const signInSchema = z.object({
   password: z.string().min(1, 'Password is required'),
 });
 
-const signUpSchema = insertUserSchema.extend({
+const signUpSchema = insertUserFormSchema.extend({
   confirmPassword: z.string().min(6, 'Password must be at least 6 characters'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",

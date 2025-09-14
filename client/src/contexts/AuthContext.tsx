@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from '
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { LocalStorageService } from '@/lib/localStorage';
-import type { User, InsertUser } from '@shared/schema';
+import type { User, InsertUserForm } from '@shared/schema';
 
 // Auth context types
 interface AuthUser extends Omit<User, 'password'> {
@@ -14,7 +14,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (userData: InsertUser) => Promise<void>;
+  signup: (userData: InsertUserForm) => Promise<void>;
   logout: () => Promise<void>;
   syncLocalStorageData: () => Promise<void>;
   refetchUser: () => Promise<void>;
@@ -79,7 +79,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Signup mutation
   const signupMutation = useMutation({
-    mutationFn: async (userData: InsertUser) => {
+    mutationFn: async (userData: InsertUserForm) => {
       const response = await apiRequest('POST', '/api/auth/signup', userData);
       return await response.json();
     },
@@ -155,7 +155,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     await loginMutation.mutateAsync({ email, password });
   };
 
-  const signup = async (userData: InsertUser): Promise<void> => {
+  const signup = async (userData: InsertUserForm): Promise<void> => {
     await signupMutation.mutateAsync(userData);
   };
 
