@@ -34,6 +34,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Query to check if user is already authenticated
   const { data: currentUser, isLoading, refetch: refetchUser } = useQuery({
     queryKey: ['/api/auth/me'],
+    queryFn: async () => {
+      const res = await fetch('/api/auth/me', {
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        return { user: null }; // Return null user instead of throwing
+      }
+
+      return await res.json();
+    },
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });

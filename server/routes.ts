@@ -78,10 +78,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/courses/status/:status", requireAuth, async (req, res) => {
+  app.get("/api/courses/status/:status", attachUserIfAuthenticated, async (req, res) => {
     try {
       const status = req.params.status as CourseStatus;
-      const userId = req.session.userId!;
+      const userId = (req as any).userId; // Optional - from session or undefined
+
+      if (!userId) {
+        // For anonymous users, return empty array or all courses with default status
+        if (status === 'not-played') {
+          const courses = await storage.getCoursesWithStatus(undefined);
+          return res.json(courses);
+        } else {
+          return res.json([]); // No played/want-to-play courses for anonymous users
+        }
+      }
 
       const courses = await storage.getCoursesByStatus(status, userId);
       res.json(courses);
@@ -117,11 +127,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/users/me/stats", requireAuth, async (req, res) => {
+  app.get("/api/users/me/stats", attachUserIfAuthenticated, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = (req as any).userId; // Optional - from session or undefined
       const courses = await storage.getCoursesWithStatus(userId);
-      
+
       const stats = {
         total: courses.length,
         played: courses.filter(c => c.status === 'played').length,
@@ -291,14 +301,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/auth/me", async (req, res) => {
     try {
       const userId = req.session.userId;
-      
+
       if (!userId) {
-        return res.status(401).json({ error: "Not authenticated" });
+        return res.json({ user: null }); // Return null instead of error for anonymous users
       }
 
       const user = await storage.getUser(userId);
       if (!user) {
-        return res.status(404).json({ error: "User not found" });
+        return res.json({ user: null }); // Return null if user not found
       }
 
       res.json({ user: sanitizeUser(user) });
