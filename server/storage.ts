@@ -68,16 +68,55 @@ const PgSession = ConnectPgSimple(session);
 // Database connection setup (with fallback)
 let sql_conn: any = null;
 let db: any = null;
+let databaseConnectionValid = false;
 
 if (process.env.DATABASE_URL) {
+  const dbUrl = process.env.DATABASE_URL;
+  const maskedUrl = dbUrl.replace(/\/\/([^:]+):([^@]+)@/, '//***:***@');
+  console.log("DATABASE_URL found:", maskedUrl);
+  console.log("Environment info:", {
+    NODE_ENV: process.env.NODE_ENV,
+    DATABASE_URL_present: !!process.env.DATABASE_URL,
+    DATABASE_URL_length: process.env.DATABASE_URL.length
+  });
+
   try {
     sql_conn = neon(process.env.DATABASE_URL);
     db = drizzle(sql_conn);
+    console.log("Database client initialized successfully");
+    // Note: actual connection will be tested when queries are executed
   } catch (error) {
-    console.warn("Failed to initialize database connection:", error);
+    console.error("Failed to initialize database client:", error);
+    db = null;
   }
 } else {
   console.warn("DATABASE_URL not provided, database features will be unavailable");
+  console.log("Available environment variables:", Object.keys(process.env).filter(key => key.includes('DATABASE')));
+}
+
+// Test database connection with a simple query
+async function testDatabaseConnection(): Promise<boolean> {
+  if (!db) {
+    console.log("No database client available for connection test");
+    return false;
+  }
+
+  try {
+    console.log("Testing database connection...");
+    // Try a simple query to test the connection
+    await db.execute(sql`SELECT 1 as test`);
+    console.log("✅ Database connection test successful");
+    databaseConnectionValid = true;
+    return true;
+  } catch (error) {
+    console.error("❌ Database connection test failed:", error);
+    console.error("Connection error details:", {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    databaseConnectionValid = false;
+    return false;
+  }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -131,13 +170,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUserForm): Promise<User> {
+    console.log("DatabaseStorage.createUser called with:", { email: insertUser.email, name: insertUser.name });
+
     if (!db) {
+      console.error("No database client available for user creation");
       throw new Error("Database connection not available for user creation");
     }
 
+    // Test database connection before attempting user creation
+    const connectionValid = await testDatabaseConnection();
+    if (!connectionValid) {
+      console.error("Database connection test failed before user creation");
+      throw new Error("Database connection test failed - unable to create user");
+    }
+
     try {
+      console.log("Attempting to create user in database...");
+
       // Hash the password with bcrypt using 12 rounds for security
       const hashedPassword = await bcrypt.hash(insertUser.password, 12);
+      console.log("Password hashed successfully");
 
       const result = await db.insert(users).values({
         name: insertUser.name,
@@ -146,9 +198,12 @@ export class DatabaseStorage implements IStorage {
         preferences: {}, // Initialize with empty preferences object
       }).returning();
 
+      console.log("User created successfully in database:", { id: result[0].id, email: result[0].email });
+
       // Log initial signup activity (don't fail user creation if this fails)
       try {
         await this.logUserActivity(result[0].id, 'login');
+        console.log("Initial signup activity logged");
       } catch (activityError) {
         console.warn('Failed to log initial signup activity:', activityError);
       }
@@ -156,6 +211,11 @@ export class DatabaseStorage implements IStorage {
       return result[0];
     } catch (error) {
       console.error('Database error during user creation:', error);
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        cause: error instanceof Error ? (error as any).cause : undefined
+      });
       throw new Error(`Failed to create user in database: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -627,12 +687,27 @@ export class MemStorage implements IStorage {
 
 // Use MemStorage as fallback when database connection fails
 let storage: IStorage;
+
+// Immediately try to use DatabaseStorage, but it will fail gracefully in createUser if db doesn't work
 if (db) {
-  console.log("Using DatabaseStorage with PostgreSQL connection");
+  console.log("✅ Database client initialized, using DatabaseStorage (will test connection on first use)");
   storage = new DatabaseStorage();
 } else {
-  console.warn("Database connection failed, falling back to MemStorage for user authentication");
+  console.warn("❌ No database client available, using MemStorage for user authentication");
   storage = new MemStorage();
 }
 
-export { storage };
+// Test database connection and log the result (but don't change storage selection)
+if (db) {
+  testDatabaseConnection().then(isValid => {
+    if (isValid) {
+      console.log("✅ Database connection verified - ready for user operations");
+    } else {
+      console.error("❌ Database connection test failed - createUser operations will fail and should be handled gracefully");
+    }
+  }).catch(error => {
+    console.error("❌ Database connection test error:", error);
+  });
+}
+
+export { storage, MemStorage };

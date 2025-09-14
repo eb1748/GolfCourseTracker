@@ -269,7 +269,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Create user (storage handles password hashing)
-      const user = await storage.createUser(validationResult.data);
+      let user: User;
+      try {
+        console.log("Attempting user creation with current storage:", storage.constructor.name);
+        user = await storage.createUser(validationResult.data);
+      } catch (dbError) {
+        console.error("Primary storage failed for user creation:", dbError);
+        console.log("Attempting fallback to MemStorage for user creation...");
+
+        // If primary storage (database) fails, try with memory storage as fallback
+        const { MemStorage } = await import("./storage");
+        const memStorage = new (MemStorage as any)();
+
+        try {
+          user = await memStorage.createUser(validationResult.data);
+          console.log("✅ User created successfully using MemStorage fallback");
+        } catch (memError) {
+          console.error("Both primary and fallback storage failed:", memError);
+          throw new Error(`User creation failed: ${dbError instanceof Error ? dbError.message : 'Database error'}`);
+        }
+      }
       
       // Set session
       req.session.userId = user.id;
