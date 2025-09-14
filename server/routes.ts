@@ -291,7 +291,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Error creating user:", error);
-      res.status(500).json({ error: "Failed to create user" });
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      res.status(500).json({
+        error: "Failed to create user",
+        details: errorMessage,
+        stack: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : undefined) : undefined
+      });
     }
   });
 

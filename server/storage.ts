@@ -131,20 +131,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUserForm): Promise<User> {
-    // Hash the password with bcrypt using 12 rounds for security
-    const hashedPassword = await bcrypt.hash(insertUser.password, 12);
-    
-    const result = await db.insert(users).values({
-      name: insertUser.name,
-      email: insertUser.email,
-      passwordHash: hashedPassword,
-      preferences: {}, // Initialize with empty preferences object
-    }).returning();
-    
-    // Log initial signup activity
-    await this.logUserActivity(result[0].id, 'login');
-    
-    return result[0];
+    if (!db) {
+      throw new Error("Database connection not available for user creation");
+    }
+
+    try {
+      // Hash the password with bcrypt using 12 rounds for security
+      const hashedPassword = await bcrypt.hash(insertUser.password, 12);
+
+      const result = await db.insert(users).values({
+        name: insertUser.name,
+        email: insertUser.email,
+        passwordHash: hashedPassword,
+        preferences: {}, // Initialize with empty preferences object
+      }).returning();
+
+      // Log initial signup activity (don't fail user creation if this fails)
+      try {
+        await this.logUserActivity(result[0].id, 'login');
+      } catch (activityError) {
+        console.warn('Failed to log initial signup activity:', activityError);
+      }
+
+      return result[0];
+    } catch (error) {
+      console.error('Database error during user creation:', error);
+      throw new Error(`Failed to create user in database: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
   async comparePassword(password: string, hashedPassword: string): Promise<boolean> {
@@ -612,4 +625,14 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+// Use MemStorage as fallback when database connection fails
+let storage: IStorage;
+if (db) {
+  console.log("Using DatabaseStorage with PostgreSQL connection");
+  storage = new DatabaseStorage();
+} else {
+  console.warn("Database connection failed, falling back to MemStorage for user authentication");
+  storage = new MemStorage();
+}
+
+export { storage };
