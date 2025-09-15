@@ -59,17 +59,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/courses", attachUserIfAuthenticated, trackUserActivity('view'), async (req, res) => {
     try {
       const userId = (req as any).userId; // Optional - from session or undefined
-      // Use caching with appropriate key
-      const cacheKey = userId ? getCacheKey.userCourses(userId) : getCacheKey.allCourses();
-
-      const courses = await withQueryMetrics('get-courses-with-status', () =>
-        withCache(
-          cacheKey,
-          () => withRetry(() => storage.getCoursesWithStatus(userId)),
-          userId ? CACHE_TTL.USER_COURSES : CACHE_TTL.COURSES
-        )
-      );
-
+      // Simplified direct call without complex caching/monitoring for better performance
+      const courses = await storage.getCoursesWithStatus(userId);
       res.json(courses);
     } catch (error) {
       console.error("Error fetching courses from database, using static data fallback:", error);
