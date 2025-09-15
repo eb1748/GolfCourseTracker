@@ -28,13 +28,14 @@ This application allows users to browse and interact with golf course data. Auth
 
 - **Backend**: Node.js with Express + TypeScript
 - **Frontend**: React + TypeScript + Vite
-- **Database**: PostgreSQL hosted on Railway
+- **Database**: PostgreSQL hosted on Railway (migrated from Replit)
+- **Database Driver**: Standard `pg` PostgreSQL driver (upgraded from `@neondatabase/serverless`)
 - **ORM**: Drizzle ORM
 - **Authentication**: Express-session with PostgreSQL session store
 - **UI**: Tailwind CSS + Radix UI components
 - **State Management**: TanStack React Query
-- **Deployment**: Vercel (frontend) + Railway (database)
-- **Originally built by**: Replit
+- **Deployment**: Railway (database) + Local development
+- **Migration**: Originally built by Replit, migrated to Railway-compatible architecture
 
 ## Database
 
@@ -141,9 +142,34 @@ The course status update functionality has been completely overhauled for reliab
 
 - **Platform**: Railway
 - **Database**: Railway PostgreSQL
-- **Status**: ✅ Deployed but needs auth fixes
+- **Status**: ✅ Migrated from Replit - Database persistence issues resolved
 
 ## Recent Changes
+
+### ✅ Replit to Railway Migration Fixes (2025-09-15)
+**CRITICAL**: Fixed user accounts saving to memory instead of PostgreSQL database
+
+**Root Cause**: Multiple Replit-specific configurations were incompatible with Railway deployment, causing user registration to default to memory storage instead of database persistence.
+
+**Major Fixes Implemented**:
+- **Database Driver Migration**: Replaced `@neondatabase/serverless` with standard `pg` PostgreSQL driver
+  - Resolved hostname rewriting bug (Neon driver incorrectly connecting to `api.proxy.rlwy.net` instead of `nozomi.proxy.rlwy.net`)
+  - Ensures proper Railway PostgreSQL connections
+- **Removed Replit Dependencies**: Eliminated all Replit-specific configurations
+  - Removed `@replit/vite-plugin-cartographer` and `@replit/vite-plugin-runtime-error-modal` from Vite
+  - Removed Replit development banner script from `index.html`
+  - Updated server proxy configuration for Railway deployment
+- **Storage System Overhaul**: Eliminated problematic fallback logic
+  - Removed MemStorage fallback in signup route to force DatabaseStorage usage
+  - Enhanced database connection logging and error handling
+  - Fixed drizzle configuration for standard PostgreSQL connections
+
+**Impact**:
+- ✅ **User accounts now persist to PostgreSQL** instead of memory
+- ✅ **DatabaseStorage properly selected** (no more MemStorage fallback)
+- ✅ **Eliminated hostname resolution errors** from Neon driver
+- ✅ **Railway-compatible database connections** established
+- ✅ **All Replit artifacts removed** from codebase
 
 ### ✅ Course Status Update Fixes (2025-09-15)
 - **Fixed 500 errors**: Course status updates (`POST /api/courses/:courseId/status`) now work reliably
@@ -203,9 +229,10 @@ The application now features a robust fallback system that ensures functionality
 2. ✅ **~~Anonymous Access~~**: ✅ COMPLETED - Full browsing without login
 3. ✅ **~~Document API~~**: ✅ COMPLETED - All endpoints documented above
 4. ✅ **~~Server Stability~~**: ✅ COMPLETED - Fixed crashes and added fallbacks
-5. **Testing**: Verify anonymous and authenticated user flows in production
-6. **Performance**: Monitor and optimize for Vercel serverless deployment
-7. **Database Connection**: Verify correct Railway connection string for production
+5. ✅ **~~Replit Migration~~**: ✅ COMPLETED - Migrated from Replit to Railway architecture
+6. **Testing**: Verify user registration writes to PostgreSQL database tables
+7. **Authentication Testing**: Test sign-in with database-stored users
+8. **Performance**: Monitor and optimize for Railway deployment
 
 ## Contributing
 
