@@ -14,10 +14,12 @@ import {
 
 const app = express();
 
-// Security middleware - apply early in the stack
-app.use(secureHeaders);
-app.use(helmetConfig);
-app.use(corsConfig);
+// Security middleware - apply early in the stack (disabled in development for debugging)
+if (process.env.NODE_ENV === 'production') {
+  app.use(secureHeaders);
+  app.use(helmetConfig);
+  app.use(corsConfig);
+}
 
 // Request parsing with size limits
 app.use(express.json({ limit: '10mb' }));
