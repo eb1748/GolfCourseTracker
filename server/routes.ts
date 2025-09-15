@@ -337,27 +337,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "User already exists" });
       }
 
-      // Create user (storage handles password hashing)
-      let user: User;
-      try {
-        console.log("Attempting user creation with current storage:", storage.constructor.name);
-        user = await storage.createUser(validationResult.data);
-      } catch (dbError) {
-        console.error("Primary storage failed for user creation:", dbError);
-        console.log("Attempting fallback to MemStorage for user creation...");
+      // Create user (storage handles password hashing) - FORCE DATABASE USAGE, NO FALLBACK
+      console.log("🚀 Attempting user creation with storage:", storage.constructor.name);
+      console.log("🔑 Database URL configured:", !!process.env.DATABASE_URL);
 
-        // If primary storage (database) fails, try with memory storage as fallback
-        const { MemStorage } = await import("./storage");
-        const memStorage = new (MemStorage as any)();
-
-        try {
-          user = await memStorage.createUser(validationResult.data);
-          console.log("✅ User created successfully using MemStorage fallback");
-        } catch (memError) {
-          console.error("Both primary and fallback storage failed:", memError);
-          throw new Error(`User creation failed: ${dbError instanceof Error ? dbError.message : 'Database error'}`);
-        }
-      }
+      const user = await storage.createUser(validationResult.data);
       
       // Set session
       req.session.userId = user.id;

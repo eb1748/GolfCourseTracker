@@ -22,8 +22,9 @@ import session from "express-session";
 import createMemoryStore from "memorystore";
 import ConnectPgSimple from "connect-pg-simple";
 import bcrypt from "bcrypt";
-import { drizzle } from "drizzle-orm/neon-http";
-import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/node-postgres";
+import pkg from "pg";
+const { Pool } = pkg;
 import { eq, sql, and, ilike, or } from "drizzle-orm";
 
 export interface IStorage {
@@ -65,8 +66,8 @@ export interface IStorage {
 const MemoryStore = createMemoryStore(session);
 const PgSession = ConnectPgSimple(session);
 
-// Database connection setup (with fallback)
-let sql_conn: any = null;
+// Database connection setup with standard PostgreSQL driver (Railway compatible)
+let pool: any = null;
 let db: any = null;
 let databaseConnectionValid = false;
 
@@ -81,13 +82,19 @@ if (process.env.DATABASE_URL) {
   });
 
   try {
-    sql_conn = neon(process.env.DATABASE_URL);
-    db = drizzle(sql_conn);
-    console.log("Database client initialized successfully");
+    // Use standard PostgreSQL connection pool instead of Neon serverless driver
+    // This resolves the hostname rewriting issue that was preventing database connections
+    pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+    });
+    db = drizzle(pool);
+    console.log("Database client initialized successfully with PostgreSQL driver");
     // Note: actual connection will be tested when queries are executed
   } catch (error) {
     console.error("Failed to initialize database client:", error);
     db = null;
+    pool = null;
   }
 } else {
   console.warn("DATABASE_URL not provided, database features will be unavailable");
@@ -177,19 +184,16 @@ export class DatabaseStorage implements IStorage {
       throw new Error("Database connection not available for user creation");
     }
 
-    // Test database connection before attempting user creation
-    const connectionValid = await testDatabaseConnection();
-    if (!connectionValid) {
-      console.error("Database connection test failed before user creation");
-      throw new Error("Database connection test failed - unable to create user");
-    }
+    // Proceed directly to database operation - let actual DB call determine if connection works
+    console.log("🔗 Using storage type:", this.constructor.name);
+    console.log("💾 Attempting direct database user creation...");
 
     try {
-      console.log("Attempting to create user in database...");
+      console.log("🔐 Hashing password...");
 
       // Hash the password with bcrypt using 12 rounds for security
       const hashedPassword = await bcrypt.hash(insertUser.password, 12);
-      console.log("Password hashed successfully");
+      console.log("✅ Password hashed successfully");
 
       const result = await db.insert(users).values({
         name: insertUser.name,
@@ -198,7 +202,13 @@ export class DatabaseStorage implements IStorage {
         preferences: {}, // Initialize with empty preferences object
       }).returning();
 
-      console.log("User created successfully in database:", { id: result[0].id, email: result[0].email });
+      console.log("🎉 ✅ User created successfully in PostgreSQL database!");
+      console.log("📝 Created user details:", {
+        id: result[0].id,
+        email: result[0].email,
+        name: result[0].name,
+        createdAt: result[0].createdAt
+      });
 
       // Log initial signup activity (don't fail user creation if this fails)
       try {
@@ -210,13 +220,19 @@ export class DatabaseStorage implements IStorage {
 
       return result[0];
     } catch (error) {
-      console.error('Database error during user creation:', error);
-      console.error('Error details:', {
+      console.error("💥 ❌ Database user creation failed with error:");
+      console.error("Error type:", error instanceof Error ? error.constructor.name : typeof error);
+      console.error("Error message:", error instanceof Error ? error.message : error);
+      console.error("Error details:", {
         message: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined,
-        cause: error instanceof Error ? (error as any).cause : undefined
+        cause: error instanceof Error ? (error as any).cause : undefined,
+        userData: { email: insertUser.email, name: insertUser.name },
+        databaseUrl: process.env.DATABASE_URL ? 'Present' : 'Missing'
       });
-      throw new Error(`Failed to create user in database: ${error instanceof Error ? error.message : 'Unknown error'}`);
+
+      // Don't throw generic errors - throw the actual database error for debugging
+      throw error;
     }
   }
 

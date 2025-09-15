@@ -1,6 +1,6 @@
 # Golf Course Tracker
 
-A web application for tracking and managing golf course information with optional user authentication for data persistence.
+This is a full-stack web application that helps golf enthusiasts track their progress through America's top 100 public golf courses. The application provides an interactive map interface where users can mark courses as "played," "want to play," or "not played," search for specific courses, and visualize their golf destination journey. Built with modern web technologies, it offers both map and list views with filtering capabilities, creating an engaging exploration-focused experience similar to travel platforms like Airbnb and AllTrails.
 
 ## Project Overview
 

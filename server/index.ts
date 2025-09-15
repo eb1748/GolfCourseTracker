@@ -23,8 +23,8 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Trust proxy for Replit environment
-app.set('trust proxy', 1);
+// Trust proxy for Railway deployment
+app.set('trust proxy', true);
 
 // Session middleware configuration  
 app.use(session({
