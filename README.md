@@ -76,7 +76,9 @@ This application allows users to browse and interact with golf course data. Auth
 
 ### **Data Storage Solutions**
 - **Schema Design**: Three main entities - users, golf courses, and user course status relationships
-- **Data Initialization**: Comprehensive dataset of top 100 public golf courses with location coordinates
+- **Database-Driven Architecture**: Golf course data is stored in PostgreSQL database as the single source of truth
+- **Manual Seeding**: Use `npm run db:seed` to populate the database with the top 100 public golf courses
+- **Idempotent Seeding**: Seed script prevents duplicates and can be run multiple times safely
 - **Performance Indexes**: Comprehensive database indexes for all common query patterns
   - **Full-text search**: GIN indexes for course name/location search
   - **Geospatial indexes**: Coordinate-based location queries
@@ -99,7 +101,7 @@ This application allows users to browse and interact with golf course data. Auth
 ### **Security Features (Priority 1 - COMPLETED)**
 - **CORS Configuration**: Environment-aware origins whitelist with fallback support
   - Development: `localhost:5173`, `localhost:3000`, `localhost:5000`
-  - Production: `golfcoursetracker.vercel.app` (configurable via `ALLOWED_ORIGINS`)
+  - Production: `your-railway-domain.railway.app` (configurable via `ALLOWED_ORIGINS`)
   - Credentials support for cross-origin authenticated requests
 - **Rate Limiting**: Multi-tier protection against abuse
   - **Authentication endpoints**: 5 requests per 15 minutes (signup, signin, signout, sync)
@@ -188,6 +190,10 @@ SESSION_SECRET=dev-secret-for-local-testing
 │   │   ├── coursesApi.ts  # API client with optimistic updates
 │   │   └── queryClient.ts # React Query configuration
 │   └── ...
+├── scripts/               # Database seeding and utilities
+│   ├── seed-golf-courses.ts    # Idempotent database seeding script
+│   └── seed-data/
+│       └── golf-courses.json   # Course data in JSON format (100 courses)
 ├── .env                   # Local environment variables
 ├── drizzle.config.ts      # Drizzle ORM configuration
 └── package.json

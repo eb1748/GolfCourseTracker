@@ -2,7 +2,6 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserCourseStatusSchema, insertUserFormSchema, type CourseStatus, type User, type UserCourseStatus, type ActivityType } from "@shared/schema";
-import { FULL_TOP_100_GOLF_COURSES } from "../client/src/data/fullGolfCourses";
 import { authRateLimit } from "./security";
 import { withCache, withRetry, withQueryMetrics, getCacheKey, invalidateCache, CACHE_TTL } from "./performance";
 
@@ -48,11 +47,19 @@ const trackUserActivity = (activityType: ActivityType) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Initialize golf courses data on startup (truly non-blocking)
-  setTimeout(() => {
-    initializeGolfCourses().catch(error => {
-      console.warn("Golf courses initialization failed, server will continue:", error.message);
-    });
+  // Check if courses exist in database on startup
+  setTimeout(async () => {
+    try {
+      const existingCourses = await storage.getAllCourses();
+      if (existingCourses.length === 0) {
+        console.log("\n⚠️  No golf courses found in database.");
+        console.log("💡 Run 'npm run db:seed' to populate the database with course data.\n");
+      } else {
+        console.log(`✅ Database contains ${existingCourses.length} golf courses`);
+      }
+    } catch (error) {
+      console.warn("Could not check course data:", error.message);
+    }
   }, 100);
 
   // Golf Courses Routes
@@ -65,19 +72,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching courses from database, using static data fallback:", error);
 
-      // Fallback to static course data when database is unavailable
-      const fallbackCourses = FULL_TOP_100_GOLF_COURSES.map(course => ({
-        ...course,
-        id: course.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''), // Generate ID from name
-        status: 'not-played' as const,
-        rating: course.rating || null,
-        description: course.description || null,
-        website: course.website || null,
-        phone: course.phone || null,
-        accessType: course.accessType || 'public'
-      }));
-
-      res.json(fallbackCourses);
+      // Return empty array when database is unavailable
+      console.warn("⚠️  Database unavailable. Run 'npm run db:seed' to populate course data.");
+      res.json([]);
     }
   });
 
@@ -95,32 +92,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error searching courses in database, using static data fallback:", error);
 
-      // Fallback to static course data for search
-      const query = req.query.q as string;
-      if (!query) {
-        return res.status(400).json({ error: "Search query is required" });
-      }
-
-      const lowerQuery = query.toLowerCase();
-      const fallbackCourses = FULL_TOP_100_GOLF_COURSES
-        .filter(course =>
-          course.name.toLowerCase().includes(lowerQuery) ||
-          course.location.toLowerCase().includes(lowerQuery) ||
-          course.state.toLowerCase().includes(lowerQuery) ||
-          (course.description && course.description.toLowerCase().includes(lowerQuery))
-        )
-        .map(course => ({
-          ...course,
-          id: course.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-          status: 'not-played' as const,
-          rating: course.rating || null,
-          description: course.description || null,
-          website: course.website || null,
-          phone: course.phone || null,
-          accessType: course.accessType || 'public'
-        }));
-
-      res.json(fallbackCourses);
+      // Return empty array when database is unavailable for search
+      console.warn("⚠️  Database unavailable for search. Run 'npm run db:seed' to populate course data.");
+      res.json([]);
     }
   });
 
@@ -261,12 +235,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user stats from database, using static data fallback:", error);
 
-      // Fallback stats for anonymous users when database is unavailable
+      // Fallback stats when database is unavailable
       const fallbackStats = {
-        total: FULL_TOP_100_GOLF_COURSES.length,
-        played: 0, // Anonymous users start with no played courses
+        total: 0,
+        played: 0,
         wantToPlay: 0,
-        notPlayed: FULL_TOP_100_GOLF_COURSES.length,
+        notPlayed: 0,
       };
 
       res.json(fallbackStats);
@@ -496,16 +470,3 @@ export async function registerRoutes(app: Express): Promise<Server> {
   return httpServer;
 }
 
-// Initialize golf courses data
-async function initializeGolfCourses() {
-  try {
-    const existingCourses = await storage.getAllCourses();
-    if (existingCourses.length === 0) {
-      console.log("Initializing golf courses data...");
-      await storage.createMultipleCourses(FULL_TOP_100_GOLF_COURSES);
-      console.log(`Initialized ${FULL_TOP_100_GOLF_COURSES.length} golf courses`);
-    }
-  } catch (error) {
-    console.error("Error initializing golf courses:", error);
-  }
-}
