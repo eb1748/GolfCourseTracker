@@ -13,7 +13,8 @@ export const corsConfig = cors({
       'http://localhost:5173',   // Vite dev server
       'http://localhost:3000',   // Common React dev port
       'http://localhost:5000',   // Production fallback
-      'https://golfcoursetracker.vercel.app', // Production domain (adjust as needed)
+      'http://localhost:8080',   // Dev server port
+      'https://golfcoursetracker-production.up.railway.app', // Railway production domain
     ];
 
     if (allowedOrigins.includes(origin)) {
