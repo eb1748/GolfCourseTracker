@@ -102,11 +102,40 @@ npm run dev
 - `/api/courses/search` - ✅ Search courses (anonymous friendly)
 - `/api/courses/status/:status` - ✅ Filter by status (anonymous friendly)
 - `/api/users/me/stats` - ✅ User statistics (works for anonymous users)
-- `/api/courses/:courseId/status` - ✅ Update course status (requires auth for DB, localStorage for anonymous)
+- `/api/courses/:courseId/status` - ✅ **FIXED** Update course status with CORS support and fallback storage
 - `/api/auth/signin` - Login endpoint
 - `/api/auth/signup` - Registration endpoint
 - `/api/auth/signout` - Logout endpoint
 - `/api/auth/sync` - Sync localStorage data to authenticated account
+
+### Course Status Update System ✅ FIXED (2025-09-15)
+
+The course status update functionality has been completely overhauled for reliability:
+
+#### **API Endpoint**: `POST /api/courses/:courseId/status`
+- **Request**: `{ status: 'played' | 'want-to-play' | 'not-played' }`
+- **CORS Enabled**: Full cross-origin support with proper headers
+- **Authentication**: Optional - works for both authenticated and anonymous users
+
+#### **Error Handling & Status Codes**:
+- **200**: Successfully updated course status
+- **400**: Invalid course status data or malformed request
+- **404**: Golf course not found in database
+- **503**: Database temporarily unavailable (fallback storage used)
+- **500**: General server error with detailed logging
+
+#### **Storage Strategy**:
+- **Authenticated Users**: Primary storage in PostgreSQL database
+- **Anonymous Users**: Local-only storage with sync option on login
+- **Database Failures**: Automatic fallback to in-memory storage
+- **Connection Issues**: Graceful degradation with user feedback
+
+#### **Reliability Features**:
+- Course existence validation before status updates
+- Atomic database operations with conflict resolution
+- Comprehensive error logging for production debugging
+- Primary/fallback storage pattern for high availability
+- Database connection testing before operations
 
 ## Deployment
 
@@ -114,9 +143,18 @@ npm run dev
 - **Database**: Railway PostgreSQL
 - **Status**: ✅ Deployed but needs auth fixes
 
-## Recent Changes (2025-09-14)
+## Recent Changes
 
-### ✅ Authentication System Overhaul
+### ✅ Course Status Update Fixes (2025-09-15)
+- **Fixed 500 errors**: Course status updates (`POST /api/courses/:courseId/status`) now work reliably
+- **CORS configuration**: Added comprehensive CORS headers to support cross-origin API calls
+- **Enhanced database operations**: Improved connection testing, course validation, and error handling
+- **Fallback storage**: Automatic fallback to in-memory storage when database is unavailable
+- **Anonymous user support**: Course status updates work for both authenticated and anonymous users
+- **Detailed error handling**: Specific HTTP status codes (404, 503, 400) with meaningful error messages
+- **Comprehensive logging**: Enhanced debugging capabilities for production troubleshooting
+
+### ✅ Authentication System Overhaul (2025-09-14)
 - **Modified middleware**: Changed `requireAuth` to `attachUserIfAuthenticated` on public endpoints
 - **Updated `/api/auth/me`**: Now returns `{user: null}` instead of 401 for anonymous users
 - **Fixed frontend auth handling**: AuthContext gracefully handles anonymous users
