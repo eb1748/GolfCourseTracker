@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { insertUserCourseStatusSchema, insertUserFormSchema, type CourseStatus, type User, type UserCourseStatus, type ActivityType } from "@shared/schema";
 import { FULL_TOP_100_GOLF_COURSES } from "../client/src/data/fullGolfCourses";
 import { authRateLimit } from "./security";
+import { withCache, withRetry, withQueryMetrics, getCacheKey, invalidateCache, CACHE_TTL } from "./performance";
 
 // Extend session interface for TypeScript
 declare module 'express-session' {
@@ -58,7 +59,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/courses", attachUserIfAuthenticated, trackUserActivity('view'), async (req, res) => {
     try {
       const userId = (req as any).userId; // Optional - from session or undefined
-      const courses = await storage.getCoursesWithStatus(userId);
+      // Use caching with appropriate key
+      const cacheKey = userId ? getCacheKey.userCourses(userId) : getCacheKey.allCourses();
+
+      const courses = await withQueryMetrics('get-courses-with-status', () =>
+        withCache(
+          cacheKey,
+          () => withRetry(() => storage.getCoursesWithStatus(userId)),
+          userId ? CACHE_TTL.USER_COURSES : CACHE_TTL.COURSES
+        )
+      );
+
       res.json(courses);
     } catch (error) {
       console.error("Error fetching courses from database, using static data fallback:", error);
@@ -203,6 +214,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           throw new Error(`Course status update failed: ${primaryError instanceof Error ? primaryError.message : 'Database connection error'}`);
         }
       }
+
+      // Invalidate user-related cache after successful status update
+      invalidateCache.userCourses(userId);
 
       res.json(updatedStatus);
     } catch (error) {

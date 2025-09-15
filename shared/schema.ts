@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, decimal, integer, timestamp, unique, json, date } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, decimal, integer, timestamp, unique, json, date, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -11,7 +11,12 @@ export const users = pgTable("users", {
   lastActiveAt: timestamp("last_active_at").defaultNow().notNull(), // Track user activity for DAU/MAU
   preferences: json("preferences").default('{}').notNull(), // Future-proof user settings
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  // Performance indexes for common queries
+  emailIdx: index("users_email_idx").on(table.email),
+  lastActiveAtIdx: index("users_last_active_at_idx").on(table.lastActiveAt),
+  createdAtIdx: index("users_created_at_idx").on(table.createdAt),
+}));
 
 export const golfCourses = pgTable("golf_courses", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -25,16 +30,36 @@ export const golfCourses = pgTable("golf_courses", {
   website: text("website"),
   phone: text("phone"),
   accessType: text("access_type", { enum: ['public', 'private', 'resort'] }).notNull().default('public'),
-});
+}, (table) => ({
+  // Performance indexes for common queries
+  nameIdx: index("golf_courses_name_idx").on(table.name),
+  stateIdx: index("golf_courses_state_idx").on(table.state),
+  locationIdx: index("golf_courses_location_idx").on(table.location),
+  ratingIdx: index("golf_courses_rating_idx").on(table.rating),
+  accessTypeIdx: index("golf_courses_access_type_idx").on(table.accessType),
+  // Geospatial index for location-based queries
+  coordsIdx: index("golf_courses_coords_idx").on(table.latitude, table.longitude),
+  // Full-text search index for name and location
+  searchIdx: index("golf_courses_search_idx").using('gin', sql`to_tsvector('english', ${table.name} || ' ' || ${table.location})`),
+}));
 
 export const userCourseStatus = pgTable("user_course_status", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id),
   courseId: varchar("course_id").notNull().references(() => golfCourses.id),
   status: text("status").notNull(), // 'played', 'want-to-play', 'not-played'
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({
   // Unique constraint to prevent duplicate user-course combinations
   userCourseUnique: unique().on(table.userId, table.courseId),
+  // Performance indexes for common queries
+  userIdIdx: index("user_course_status_user_id_idx").on(table.userId),
+  courseIdIdx: index("user_course_status_course_id_idx").on(table.courseId),
+  statusIdx: index("user_course_status_status_idx").on(table.status),
+  // Composite indexes for frequent query patterns
+  userStatusIdx: index("user_course_status_user_status_idx").on(table.userId, table.status),
+  createdAtIdx: index("user_course_status_created_at_idx").on(table.createdAt),
 }));
 
 // Privacy-friendly analytics tracking table for DAU/MAU calculations
@@ -48,6 +73,12 @@ export const userActivityLogs = pgTable("user_activity_logs", {
 }, (table) => ({
   // Unique constraint to prevent duplicate activity logs per user per day per type
   userDateActivityUnique: unique().on(table.userId, table.activityDate, table.activityType),
+  // Performance indexes for analytics queries
+  activityDateIdx: index("user_activity_logs_activity_date_idx").on(table.activityDate),
+  activityTypeIdx: index("user_activity_logs_activity_type_idx").on(table.activityType),
+  userIdIdx: index("user_activity_logs_user_id_idx").on(table.userId),
+  // Composite index for DAU/MAU calculations
+  dateTypeIdx: index("user_activity_logs_date_type_idx").on(table.activityDate, table.activityType),
 }));
 
 export const insertUserSchema = createInsertSchema(users).pick({

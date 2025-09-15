@@ -14,7 +14,7 @@ import CourseListCard from '@/components/CourseListCard';
 import ThemeToggle from '@/components/ThemeToggle';
 import { AuthNav } from '@/components/AuthNav';
 
-import { coursesApi } from '@/lib/coursesApi';
+import { coursesApi, optimisticUpdates } from '@/lib/coursesApi';
 import { useAuth } from '@/contexts/AuthContext';
 import type { GolfCourseWithStatus, CourseStatus, AccessType } from '@shared/schema';
 
@@ -40,20 +40,61 @@ export default function Home() {
     queryFn: () => coursesApi.getUserStats(isAuthenticated),
   });
 
-  // Status update mutation
+  // Status update mutation with optimistic updates
   const statusMutation = useMutation({
     mutationFn: ({ courseId, status }: { courseId: string; status: CourseStatus }) =>
       coursesApi.updateCourseStatus(courseId, status, isAuthenticated),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['courses'] });
-      queryClient.invalidateQueries({ queryKey: ['user-stats'] });
+    onMutate: async ({ courseId, status }) => {
+      // Cancel outgoing refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({ queryKey: ['courses'] });
+      await queryClient.cancelQueries({ queryKey: ['user-stats'] });
+
+      // Get the current course data to determine previous status
+      const coursesData = queryClient.getQueryData(['courses', { isAuthenticated }]) as GolfCourseWithStatus[] | undefined;
+      const previousStatus = coursesData?.find(course => course.id === courseId)?.status;
+
+      // Snapshot previous values for potential rollback
+      const previousCoursesData = queryClient.getQueryData(['courses', { isAuthenticated }]);
+      const previousStatsData = queryClient.getQueryData(['user-stats', { isAuthenticated }]);
+
+      // Apply optimistic updates
+      optimisticUpdates.updateCourseStatus(queryClient, courseId, status, isAuthenticated);
+
+      // Return context with snapshot for rollback
+      return {
+        previousCoursesData,
+        previousStatsData,
+        courseId,
+        previousStatus,
+        isAuthenticated
+      };
     },
-    onError: () => {
+    onSuccess: (data, variables, context) => {
+      // On success, we can optionally refetch to sync with server
+      // But since optimistic updates should match server state, this is usually not needed
+      toast({
+        title: "Status Updated",
+        description: "Course status updated successfully.",
+        variant: "default",
+      });
+    },
+    onError: (error, variables, context) => {
+      // Rollback optimistic updates on error
+      if (context) {
+        queryClient.setQueryData(['courses', { isAuthenticated: context.isAuthenticated }], context.previousCoursesData);
+        queryClient.setQueryData(['user-stats', { isAuthenticated: context.isAuthenticated }], context.previousStatsData);
+      }
+
       toast({
         title: "Update Failed",
         description: "Failed to update course status. Please try again.",
         variant: "destructive",
       });
+    },
+    onSettled: () => {
+      // Always refetch after mutation settles (success or error) to ensure consistency
+      queryClient.invalidateQueries({ queryKey: ['courses'] });
+      queryClient.invalidateQueries({ queryKey: ['user-stats'] });
     },
   });
 

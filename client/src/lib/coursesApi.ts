@@ -113,6 +113,108 @@ export async function getUserStats(isAuthenticated: boolean): Promise<UserStats>
 }
 
 /**
+ * React Query optimistic update helpers
+ */
+export const optimisticUpdates = {
+  /**
+   * Updates course status optimistically in the query cache
+   */
+  updateCourseStatus: (
+    queryClient: any,
+    courseId: string,
+    newStatus: CourseStatus,
+    isAuthenticated: boolean
+  ) => {
+    // Update all courses query
+    queryClient.setQueryData(
+      ['courses', { isAuthenticated }],
+      (oldData: GolfCourseWithStatus[] | undefined) => {
+        if (!oldData) return oldData;
+        return oldData.map(course =>
+          course.id === courseId
+            ? { ...course, status: newStatus }
+            : course
+        );
+      }
+    );
+
+    // Update filtered queries
+    const statusFilters: (CourseStatus | 'all')[] = ['all', 'played', 'want-to-play', 'not-played'];
+    statusFilters.forEach(status => {
+      queryClient.setQueryData(
+        ['courses', { status, isAuthenticated }],
+        (oldData: GolfCourseWithStatus[] | undefined) => {
+          if (!oldData) return oldData;
+          return oldData.map(course =>
+            course.id === courseId
+              ? { ...course, status: newStatus }
+              : course
+          );
+        }
+      );
+    });
+
+    // Update search queries - this is more complex, so we'll invalidate instead
+    const queryKeys = queryClient.getQueryCache().getAll()
+      .map(query => query.queryKey)
+      .filter(key =>
+        Array.isArray(key) &&
+        key[0] === 'courses' &&
+        typeof key[1] === 'object' &&
+        'searchQuery' in key[1]
+      );
+
+    queryKeys.forEach(key => queryClient.invalidateQueries({ queryKey: key }));
+
+    // Update user stats optimistically
+    queryClient.setQueryData(
+      ['user-stats', { isAuthenticated }],
+      (oldStats: UserStats | undefined) => {
+        if (!oldStats) return oldStats;
+
+        // We need the previous status to calculate the correct stats update
+        const coursesData = queryClient.getQueryData(['courses', { isAuthenticated }]) as GolfCourseWithStatus[] | undefined;
+        if (!coursesData) return oldStats;
+
+        const course = coursesData.find(c => c.id === courseId);
+        const previousStatus = course?.status;
+
+        if (!previousStatus || previousStatus === newStatus) return oldStats;
+
+        let newStats = { ...oldStats };
+
+        // Decrease count for previous status
+        if (previousStatus === 'played') newStats.played--;
+        else if (previousStatus === 'want-to-play') newStats.wantToPlay--;
+
+        // Increase count for new status
+        if (newStatus === 'played') newStats.played++;
+        else if (newStatus === 'want-to-play') newStats.wantToPlay++;
+
+        // Update not played count (total - played)
+        newStats.notPlayed = newStats.total - newStats.played;
+
+        return newStats;
+      }
+    );
+  },
+
+  /**
+   * Creates a rollback function for optimistic updates
+   */
+  createRollback: (
+    queryClient: any,
+    courseId: string,
+    originalStatus: CourseStatus,
+    isAuthenticated: boolean
+  ) => {
+    return () => {
+      optimisticUpdates.updateCourseStatus(queryClient, courseId, originalStatus, isAuthenticated);
+    };
+  }
+};
+
+/**
  * React Query compatible functions that use authentication context
  */
 export const useCoursesApi = () => {
