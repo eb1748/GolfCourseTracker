@@ -710,4 +710,4 @@ if (db) {
   });
 }
 
-export { storage, MemStorage };
+export { storage };
