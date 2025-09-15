@@ -3,41 +3,58 @@ import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
+import {
+  corsConfig,
+  helmetConfig,
+  apiRateLimit,
+  validateContentType,
+  validateRequestSize,
+  secureHeaders
+} from "./security";
 
 const app = express();
 
-// CORS configuration
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
+// Security middleware - apply early in the stack
+app.use(secureHeaders);
+app.use(helmetConfig);
+app.use(corsConfig);
 
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-  } else {
-    next();
-  }
-});
+// Request parsing with size limits
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// Input validation middleware
+app.use(validateContentType);
+app.use(validateRequestSize);
+
+// General API rate limiting
+app.use('/api', apiRateLimit);
 
 // Trust proxy for Railway deployment
 app.set('trust proxy', true);
 
-// Session middleware configuration  
+// Session middleware configuration with enhanced security
 app.use(session({
   store: storage.sessionStore,
-  secret: process.env.SESSION_SECRET || 'dev-secret-change-in-production',
+  secret: (() => {
+    const secret = process.env.SESSION_SECRET;
+    if (!secret) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('SESSION_SECRET environment variable is required in production');
+      }
+      console.warn('⚠️  Using default session secret in development - set SESSION_SECRET for production');
+      return 'dev-secret-for-local-testing-only';
+    }
+    return secret;
+  })(),
   resave: false,
   saveUninitialized: false,
-  name: 'golf-session', // Custom session name
+  name: 'golf-session',
   cookie: {
-    secure: false, // Temporarily disable for debugging
+    secure: process.env.NODE_ENV === 'production', // Enable secure cookies in production
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: 'lax'
+    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax'
   }
 }));
 

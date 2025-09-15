@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertUserCourseStatusSchema, insertUserFormSchema, type CourseStatus, type User, type UserCourseStatus, type ActivityType } from "@shared/schema";
 import { FULL_TOP_100_GOLF_COURSES } from "../client/src/data/fullGolfCourses";
+import { authRateLimit } from "./security";
 
 // Extend session interface for TypeScript
 declare module 'express-session' {
@@ -321,7 +322,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return sanitizedUser;
   };
 
-  app.post("/api/auth/signup", async (req, res) => {
+  app.post("/api/auth/signup", authRateLimit, async (req, res) => {
     try {
       const { email, password, name } = req.body;
 
@@ -372,7 +373,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/auth/signin", async (req, res) => {
+  app.post("/api/auth/signin", authRateLimit, async (req, res) => {
     try {
       const { email, password } = req.body;
 
@@ -417,7 +418,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/auth/signout", (req, res) => {
+  app.post("/api/auth/signout", authRateLimit, (req, res) => {
     req.session.destroy((err) => {
       if (err) {
         console.error("Error destroying session:", err);
@@ -447,7 +448,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/auth/sync", async (req, res) => {
+  app.post("/api/auth/sync", authRateLimit, async (req, res) => {
     try {
       const userId = req.session.userId;
       
