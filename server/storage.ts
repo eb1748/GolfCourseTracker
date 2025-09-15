@@ -388,22 +388,45 @@ export class DatabaseStorage implements IStorage {
   }
 
   async setUserCourseStatus(insertStatus: InsertUserCourseStatus): Promise<UserCourseStatus> {
-    // Use atomic upsert to handle concurrent requests safely
-    const result = await db.insert(userCourseStatus)
-      .values({
-        userId: insertStatus.userId,
-        courseId: insertStatus.courseId,
-        status: insertStatus.status
-      })
-      .onConflictDoUpdate({
-        target: [userCourseStatus.userId, userCourseStatus.courseId],
-        set: {
+    console.log("DatabaseStorage.setUserCourseStatus called with:", insertStatus);
+
+    if (!db) {
+      throw new Error("Database connection not available for course status update");
+    }
+
+    // Validate that the course exists before setting status
+    const courseExists = await db.select({ id: golfCourses.id })
+      .from(golfCourses)
+      .where(eq(golfCourses.id, insertStatus.courseId))
+      .limit(1);
+
+    if (courseExists.length === 0) {
+      console.error("Course not found:", insertStatus.courseId);
+      throw new Error(`Course with ID ${insertStatus.courseId} not found`);
+    }
+
+    try {
+      // Use atomic upsert to handle concurrent requests safely
+      const result = await db.insert(userCourseStatus)
+        .values({
+          userId: insertStatus.userId,
+          courseId: insertStatus.courseId,
           status: insertStatus.status
-        }
-      })
-      .returning();
-    
-    return result[0];
+        })
+        .onConflictDoUpdate({
+          target: [userCourseStatus.userId, userCourseStatus.courseId],
+          set: {
+            status: insertStatus.status
+          }
+        })
+        .returning();
+
+      console.log("DatabaseStorage.setUserCourseStatus successful:", result[0]);
+      return result[0];
+    } catch (error) {
+      console.error("DatabaseStorage.setUserCourseStatus failed:", error);
+      throw new Error(`Failed to set course status: ${error instanceof Error ? error.message : 'Unknown database error'}`);
+    }
   }
 
   async getAllUserCourseStatuses(userId: string): Promise<UserCourseStatus[]> {
@@ -635,10 +658,13 @@ export class MemStorage implements IStorage {
   }
 
   async setUserCourseStatus(insertStatus: InsertUserCourseStatus): Promise<UserCourseStatus> {
+    console.log("MemStorage.setUserCourseStatus called with:", insertStatus);
     const id = randomUUID();
     const key = `${insertStatus.userId}-${insertStatus.courseId}`;
     const status: UserCourseStatus = { ...insertStatus, id };
     this.userCourseStatuses.set(key, status);
+    console.log("MemStorage.setUserCourseStatus saved:", status);
+    console.log("Total course statuses in memory:", this.userCourseStatuses.size);
     return status;
   }
 

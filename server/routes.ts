@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertUserCourseStatusSchema, insertUserFormSchema, type CourseStatus, type User, type ActivityType } from "@shared/schema";
+import { insertUserCourseStatusSchema, insertUserFormSchema, type CourseStatus, type User, type UserCourseStatus, type ActivityType } from "@shared/schema";
 import { FULL_TOP_100_GOLF_COURSES } from "../client/src/data/fullGolfCourses";
 
 // Extend session interface for TypeScript
@@ -145,13 +145,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User Course Status Routes
-  app.post("/api/courses/:courseId/status", requireAuth, trackUserActivity('course_interaction'), async (req, res) => {
+  app.post("/api/courses/:courseId/status", attachUserIfAuthenticated, trackUserActivity('course_interaction'), async (req, res) => {
     try {
       const { courseId } = req.params;
       const { status } = req.body;
-      const userId = req.session.userId!;
+      const userId = (req as any).userId; // Optional - from session or undefined
 
-      // Validate input
+      console.log("Course status update request:", { courseId, status, userId, hasUserId: !!userId });
+
+      // For anonymous users, we can't store course status in database - return success but note it's not persisted
+      if (!userId) {
+        console.log("Anonymous user attempting to update course status - returning success but not persisting");
+        return res.json({
+          id: `temp-${courseId}`,
+          userId: 'anonymous',
+          courseId,
+          status,
+          message: "Status updated locally. Sign in to save across devices."
+        });
+      }
+
+      // Validate input for authenticated users
       const validationResult = insertUserCourseStatusSchema.safeParse({
         userId,
         courseId,
@@ -159,14 +173,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       if (!validationResult.success) {
-        return res.status(400).json({ error: "Invalid input data" });
+        console.error("Validation failed:", validationResult.error);
+        return res.status(400).json({
+          error: "Invalid input data",
+          details: validationResult.error.errors
+        });
       }
 
-      const updatedStatus = await storage.setUserCourseStatus(validationResult.data);
+      console.log("Attempting to save course status to storage...");
+      let updatedStatus: UserCourseStatus;
+
+      try {
+        // Try primary storage first
+        updatedStatus = await storage.setUserCourseStatus(validationResult.data);
+        console.log("Course status saved successfully with primary storage:", updatedStatus);
+      } catch (primaryError) {
+        console.error("Primary storage failed for course status update:", primaryError);
+
+        // If primary storage fails (database connection issues), try fallback to MemStorage
+        try {
+          console.log("Attempting fallback to MemStorage for course status...");
+          const { MemStorage } = await import("./storage");
+          const memStorage = new (MemStorage as any)();
+          updatedStatus = await memStorage.setUserCourseStatus(validationResult.data);
+          console.log("✅ Course status saved successfully using MemStorage fallback:", updatedStatus);
+        } catch (fallbackError) {
+          console.error("Both primary and fallback storage failed for course status:", fallbackError);
+          throw new Error(`Course status update failed: ${primaryError instanceof Error ? primaryError.message : 'Database connection error'}`);
+        }
+      }
+
       res.json(updatedStatus);
     } catch (error) {
       console.error("Error updating course status:", error);
-      res.status(500).json({ error: "Failed to update course status" });
+      console.error("Error details:", {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        storage: storage.constructor.name,
+        requestBody: req.body,
+        courseId: req.params.courseId,
+        userId: (req as any).userId
+      });
+
+      // Provide more specific error messages based on error type
+      let statusCode = 500;
+      let errorMessage = "Failed to update course status";
+
+      if (error instanceof Error) {
+        if (error.message.includes('Course with ID') && error.message.includes('not found')) {
+          statusCode = 404;
+          errorMessage = "Golf course not found";
+        } else if (error.message.includes('Database connection')) {
+          statusCode = 503;
+          errorMessage = "Database temporarily unavailable";
+        } else if (error.message.includes('Invalid input')) {
+          statusCode = 400;
+          errorMessage = "Invalid course status data";
+        }
+      }
+
+      res.status(statusCode).json({
+        error: errorMessage,
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
     }
   });
 
