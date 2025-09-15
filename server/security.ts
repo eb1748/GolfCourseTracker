@@ -15,6 +15,7 @@ export const corsConfig = cors({
       'http://localhost:5000',   // Production fallback
       'http://localhost:8080',   // Dev server port
       'https://golfcoursetracker-production.up.railway.app', // Railway production domain
+      'https://golfjourneymap.com', // Custom production domain
     ];
 
     if (allowedOrigins.includes(origin)) {
