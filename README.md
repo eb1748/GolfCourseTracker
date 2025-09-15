@@ -26,22 +26,61 @@ This application allows users to browse and interact with golf course data. Auth
 
 ## Tech Stack
 
-- **Backend**: Node.js with Express + TypeScript
-- **Frontend**: React + TypeScript + Vite
+### **Backend Architecture**
+- **Runtime**: Node.js with Express.js server framework
+- **Language**: TypeScript with ES modules for consistency across the stack
 - **Database**: PostgreSQL hosted on Railway (migrated from Replit)
 - **Database Driver**: Standard `pg` PostgreSQL driver (upgraded from `@neondatabase/serverless`)
-- **ORM**: Drizzle ORM
+- **ORM**: Drizzle ORM for type-safe database operations
 - **Authentication**: Express-session with PostgreSQL session store
-- **UI**: Tailwind CSS + Radix UI components
-- **State Management**: TanStack React Query
+- **API Design**: RESTful endpoints for course data, search, and status management
+
+### **Frontend Architecture**
+- **Framework**: React 18 with TypeScript for type safety and modern development
+- **Build Tool**: Vite for fast development and optimized production builds
+- **Routing**: Wouter for lightweight client-side routing
+- **State Management**: TanStack React Query for server state management and caching
+- **Styling**: Tailwind CSS with custom design system based on shadcn/ui components
+- **Component Library**: Radix UI primitives for accessible, unstyled components
+- **Map Integration**: Leaflet for interactive mapping with custom golf pin icons
+
+### **Key Dependencies**
+- **UI Components**: Complete Radix UI suite (dialogs, dropdowns, forms, navigation)
+- **Icons**: Lucide React for consistent iconography
+- **Form Management**: React Hook Form with Hookform Resolvers
+- **Validation**: Zod for runtime type checking and schema validation
+- **Date Handling**: date-fns for date manipulation and formatting
+- **Utilities**: clsx and class-variance-authority for conditional styling
+
+### **Design System**
+- **Color Palette**: Golf-themed colors with semantic status colors (green for played, gold for want-to-play, gray for not-played)
+- **Typography**: Google Fonts (Inter for UI, Poppins for headings) loaded via CDN
+- **Responsive Design**: Mobile-first approach with Tailwind breakpoints
+- **Theme Support**: Light/dark mode toggle with CSS custom properties
+
+### **Migration Notes**
+- **Originally built by**: Replit, migrated to Railway-compatible architecture
 - **Deployment**: Railway (database) + Local development
-- **Migration**: Originally built by Replit, migrated to Railway-compatible architecture
 
-## Database
+## Database & Data Architecture
 
+### **Database Configuration**
 - **Host**: Railway PostgreSQL
 - **Connection**: External URL (nozomi.proxy.rlwy.net:34913)
 - **Status**: ✅ Connected and migrations applied successfully
+- **Driver**: Standard `pg` PostgreSQL driver (migrated from Neon serverless)
+
+### **Data Storage Solutions**
+- **Schema Design**: Three main entities - users, golf courses, and user course status relationships
+- **Data Initialization**: Comprehensive dataset of top 100 public golf courses with location coordinates
+- **Caching**: TanStack Query provides client-side caching with optimistic updates
+- **Session Management**: Connect-pg-simple for PostgreSQL session store
+
+### **Storage Strategy**
+- **Authenticated Users**: Primary storage in PostgreSQL database
+- **Anonymous Users**: Local-only storage with sync option on login
+- **Database Failures**: Automatic fallback to in-memory storage
+- **Connection Issues**: Graceful degradation with user feedback
 
 ## Environment Variables
 
