@@ -37,10 +37,8 @@ export const golfCourses = pgTable("golf_courses", {
   locationIdx: index("golf_courses_location_idx").on(table.location),
   ratingIdx: index("golf_courses_rating_idx").on(table.rating),
   accessTypeIdx: index("golf_courses_access_type_idx").on(table.accessType),
-  // Geospatial index for location-based queries
+  // Geospatial index for location-based queries (lightweight for 100 courses)
   coordsIdx: index("golf_courses_coords_idx").on(table.latitude, table.longitude),
-  // Full-text search index for name and location
-  searchIdx: index("golf_courses_search_idx").using('gin', sql`to_tsvector('english', ${table.name} || ' ' || ${table.location})`),
 }));
 
 export const userCourseStatus = pgTable("user_course_status", {
