@@ -32,8 +32,12 @@ app.use(validateRequestSize);
 // General API rate limiting
 app.use('/api', apiRateLimit);
 
-// Trust proxy for Railway deployment
-app.set('trust proxy', true);
+// Trust proxy for Railway deployment - properly configure for Railway's reverse proxy
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1); // Trust first proxy (Railway's load balancer)
+} else {
+  app.set('trust proxy', 'loopback'); // Trust only local connections in development
+}
 
 // Session middleware configuration with enhanced security
 app.use(session({
@@ -97,8 +101,17 @@ app.use((req, res, next) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
-    res.status(status).json({ message });
-    throw err;
+    // Only send response if not already sent
+    if (!res.headersSent) {
+      res.status(status).json({ message });
+    }
+
+    // Log error but don't throw in production to avoid crashing
+    if (process.env.NODE_ENV === 'production') {
+      console.error('Error handled:', err);
+    } else {
+      throw err;
+    }
   });
 
   // importantly only setup vite in development and after
