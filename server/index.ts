@@ -2,7 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { storage } from "./storage";
+import { getStorage } from "./storage";
 import {
   corsConfig,
   helmetConfig,
@@ -41,7 +41,7 @@ if (process.env.NODE_ENV === 'production') {
 
 // Session middleware configuration with enhanced security
 app.use(session({
-  store: storage.sessionStore,
+  store: getStorage().sessionStore,
   secret: (() => {
     const secret = process.env.SESSION_SECRET;
     if (!secret) {

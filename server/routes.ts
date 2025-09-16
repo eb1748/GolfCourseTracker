@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { getStorage } from "./storage";
 import { insertUserCourseStatusSchema, insertUserFormSchema, type CourseStatus, type User, type UserCourseStatus, type ActivityType } from "@shared/schema";
 import { authRateLimit } from "./security";
 import { withCache, withRetry, withQueryMetrics, getCacheKey, invalidateCache, CACHE_TTL } from "./performance";
@@ -35,8 +35,8 @@ const trackUserActivity = (activityType: ActivityType) => {
   return async (req: any, res: any, next: any) => {
     try {
       if (req.session?.userId) {
-        await storage.updateUserLastActive(req.session.userId);
-        await storage.logUserActivity(req.session.userId, activityType);
+        await getStorage().updateUserLastActive(req.session.userId);
+        await getStorage().logUserActivity(req.session.userId, activityType);
       }
     } catch (error) {
       // Don't fail the request if activity tracking fails
@@ -50,7 +50,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Check if courses exist in database on startup
   setTimeout(async () => {
     try {
-      const existingCourses = await storage.getAllCourses();
+      const existingCourses = await getStorage().getAllCourses();
       if (existingCourses.length === 0) {
         console.log("\n⚠️  No golf courses found in database.");
         console.log("💡 Run 'npm run db:seed' to populate the database with course data.\n");
@@ -67,7 +67,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = (req as any).userId; // Optional - from session or undefined
       // Simplified direct call without complex caching/monitoring for better performance
-      const courses = await storage.getCoursesWithStatus(userId);
+      const courses = await getStorage().getCoursesWithStatus(userId);
       res.json(courses);
     } catch (error) {
       console.error("Error fetching courses from database, using static data fallback:", error);
@@ -87,7 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Search query is required" });
       }
 
-      const courses = await storage.searchCourses(query, userId);
+      const courses = await getStorage().searchCourses(query, userId);
       res.json(courses);
     } catch (error) {
       console.error("Error searching courses in database, using static data fallback:", error);
@@ -106,14 +106,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!userId) {
         // For anonymous users, return empty array or all courses with default status
         if (status === 'not-played') {
-          const courses = await storage.getCoursesWithStatus(undefined);
+          const courses = await getStorage().getCoursesWithStatus(undefined);
           return res.json(courses);
         } else {
           return res.json([]); // No played/want-to-play courses for anonymous users
         }
       }
 
-      const courses = await storage.getCoursesByStatus(status, userId);
+      const courses = await getStorage().getCoursesByStatus(status, userId);
       res.json(courses);
     } catch (error) {
       console.error("Error fetching courses by status:", error);
@@ -157,12 +157,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      console.log("Attempting to save course status to storage...");
+      console.log("Attempting to save course status to getStorage()...");
       let updatedStatus: UserCourseStatus;
 
       try {
         // Try primary storage first
-        updatedStatus = await storage.setUserCourseStatus(validationResult.data);
+        updatedStatus = await getStorage().setUserCourseStatus(validationResult.data);
         console.log("Course status saved successfully with primary storage:", updatedStatus);
       } catch (primaryError) {
         console.error("Primary storage failed for course status update:", primaryError);
@@ -189,7 +189,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error details:", {
         message: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined,
-        storage: storage.constructor.name,
+        storage: getStorage().constructor.name,
         requestBody: req.body,
         courseId: req.params.courseId,
         userId: (req as any).userId
@@ -222,7 +222,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/users/me/stats", attachUserIfAuthenticated, async (req, res) => {
     try {
       const userId = (req as any).userId; // Optional - from session or undefined
-      const courses = await storage.getCoursesWithStatus(userId);
+      const courses = await getStorage().getCoursesWithStatus(userId);
 
       const stats = {
         total: courses.length,
@@ -253,7 +253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const dateParam = req.query.date as string;
       const date = dateParam ? new Date(dateParam) : new Date();
       
-      const dailyActiveUsers = await storage.getDailyActiveUsers(date);
+      const dailyActiveUsers = await getStorage().getDailyActiveUsers(date);
       res.json({ date: date.toISOString().split('T')[0], activeUsers: dailyActiveUsers });
     } catch (error) {
       console.error("Error fetching DAU:", error);
@@ -269,7 +269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const year = yearParam ? parseInt(yearParam) : new Date().getFullYear();
       const month = monthParam ? parseInt(monthParam) : new Date().getMonth() + 1;
       
-      const monthlyActiveUsers = await storage.getMonthlyActiveUsers(year, month);
+      const monthlyActiveUsers = await getStorage().getMonthlyActiveUsers(year, month);
       res.json({ year, month, activeUsers: monthlyActiveUsers });
     } catch (error) {
       console.error("Error fetching MAU:", error);
@@ -285,7 +285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const startDate = startDateParam ? new Date(startDateParam) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       const endDate = endDateParam ? new Date(endDateParam) : new Date();
       
-      const activityStats = await storage.getActivityStats(startDate, endDate);
+      const activityStats = await getStorage().getActivityStats(startDate, endDate);
       res.json(activityStats);
     } catch (error) {
       console.error("Error fetching activity stats:", error);
@@ -312,16 +312,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if user already exists
-      const existingUser = await storage.getUserByEmail(email);
+      const existingUser = await getStorage().getUserByEmail(email);
       if (existingUser) {
         return res.status(400).json({ error: "User already exists" });
       }
 
       // Create user (storage handles password hashing) - FORCE DATABASE USAGE, NO FALLBACK
-      console.log("🚀 Attempting user creation with storage:", storage.constructor.name);
+      console.log("🚀 Attempting user creation with storage:", getStorage().constructor.name);
       console.log("🔑 Database URL configured:", !!process.env.DATABASE_URL);
 
-      const user = await storage.createUser(validationResult.data);
+      const user = await getStorage().createUser(validationResult.data);
       
       // Set session
       req.session.userId = user.id;
@@ -334,8 +334,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         // Track login activity for new signup
         try {
-          await storage.updateUserLastActive(user.id);
-          await storage.logUserActivity(user.id, 'login');
+          await getStorage().updateUserLastActive(user.id);
+          await getStorage().logUserActivity(user.id, 'login');
         } catch (error) {
           console.warn('Failed to log signup activity:', error);
         }
@@ -361,13 +361,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get user by email
-      const user = await storage.getUserByEmail(email);
+      const user = await getStorage().getUserByEmail(email);
       if (!user) {
         return res.status(401).json({ error: "Invalid credentials" });
       }
 
       // Verify password
-      const isValidPassword = await storage.comparePassword(password, user.passwordHash);
+      const isValidPassword = await getStorage().comparePassword(password, user.passwordHash);
       if (!isValidPassword) {
         return res.status(401).json({ error: "Invalid credentials" });
       }
@@ -383,8 +383,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         // Track login activity
         try {
-          await storage.updateUserLastActive(user.id);
-          await storage.logUserActivity(user.id, 'login');
+          await getStorage().updateUserLastActive(user.id);
+          await getStorage().logUserActivity(user.id, 'login');
         } catch (error) {
           console.warn('Failed to log signin activity:', error);
         }
@@ -415,7 +415,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ user: null }); // Return null instead of error for anonymous users
       }
 
-      const user = await storage.getUser(userId);
+      const user = await getStorage().getUser(userId);
       if (!user) {
         return res.json({ user: null }); // Return null if user not found
       }
@@ -451,7 +451,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
 
           if (validationResult.success) {
-            const result = await storage.setUserCourseStatus(validationResult.data);
+            const result = await getStorage().setUserCourseStatus(validationResult.data);
             syncResults.push(result);
           }
         } catch (error) {

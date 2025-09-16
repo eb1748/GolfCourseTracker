@@ -10,7 +10,10 @@ export default function FilterControlsExample() {
     total: 100,
     played: 23,
     wantToPlay: 31,
-    notPlayed: 46
+    notPlayed: 46,
+    public: 60,
+    private: 25,
+    resort: 15
   };
 
   return (

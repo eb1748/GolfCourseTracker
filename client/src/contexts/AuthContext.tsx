@@ -201,33 +201,5 @@ export function useAuth(): AuthContextType {
   return context;
 }
 
-// Helper hook to check if user has stored data to sync
-export function useStoredDataStatus() {
-  const [hasStoredData, setHasStoredData] = useState(LocalStorageService.hasStoredData());
-  const [storedStats, setStoredStats] = useState(LocalStorageService.getStats());
-  
-  const refreshStoredData = () => {
-    setHasStoredData(LocalStorageService.hasStoredData());
-    setStoredStats(LocalStorageService.getStats());
-  };
-
-  useEffect(() => {
-    // Check for stored data changes periodically or on focus
-    const handleFocus = () => refreshStoredData();
-    window.addEventListener('focus', handleFocus);
-    
-    // Check every 30 seconds while page is visible
-    const interval = setInterval(refreshStoredData, 30000);
-    
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-      clearInterval(interval);
-    };
-  }, []);
-
-  return {
-    hasStoredData,
-    storedStats,
-    refreshStoredData,
-  };
-}
+// Re-export the improved localStorage hooks for backward compatibility
+export { useLocalStorage, useStoredDataStatus } from '@/hooks/useLocalStorage';

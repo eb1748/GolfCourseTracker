@@ -1,11 +1,9 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Map, List, BarChart3, Loader2 } from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/hooks/use-toast';
 
 import HeroSection from '@/components/HeroSection';
 import GolfCourseMap from '@/components/GolfCourseMap';
@@ -14,140 +12,34 @@ import CourseListCard from '@/components/CourseListCard';
 import ThemeToggle from '@/components/ThemeToggle';
 import { AuthNav } from '@/components/AuthNav';
 
-import { coursesApi, optimisticUpdates } from '@/lib/coursesApi';
+import { useCourses } from '@/hooks/useCourses';
 import { useAuth } from '@/contexts/AuthContext';
-import type { GolfCourseWithStatus, CourseStatus, AccessType } from '@shared/schema';
+import type { CourseStatus, AccessType } from '@shared/schema';
 
 export default function Home() {
   const [activeFilter, setActiveFilter] = useState<CourseStatus | 'all'>('all');
   const [activeAccessFilter, setActiveAccessFilter] = useState<AccessType | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('hero');
-  
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
+
   const { isAuthenticated } = useAuth();
 
-  // Fetch courses data
-  const { data: courses = [], isLoading: coursesLoading, error: coursesError } = useQuery({
-    queryKey: ['courses', { isAuthenticated }],
-    queryFn: () => coursesApi.getAllCourses(isAuthenticated),
+  // Use the custom courses hook with filters
+  const {
+    courses,
+    filteredCourses,
+    stats: calculatedStats,
+    isLoading: coursesLoading,
+    error: coursesError,
+    updateCourseStatus,
+  } = useCourses({
+    activeFilter,
+    activeAccessFilter,
+    searchQuery,
   });
-
-  // Fetch user stats
-  const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['user-stats', { isAuthenticated }],
-    queryFn: () => coursesApi.getUserStats(isAuthenticated),
-  });
-
-  // Status update mutation with optimistic updates
-  const statusMutation = useMutation({
-    mutationFn: ({ courseId, status }: { courseId: string; status: CourseStatus }) =>
-      coursesApi.updateCourseStatus(courseId, status, isAuthenticated),
-    onMutate: async ({ courseId, status }) => {
-      // Cancel outgoing refetches so they don't overwrite our optimistic update
-      await queryClient.cancelQueries({ queryKey: ['courses'] });
-      await queryClient.cancelQueries({ queryKey: ['user-stats'] });
-
-      // Get the current course data to determine previous status
-      const coursesData = queryClient.getQueryData(['courses', { isAuthenticated }]) as GolfCourseWithStatus[] | undefined;
-      const previousStatus = coursesData?.find(course => course.id === courseId)?.status;
-
-      // Snapshot previous values for potential rollback
-      const previousCoursesData = queryClient.getQueryData(['courses', { isAuthenticated }]);
-      const previousStatsData = queryClient.getQueryData(['user-stats', { isAuthenticated }]);
-
-      // Apply optimistic updates
-      optimisticUpdates.updateCourseStatus(queryClient, courseId, status, isAuthenticated);
-
-      // Return context with snapshot for rollback
-      return {
-        previousCoursesData,
-        previousStatsData,
-        courseId,
-        previousStatus,
-        isAuthenticated
-      };
-    },
-    onSuccess: (data, variables, context) => {
-      // On success, we can optionally refetch to sync with server
-      // But since optimistic updates should match server state, this is usually not needed
-      toast({
-        title: "Status Updated",
-        description: "Course status updated successfully.",
-        variant: "default",
-      });
-    },
-    onError: (error, variables, context) => {
-      // Rollback optimistic updates on error
-      if (context) {
-        queryClient.setQueryData(['courses', { isAuthenticated: context.isAuthenticated }], context.previousCoursesData);
-        queryClient.setQueryData(['user-stats', { isAuthenticated: context.isAuthenticated }], context.previousStatsData);
-      }
-
-      toast({
-        title: "Update Failed",
-        description: "Failed to update course status. Please try again.",
-        variant: "destructive",
-      });
-    },
-    onSettled: () => {
-      // Always refetch after mutation settles (success or error) to ensure consistency
-      queryClient.invalidateQueries({ queryKey: ['courses'] });
-      queryClient.invalidateQueries({ queryKey: ['user-stats'] });
-    },
-  });
-
-  // Filter and search courses
-  const filteredCourses = useMemo(() => {
-    let filtered = courses;
-
-    // Apply status filter
-    if (activeFilter !== 'all') {
-      filtered = filtered.filter(course => course.status === activeFilter);
-    }
-
-    // Apply access type filter
-    if (activeAccessFilter !== 'all') {
-      filtered = filtered.filter(course => course.accessType === activeAccessFilter);
-    }
-
-    // Apply search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(course =>
-        course.name.toLowerCase().includes(query) ||
-        course.location.toLowerCase().includes(query) ||
-        course.state.toLowerCase().includes(query)
-      );
-    }
-
-    return filtered;
-  }, [courses, activeFilter, activeAccessFilter, searchQuery]);
-
-  // Calculate default stats if API stats not available
-  const calculatedStats = useMemo(() => {
-    const total = courses.length;
-    const played = courses.filter(c => c.status === 'played').length;
-    const wantToPlay = courses.filter(c => c.status === 'want-to-play').length;
-    const notPlayed = total - played; // Not played = total - played (includes want-to-play courses)
-    const publicCourses = courses.filter(c => c.accessType === 'public').length;
-    const privateCourses = courses.filter(c => c.accessType === 'private').length;
-    const resortCourses = courses.filter(c => c.accessType === 'resort').length;
-
-    return { 
-      total, 
-      played, 
-      wantToPlay, 
-      notPlayed, 
-      public: publicCourses, 
-      private: privateCourses, 
-      resort: resortCourses 
-    };
-  }, [courses]);
 
   const handleStatusChange = (courseId: string, status: CourseStatus) => {
-    statusMutation.mutate({ courseId, status });
+    updateCourseStatus(courseId, status);
   };
 
   const handleLocationClick = (courseId: string) => {
