@@ -86,7 +86,27 @@ export function serveStatic(app: Express) {
     );
   }
 
-  app.use(express.static(distPath));
+  // Debug all static file requests
+  app.use((req, res, next) => {
+    if (!req.path.startsWith('/api/')) {
+      console.log("Static request:", req.method, req.path);
+    }
+    next();
+  });
+
+  app.use(express.static(distPath, {
+    setHeaders: (res, path) => {
+      console.log("Setting headers for static file:", path);
+      // Ensure proper MIME types for key file types
+      if (path.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+      } else if (path.endsWith('.css')) {
+        res.setHeader('Content-Type', 'text/css; charset=utf-8');
+      } else if (path.endsWith('.html')) {
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      }
+    }
+  }));
 
   // fall through to index.html if the file doesn't exist
   app.use("*", (req, res) => {
@@ -101,6 +121,8 @@ export function serveStatic(app: Express) {
       console.log("Index file starts with:", content.substring(0, 100));
     }
 
+    // Explicitly set Content-Type header for HTML
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.sendFile(indexPath);
   });
 }
