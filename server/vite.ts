@@ -89,8 +89,18 @@ export function serveStatic(app: Express) {
   app.use(express.static(distPath));
 
   // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
+  app.use("*", (req, res) => {
     console.log("Serving fallback index.html for:", req.path);
-    res.sendFile(path.resolve(distPath, "index.html"));
+    const indexPath = path.resolve(distPath, "index.html");
+    console.log("Index file path:", indexPath);
+    console.log("Index file exists:", fs.existsSync(indexPath));
+
+    if (fs.existsSync(indexPath)) {
+      const content = fs.readFileSync(indexPath, 'utf-8');
+      console.log("Index file size:", content.length, "bytes");
+      console.log("Index file starts with:", content.substring(0, 100));
+    }
+
+    res.sendFile(indexPath);
   });
 }
