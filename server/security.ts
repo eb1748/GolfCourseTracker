@@ -40,7 +40,7 @@ export const helmetConfig = helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       scriptSrc: process.env.NODE_ENV === 'development'
         ? ["'self'", "'unsafe-inline'", "'unsafe-eval'"]
-        : ["'self'"],
+        : ["'self'", "https://static.cloudflareinsights.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https:", "blob:"],
       connectSrc: ["'self'", "https:", "wss:"],
@@ -88,6 +88,12 @@ export const apiRateLimit = rateLimit({
 export const validateContentType = (req: Request, res: Response, next: NextFunction) => {
   if (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') {
     const contentType = req.get('Content-Type');
+    const contentLength = req.get('Content-Length');
+
+    // Allow empty body requests (like signout)
+    if (!contentLength || contentLength === '0') {
+      return next();
+    }
 
     if (!contentType || !contentType.includes('application/json')) {
       return res.status(400).json({
