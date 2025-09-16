@@ -70,15 +70,6 @@ export async function setupVite(app: Express, server: Server) {
 export function serveStatic(app: Express) {
   const distPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "public");
 
-  console.log("Static file serving debug:");
-  console.log("- import.meta.url:", import.meta.url);
-  console.log("- __dirname equivalent:", path.dirname(fileURLToPath(import.meta.url)));
-  console.log("- Resolved distPath:", distPath);
-  console.log("- distPath exists:", fs.existsSync(distPath));
-
-  if (fs.existsSync(distPath)) {
-    console.log("- Contents of distPath:", fs.readdirSync(distPath));
-  }
 
   if (!fs.existsSync(distPath)) {
     throw new Error(
@@ -86,43 +77,12 @@ export function serveStatic(app: Express) {
     );
   }
 
-  // Debug all static file requests
-  app.use((req, res, next) => {
-    if (!req.path.startsWith('/api/')) {
-      console.log("Static request:", req.method, req.path);
-    }
-    next();
-  });
 
-  app.use(express.static(distPath, {
-    setHeaders: (res, path) => {
-      console.log("Setting headers for static file:", path);
-      // Ensure proper MIME types for key file types
-      if (path.endsWith('.js')) {
-        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
-      } else if (path.endsWith('.css')) {
-        res.setHeader('Content-Type', 'text/css; charset=utf-8');
-      } else if (path.endsWith('.html')) {
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      }
-    }
-  }));
+  app.use(express.static(distPath));
 
   // fall through to index.html if the file doesn't exist
   app.use("*", (req, res) => {
-    console.log("Serving fallback index.html for:", req.path);
     const indexPath = path.resolve(distPath, "index.html");
-    console.log("Index file path:", indexPath);
-    console.log("Index file exists:", fs.existsSync(indexPath));
-
-    if (fs.existsSync(indexPath)) {
-      const content = fs.readFileSync(indexPath, 'utf-8');
-      console.log("Index file size:", content.length, "bytes");
-      console.log("Index file starts with:", content.substring(0, 100));
-    }
-
-    // Explicitly set Content-Type header for HTML
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.sendFile(indexPath);
   });
 }
