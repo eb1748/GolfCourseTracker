@@ -95,6 +95,24 @@ app.use((req, res, next) => {
   next();
 });
 
+  // Add health check endpoint for Railway
+  app.get('/health', (req, res) => {
+    console.log("Health check requested");
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  // Add root endpoint debugging
+  app.get('/', (req, res, next) => {
+    console.log("Root request received:", {
+      method: req.method,
+      url: req.url,
+      headers: Object.keys(req.headers),
+      userAgent: req.get('User-Agent'),
+      origin: req.get('Origin')
+    });
+    next();
+  });
+
 (async () => {
   const server = await registerRoutes(app);
 
@@ -130,12 +148,26 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
+  // Railway debugging - log all environment info
+  console.log("Railway environment debug:");
+  console.log("- PORT env var:", process.env.PORT);
+  console.log("- All env vars containing 'PORT':", Object.keys(process.env).filter(k => k.includes('PORT')).map(k => `${k}=${process.env[k]}`));
+  console.log("- Railway specific vars:", {
+    RAILWAY_ENVIRONMENT: process.env.RAILWAY_ENVIRONMENT,
+    RAILWAY_SERVICE_NAME: process.env.RAILWAY_SERVICE_NAME,
+    RAILWAY_PROJECT_NAME: process.env.RAILWAY_PROJECT_NAME
+  });
+
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || '5000', 10);
   const host = process.env.NODE_ENV === 'production' ? "0.0.0.0" : "localhost";
+
+  console.log("Final server config:");
+  console.log("- Port:", port);
+  console.log("- Host:", host);
 
   server.listen(port, host, () => {
     log(`serving on ${host}:${port}`);
