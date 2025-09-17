@@ -5,6 +5,7 @@ import { z } from "zod";
 
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  username: text("username").notNull().unique(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(), // Renamed for clarity - stores bcrypt hash
@@ -13,6 +14,7 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => ({
   // Performance indexes for common queries
+  usernameIdx: index("users_username_idx").on(table.username),
   emailIdx: index("users_email_idx").on(table.email),
   lastActiveAtIdx: index("users_last_active_at_idx").on(table.lastActiveAt),
   createdAtIdx: index("users_created_at_idx").on(table.createdAt),
@@ -79,17 +81,40 @@ export const userActivityLogs = pgTable("user_activity_logs", {
   dateTypeIdx: index("user_activity_logs_date_type_idx").on(table.activityDate, table.activityType),
 }));
 
+// Username validation regex: alphanumeric + underscore/hyphen, 3-20 chars, must start with letter/number
+const usernameRegex = /^[a-zA-Z0-9][a-zA-Z0-9_-]{2,19}$/;
+
+// Reserved usernames to prevent conflicts with system routes/functions
+const RESERVED_USERNAMES = [
+  'admin', 'root', 'api', 'www', 'mail', 'ftp', 'localhost', 'system', 'user',
+  'test', 'guest', 'public', 'private', 'static', 'assets', 'images', 'css',
+  'js', 'javascript', 'null', 'undefined', 'true', 'false', 'about', 'contact',
+  'help', 'support', 'blog', 'news', 'login', 'logout', 'register', 'signup',
+  'signin', 'dashboard', 'profile', 'settings', 'account', 'home', 'index'
+];
+
+export const usernameSchema = z.string()
+  .min(3, 'Username must be at least 3 characters')
+  .max(20, 'Username must be no more than 20 characters')
+  .regex(usernameRegex, 'Username can only contain letters, numbers, underscores, and hyphens, and must start with a letter or number')
+  .refine((username) => !RESERVED_USERNAMES.includes(username.toLowerCase()), {
+    message: 'This username is reserved and cannot be used'
+  });
+
 export const insertUserSchema = createInsertSchema(users).pick({
+  username: true,
   name: true,
   email: true,
   passwordHash: true,
 }).extend({
+  username: usernameSchema,
   email: z.string().email(),
   passwordHash: z.string().min(6, 'Password must be at least 6 characters')
 });
 
 // For backwards compatibility with frontend forms that send 'password'
 export const insertUserFormSchema = z.object({
+  username: usernameSchema,
   name: z.string().min(1, 'Name is required'),
   email: z.string().email(),
   password: z.string().min(6, 'Password must be at least 6 characters')

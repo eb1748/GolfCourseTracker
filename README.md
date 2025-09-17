@@ -1,6 +1,6 @@
 # Golf Course Tracker
 
-This is a full-stack web application that helps golf enthusiasts track their progress through America's top 100 public golf courses. The application provides an interactive map interface where users can mark courses as "played," "want to play," or "not played," search for specific courses, and visualize their golf destination journey. Built with modern web technologies, it offers both map and list views with filtering capabilities, creating an engaging exploration-focused experience similar to travel platforms like Airbnb and AllTrails.
+This is a full-stack web application that helps golf enthusiasts track their progress through America's bucket list golf courses. The application provides an interactive map interface where users can mark courses as "played," "want to play," or "not played," search for specific courses, and visualize their golf destination journey. Built with modern web technologies, it offers both map and list views with filtering capabilities, creating an engaging exploration-focused experience similar to travel platforms like Airbnb and AllTrails.
 
 ## Project Overview
 
@@ -10,7 +10,14 @@ This application allows users to browse and interact with golf course data. Auth
 
 **LIVE**: Application is fully deployed and operational at [golfjourneymap.com](https://golfjourneymap.com)
 
-### ✅ Latest Fixes (2025-09-16):
+### ✅ Latest Fixes (2025-09-17):
+- **Username Migration**: Replaced 'Full Name' with unique username system for user accounts
+- **Real-time Validation**: Username availability checking with visual feedback and debounced API calls
+- **Database Schema Enhancement**: Added username field with unique constraints and proper indexing
+- **Frontend UX Improvements**: Enhanced signup form with username field and availability indicators
+- **Authentication System**: Complete username-based authentication with error checking and validation
+
+### ✅ Previous Fixes (2025-09-16):
 - **DNS Configuration**: Custom domain (golfjourneymap.com) properly routes to Railway deployment
 - **Database Schema**: Fixed missing `created_at` columns causing authenticated user bugs
 - **Content Security Policy**: Cloudflare analytics scripts now allowed in CSP
@@ -82,7 +89,7 @@ This application allows users to browse and interact with golf course data. Auth
 ### **Data Storage Solutions**
 - **Schema Design**: Three main entities - users, golf courses, and user course status relationships
 - **Database-Driven Architecture**: Golf course data is stored in PostgreSQL database as the single source of truth
-- **Manual Seeding**: Use `npm run db:seed` to populate the database with the top 100 public golf courses
+- **Manual Seeding**: Use `npm run db:seed` to populate the database with America's bucket list golf courses
 - **Idempotent Seeding**: Seed script prevents duplicates and can be run multiple times safely
 - **Performance Indexes**: Comprehensive database indexes for all common query patterns
   - **Full-text search**: GIN indexes for course name/location search
@@ -258,9 +265,10 @@ npm run dev
 - `/api/users/me/stats` - ✅ User statistics (works for anonymous users)
 - `/api/courses/:courseId/status` - ✅ **FIXED** Update course status with CORS support and fallback storage
 - `/api/auth/signin` - Login endpoint
-- `/api/auth/signup` - Registration endpoint
+- `/api/auth/signup` - Registration endpoint (now requires username)
 - `/api/auth/signout` - Logout endpoint
 - `/api/auth/sync` - Sync localStorage data to authenticated account
+- `/api/auth/username-available/:username` - ✅ NEW: Check username availability with validation
 
 ### Course Status Update System ✅ FIXED (2025-09-15)
 
@@ -392,6 +400,68 @@ if (!contentLength || contentLength === '0') {
 - ✅ **Authentication Flow**: Complete sign in/out cycle working
 - ✅ **Security**: CSP allows necessary scripts, Content-Type validation handles edge cases
 - ✅ **Static Assets**: Proper MIME types and file serving in production
+
+## Username Migration System ✅ NEW (2025-09-17)
+
+### 🎯 **Migration Overview**
+**Challenge**: Replace 'Full Name' field with unique username system for future functionality and better user management.
+
+**Solution Implemented**: Comprehensive username-based authentication system with real-time validation and error checking.
+
+### 🔧 **Technical Implementation**
+
+#### **Database Schema Enhancement**
+- **New Username Field**: Added to users table with unique constraints and proper indexing
+- **Migration Scripts**: Safe database migration preserving existing user data
+- **Validation Schema**: Zod-based validation with regex pattern `/^[a-zA-Z0-9][a-zA-Z0-9_-]{2,19}$/`
+- **Reserved Usernames**: Protection against system conflicts (admin, api, root, etc.)
+
+#### **Backend API Enhancements**
+- **Username Availability Endpoint**: `GET /api/auth/username-available/:username`
+  - Real-time availability checking with validation
+  - Rate limiting and comprehensive error handling
+  - Reserved username checking and format validation
+- **Enhanced Signup Process**: Updated to require and validate usernames
+  - Duplicate username detection and prevention
+  - Integration with existing email validation
+  - Comprehensive error messages for user guidance
+
+#### **Frontend UX Improvements**
+- **Enhanced Signup Form**: Added username field with real-time feedback
+  - Debounced API calls (500ms delay) for optimal performance
+  - Visual indicators: loading spinner, check/X icons, status messages
+  - Form validation with immediate feedback on username requirements
+- **User Experience**: Seamless transition from email-based to username-based registration
+  - Clear validation messages and formatting requirements
+  - Progressive enhancement with graceful fallbacks
+
+### 🛡️ **Security & Validation Features**
+- **Format Validation**: 3-20 characters, alphanumeric with underscore/hyphen allowed
+- **Uniqueness Enforcement**: Database-level unique constraints with API validation
+- **Reserved Word Protection**: Prevents conflicts with system endpoints and common terms
+- **Input Sanitization**: Server-side validation with Zod schema enforcement
+- **Rate Limiting**: Username availability checks protected against abuse
+
+### 📊 **Migration Impact**
+- **Database Schema**: New username column with proper indexing for performance
+- **API Compatibility**: Backward-compatible authentication system
+- **User Data**: Existing users unaffected, new registrations require username
+- **Performance**: Optimized queries with indexed username lookups
+- **Security**: Enhanced user account security with unique identifier system
+
+### 🚀 **Production Readiness**
+- ✅ **Database Migration**: Safe schema updates with data preservation
+- ✅ **API Testing**: Comprehensive endpoint testing and validation
+- ✅ **Frontend Integration**: Real-time username availability checking
+- ✅ **Error Handling**: Graceful degradation and user-friendly error messages
+- ✅ **Performance**: Optimized for high-traffic usage with proper indexing
+
+**Files Enhanced**:
+- `shared/schema.ts` - Username validation and database schema
+- `server/routes.ts` - Username availability API and signup enhancement
+- `server/storage/userStorage.ts` - Username lookup and validation methods
+- `client/src/components/AuthForms.tsx` - Enhanced signup form with real-time validation
+- `migrations/` - Database migration scripts for username field addition
 
 ## Recent Changes
 

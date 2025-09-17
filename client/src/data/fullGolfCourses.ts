@@ -1,6 +1,6 @@
 import type { InsertGolfCourse } from "@shared/schema";
 
-// Complete list of top 100 public golf courses in the US
+// Complete list of America's bucket list golf courses
 export const FULL_TOP_100_GOLF_COURSES: InsertGolfCourse[] = [
   {
     name: "Pebble Beach Golf Links",

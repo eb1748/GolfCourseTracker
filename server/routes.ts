@@ -301,12 +301,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return sanitizedUser;
   };
 
+  // Username availability endpoint
+  app.get("/api/auth/username-available/:username", authRateLimit, async (req, res) => {
+    try {
+      const { username } = req.params;
+
+      if (!username) {
+        return res.status(400).json({ error: "Username is required" });
+      }
+
+      // Import username schema for validation
+      const { usernameSchema } = await import("@shared/schema");
+      const validationResult = usernameSchema.safeParse(username);
+
+      if (!validationResult.success) {
+        return res.json({
+          available: false,
+          error: validationResult.error.errors[0]?.message || "Invalid username format"
+        });
+      }
+
+      const isAvailable = await getStorage().isUsernameAvailable(username);
+      res.json({ available: isAvailable });
+    } catch (error) {
+      console.error("Error checking username availability:", error);
+      res.status(500).json({ error: "Failed to check username availability" });
+    }
+  });
+
   app.post("/api/auth/signup", authRateLimit, async (req, res) => {
     try {
-      const { email, password, name } = req.body;
+      const { email, password, name, username } = req.body;
 
       // Validate input using form schema
-      const validationResult = insertUserFormSchema.safeParse({ email, password, name });
+      const validationResult = insertUserFormSchema.safeParse({ email, password, name, username });
       if (!validationResult.success) {
         return res.status(400).json({ error: "Invalid input data", details: validationResult.error.errors });
       }
@@ -315,6 +343,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const existingUser = await getStorage().getUserByEmail(email);
       if (existingUser) {
         return res.status(400).json({ error: "User already exists" });
+      }
+
+      // Check if username is already taken
+      const existingUsername = await getStorage().getUserByUsername(username);
+      if (existingUsername) {
+        return res.status(400).json({ error: "Username is already taken" });
       }
 
       // Create user (storage handles password hashing) - FORCE DATABASE USAGE, NO FALLBACK

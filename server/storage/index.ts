@@ -135,6 +135,14 @@ export class UnifiedStorage implements IStorage {
     return this.userStorage.updateUserPreferences(userId, preferences);
   }
 
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    return this.userStorage.getUserByUsername(username);
+  }
+
+  async isUsernameAvailable(username: string): Promise<boolean> {
+    return this.userStorage.isUsernameAvailable(username);
+  }
+
   // Course storage methods - delegate to courseStorage
   async getAllCourses(): Promise<GolfCourse[]> {
     return this.courseStorage.getAllCourses();
@@ -448,6 +456,7 @@ export class MemStorage implements IStorage {
     const hashedPassword = await bcrypt.hash(insertUser.password, 12);
     const user: User = {
       id,
+      username: insertUser.username,
       email: insertUser.email,
       name: insertUser.name,
       passwordHash: hashedPassword,
@@ -461,6 +470,20 @@ export class MemStorage implements IStorage {
 
   async comparePassword(password: string, hashedPassword: string): Promise<boolean> {
     return bcrypt.compare(password, hashedPassword);
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    for (const user of Array.from(this.users.values())) {
+      if (user.username === username) return user;
+    }
+    return undefined;
+  }
+
+  async isUsernameAvailable(username: string): Promise<boolean> {
+    for (const user of Array.from(this.users.values())) {
+      if (user.username === username) return false;
+    }
+    return true;
   }
 
   async updateUserActivity(userId: string): Promise<void> {

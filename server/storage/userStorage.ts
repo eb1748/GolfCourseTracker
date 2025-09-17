@@ -15,6 +15,8 @@ export interface IUserStorage {
   // User CRUD operations
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  isUsernameAvailable(username: string): Promise<boolean>;
   createUser(user: InsertUserForm): Promise<User>;
   updateUserPreferences(userId: string, preferences: UserPreferences): Promise<User>;
 
@@ -85,6 +87,28 @@ export class UserStorage implements IUserStorage {
     });
   }
 
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    if (!this.db) {
+      return undefined;
+    }
+
+    return this.connectionManager.executeWithRetry(async () => {
+      const result = await this.db.select().from(users).where(eq(users.username, username)).limit(1);
+      return result[0];
+    });
+  }
+
+  async isUsernameAvailable(username: string): Promise<boolean> {
+    if (!this.db) {
+      return false; // Conservative approach - if no DB, assume unavailable
+    }
+
+    return this.connectionManager.executeWithRetry(async () => {
+      const result = await this.db.select({ count: sql`count(*)` }).from(users).where(eq(users.username, username));
+      return parseInt(result[0].count) === 0;
+    });
+  }
+
   async createUser(insertUser: InsertUserForm): Promise<User> {
     console.log("UserStorage.createUser called with:", { email: insertUser.email, name: insertUser.name });
 
@@ -106,6 +130,7 @@ export class UserStorage implements IUserStorage {
 
       // Insert user with transaction safety
       const result = await this.db.insert(users).values({
+        username: insertUser.username,
         name: insertUser.name,
         email: insertUser.email,
         passwordHash: hashedPassword,

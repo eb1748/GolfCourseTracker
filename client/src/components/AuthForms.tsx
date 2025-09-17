@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { insertUserFormSchema } from '@shared/schema';
@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Mail, Lock, User, AlertCircle } from 'lucide-react';
+import { Loader2, Mail, Lock, User, AlertCircle, Check, X } from 'lucide-react';
 import { z } from 'zod';
 
 // Form schemas
@@ -38,6 +38,7 @@ export function AuthForms({ onClose, defaultTab = 'signin' }: AuthFormsProps) {
   const [activeTab, setActiveTab] = useState(defaultTab);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
   const { login, signup } = useAuth();
   const { toast } = useToast();
 
@@ -54,6 +55,7 @@ export function AuthForms({ onClose, defaultTab = 'signin' }: AuthFormsProps) {
   const signUpForm = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
+      username: '',
       name: '',
       email: '',
       password: '',
@@ -107,6 +109,44 @@ export function AuthForms({ onClose, defaultTab = 'signin' }: AuthFormsProps) {
   const clearError = () => {
     setError(null);
   };
+
+  // Debounced username availability checking
+  const checkUsernameAvailability = useCallback(async (username: string) => {
+    if (!username || username.length < 3) {
+      setUsernameStatus('idle');
+      return;
+    }
+
+    try {
+      setUsernameStatus('checking');
+      const response = await fetch(`/api/auth/username-available/${encodeURIComponent(username)}`);
+      const data = await response.json();
+
+      if (data.available) {
+        setUsernameStatus('available');
+      } else {
+        setUsernameStatus('taken');
+      }
+    } catch (error) {
+      console.error('Error checking username availability:', error);
+      setUsernameStatus('idle');
+    }
+  }, []);
+
+  // Debounce username checking
+  useEffect(() => {
+    const username = signUpForm.watch('username');
+    if (!username) {
+      setUsernameStatus('idle');
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      checkUsernameAvailability(username);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [signUpForm.watch('username'), checkUsernameAvailability]);
 
   return (
     <div className="w-full max-w-md mx-auto">
@@ -209,6 +249,43 @@ export function AuthForms({ onClose, defaultTab = 'signin' }: AuthFormsProps) {
             <CardContent>
               <Form {...signUpForm}>
                 <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-4">
+                  <FormField
+                    control={signUpForm.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Username</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Input
+                              placeholder="Choose a unique username"
+                              disabled={isLoading}
+                              data-testid="input-signup-username"
+                              {...field}
+                            />
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                              {usernameStatus === 'checking' && (
+                                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                              )}
+                              {usernameStatus === 'available' && (
+                                <Check className="h-4 w-4 text-green-600" />
+                              )}
+                              {usernameStatus === 'taken' && (
+                                <X className="h-4 w-4 text-red-600" />
+                              )}
+                            </div>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                        {usernameStatus === 'available' && (
+                          <p className="text-sm text-green-600">Username is available!</p>
+                        )}
+                        {usernameStatus === 'taken' && (
+                          <p className="text-sm text-red-600">Username is already taken</p>
+                        )}
+                      </FormItem>
+                    )}
+                  />
                   <FormField
                     control={signUpForm.control}
                     name="name"

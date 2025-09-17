@@ -1,6 +1,6 @@
 import type { GolfCourse } from "@shared/schema";
 
-// Top 100 public golf courses in the US - representative sample
+// America's bucket list golf courses - representative sample
 //todo: remove mock functionality - replace with real data source
 export const TOP_100_GOLF_COURSES: GolfCourse[] = [
   {
