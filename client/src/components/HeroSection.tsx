@@ -48,7 +48,7 @@ export default function HeroSection({ totalCourses, coursesPlayed, onGetStarted 
   };
 
   return (
-    <div className="relative w-full overflow-hidden rounded-lg min-h-[520px] md:h-[500px]">
+    <div className="relative w-full overflow-hidden rounded-lg min-h-[420px] md:min-h-[500px]">
       {/* Rotating Background Images */}
       <div 
         className="absolute inset-0 bg-cover bg-center transition-opacity duration-1000"
@@ -69,8 +69,8 @@ export default function HeroSection({ totalCourses, coursesPlayed, onGetStarted 
       <div className="absolute inset-0 bg-black/50" />
       
       {/* Content */}
-      <div className="relative flex items-center justify-center px-6 py-8">
-        <div className="text-center text-white space-y-6 max-w-2xl">
+      <div className="relative flex items-center justify-center px-6 py-6 md:py-8">
+        <div className="text-center text-white space-y-4 md:space-y-6 max-w-2xl">
           {/* Badge */}
           <Badge variant="outline" className="bg-white/20 border-white/30 text-white backdrop-blur-sm">
             <MapPin className="w-4 h-4 mr-2" />
@@ -78,7 +78,7 @@ export default function HeroSection({ totalCourses, coursesPlayed, onGetStarted 
           </Badge>
 
           {/* Main Heading */}
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             <h1 className="text-4xl md:text-5xl font-bold font-poppins leading-tight">
               Track Your Golf
               <br />
@@ -92,7 +92,7 @@ export default function HeroSection({ totalCourses, coursesPlayed, onGetStarted 
           </div>
 
           {/* Stats */}
-          <div className="flex items-center justify-center gap-8 py-4">
+          <div className="flex items-center justify-center gap-6 md:gap-8 py-3 md:py-4">
             <div className="text-center">
               <div className="flex items-center gap-2 justify-center">
                 <Target className="w-5 h-5 text-golf-want" />

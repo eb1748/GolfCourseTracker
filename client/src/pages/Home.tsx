@@ -195,7 +195,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto px-4 py-4 md:py-6">
         {/* Dedicated swipe area for better touch event handling */}
         <div
           className="relative w-full"
@@ -209,7 +209,7 @@ export default function Home() {
             onValueChange={handleTabChange}
             className="w-full"
           >
-          <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsList className="grid w-full grid-cols-3 mb-4 md:mb-6">
             <TabsTrigger value="hero" data-testid="tab-hero">
               <BarChart3 className="w-4 h-4 mr-2" />
               Overview
@@ -224,34 +224,12 @@ export default function Home() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="hero" className="space-y-6">
+          <TabsContent value="hero" className="space-y-4 md:space-y-6">
             <HeroSection
               totalCourses={calculatedStats.total}
               coursesPlayed={calculatedStats.played}
               onGetStarted={handleGetStarted}
             />
-            
-            {/* Quick Stats Cards */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-4">
-              <Card>
-                <CardContent className="p-3 sm:p-6 text-center">
-                  <div className="text-xl sm:text-2xl font-bold text-golf-played">{calculatedStats.played}</div>
-                  <p className="text-xs sm:text-sm text-muted-foreground">Courses Played</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-3 sm:p-6 text-center">
-                  <div className="text-xl sm:text-2xl font-bold text-golf-want">{calculatedStats.wantToPlay}</div>
-                  <p className="text-xs sm:text-sm text-muted-foreground">Want to Play</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-3 sm:p-6 text-center">
-                  <div className="text-xl sm:text-2xl font-bold text-golf-not-played">{calculatedStats.notPlayed}</div>
-                  <p className="text-xs sm:text-sm text-muted-foreground">Not Played</p>
-                </CardContent>
-              </Card>
-            </div>
           </TabsContent>
 
           <TabsContent value="map" className="lg:space-y-4">
