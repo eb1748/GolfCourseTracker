@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CSS optimizations for mobile touch performance
 - Mobile swipe functionality between map view and list view (50px minimum distance)
 - Touch gesture navigation matching overview/map swipe patterns
+- Multi-touch detection system preventing map gesture interference
+- Full 3-tab swipe navigation (hero ↔ map ↔ list) with circular routing
 
 ### Fixed
 - Backend user stats calculation for authenticated users
@@ -37,6 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Touch action restrictions preventing normal mobile gestures and scrolling
 - Mobile header overlap issue with courses tracked badge and Sign In button
 - Statistics boxes vertical stacking on mobile wasting screen space
+- Multi-touch interference with map pan/zoom gestures during swipe detection
+- Limited swipe navigation scope that excluded hero tab from gesture controls
 
 ### Changed
 - FilterControls component: Single-column layout on mobile with improved spacing
@@ -71,6 +75,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Statistics grid responsive layout: grid-cols-3 with responsive padding and font sizes
 - Mobile header responsive spacing: gap-1 sm:gap-2 and flex-shrink-0 for element optimization
 - AuthNav responsive text: Conditional display based on screen size for compact mobile layout
+- Multi-touch gesture detection system with `isMultiTouch` state management
+- Enhanced touch event handlers to differentiate single vs multi-finger gestures
+- Circular swipe navigation logic supporting all 3 tabs (hero→map→list→hero)
+- Comprehensive swipe direction handling for both left and right swipe gestures
 
 ## [2025-09-20] - Course Statistics Fix
 
