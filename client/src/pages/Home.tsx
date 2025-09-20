@@ -288,15 +288,39 @@ export default function Home() {
           </TabsContent>
 
           <TabsContent value="map" className="lg:space-y-4">
-            {/* Mobile filter toggle button */}
-            <div className="lg:hidden mb-4">
+            {/* Mobile quick filters - always visible */}
+            <div className="lg:hidden mb-4 space-y-3">
+              {/* Quick status filters */}
+              <div className="flex gap-1 overflow-hidden">
+                {[
+                  { key: 'all', label: 'All', count: calculatedStats.total },
+                  { key: 'played', label: 'Played', count: calculatedStats.played },
+                  { key: 'want-to-play', label: 'Want to Play', count: calculatedStats.wantToPlay },
+                  { key: 'not-played', label: 'Not Played', count: calculatedStats.notPlayed },
+                ].map((filter) => (
+                  <Button
+                    key={filter.key}
+                    variant={activeFilter === filter.key ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setActiveFilter(filter.key as any)}
+                    className="text-xs flex-1 min-w-0 px-1 h-auto py-2"
+                  >
+                    <span className="text-center leading-tight break-words whitespace-normal">
+                      {filter.label} ({filter.count})
+                    </span>
+                  </Button>
+                ))}
+              </div>
+
+              {/* Advanced filters toggle */}
               <Button
                 variant="outline"
                 onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
                 className="w-full"
+                size="sm"
               >
                 <Filter className="w-4 h-4 mr-2" />
-                Filters {mobileFiltersOpen ? '(Hide)' : '(Show)'}
+                Advanced Filters {mobileFiltersOpen ? '(Hide)' : '(Show)'}
               </Button>
             </div>
 
@@ -318,9 +342,9 @@ export default function Home() {
                 </ScrollArea>
               </div>
 
-              {/* Map with improved mobile height */}
+              {/* Map with optimized responsive height */}
               <div className="lg:col-span-3">
-                <Card className="h-[calc(100vh-120px)] lg:h-[calc(100vh-200px)]">
+                <Card className="h-[60vh] sm:h-[62vh] md:h-[70vh] lg:h-[calc(100vh-200px)]">
                   <CardContent className="p-0 h-full">
                     <GolfCourseMap
                       courses={filteredCourses}

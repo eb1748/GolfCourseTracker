@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Touch gesture navigation matching overview/map swipe patterns
 - Multi-touch detection system preventing map gesture interference
 - Full 3-tab swipe navigation (hero ↔ map ↔ list) with circular routing
+- Optimized mobile map height following industry standards (60% viewport vs 85%)
+- Always-visible quick filter buttons on mobile with proper text wrapping
+- Responsive map height system across all device breakpoints
 
 ### Fixed
 - Backend user stats calculation for authenticated users
@@ -41,6 +44,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Statistics boxes vertical stacking on mobile wasting screen space
 - Multi-touch interference with map pan/zoom gestures during swipe detection
 - Limited swipe navigation scope that excluded hero tab from gesture controls
+- Mobile map height consuming 85% of viewport causing poor information hierarchy
+- Mobile filter button text overflow and intersection issues
 
 ### Changed
 - FilterControls component: Single-column layout on mobile with improved spacing
@@ -79,6 +84,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced touch event handlers to differentiate single vs multi-finger gestures
 - Circular swipe navigation logic supporting all 3 tabs (hero→map→list→hero)
 - Comprehensive swipe direction handling for both left and right swipe gestures
+- Mobile map height optimization from 85% to 60% viewport following industry standards
+- Always-visible mobile quick filters with responsive single-row layout
+- Mobile filter button text wrapping system preventing overflow and intersection
 
 ## [2025-09-20] - Course Statistics Fix
 

@@ -111,7 +111,8 @@ PORT=3000  # Optional, defaults to 3000
 
 ### Frontend Core
 - `client/src/components/AuthForms.tsx` - **CRITICAL**: Login/signup with username validation
-- `client/src/components/GolfCourseMap.tsx` - Interactive map component
+- `client/src/components/GolfCourseMap.tsx` - Interactive map component with mobile optimization
+- `client/src/pages/Home.tsx` - **CRITICAL**: Main page with responsive map height system
 - `client/src/data/golfCourses.ts` - Golf course data (100 courses)
 
 ## API Endpoints
