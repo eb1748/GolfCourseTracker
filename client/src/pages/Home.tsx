@@ -174,7 +174,7 @@ export default function Home() {
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 mr-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 mr-2 sm:mr-3">
             <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center flex-shrink-0">
               <Map className="w-5 h-5 text-primary-foreground" />
             </div>
@@ -183,9 +183,9 @@ export default function Home() {
               <p className="text-xs text-muted-foreground hidden md:block">Play America's Best Golf Courses</p>
             </div>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground hidden sm:block">
+
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+            <span className="text-sm text-muted-foreground hidden md:block">
               {calculatedStats.played}/{calculatedStats.total} played
             </span>
             <AuthNav />
@@ -232,23 +232,23 @@ export default function Home() {
             />
             
             {/* Quick Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4">
               <Card>
-                <CardContent className="p-6 text-center">
-                  <div className="text-2xl font-bold text-golf-played">{calculatedStats.played}</div>
-                  <p className="text-muted-foreground">Courses Played</p>
+                <CardContent className="p-3 sm:p-6 text-center">
+                  <div className="text-xl sm:text-2xl font-bold text-golf-played">{calculatedStats.played}</div>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Courses Played</p>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-6 text-center">
-                  <div className="text-2xl font-bold text-golf-want">{calculatedStats.wantToPlay}</div>
-                  <p className="text-muted-foreground">Want to Play</p>
+                <CardContent className="p-3 sm:p-6 text-center">
+                  <div className="text-xl sm:text-2xl font-bold text-golf-want">{calculatedStats.wantToPlay}</div>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Want to Play</p>
                 </CardContent>
               </Card>
               <Card>
-                <CardContent className="p-6 text-center">
-                  <div className="text-2xl font-bold text-golf-not-played">{calculatedStats.notPlayed}</div>
-                  <p className="text-muted-foreground">Not Played</p>
+                <CardContent className="p-3 sm:p-6 text-center">
+                  <div className="text-xl sm:text-2xl font-bold text-golf-not-played">{calculatedStats.notPlayed}</div>
+                  <p className="text-xs sm:text-sm text-muted-foreground">Not Played</p>
                 </CardContent>
               </Card>
             </div>

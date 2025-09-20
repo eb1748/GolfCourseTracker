@@ -72,22 +72,24 @@ export function AuthNav() {
   // Unauthenticated state
   if (!isAuthenticated) {
     return (
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1 sm:gap-3">
         {/* Show guest data indicator if user has stored data */}
         {hasStoredData && (
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="text-xs">
-              <Database className="h-3 w-3 mr-1" />
-              {storedStats.trackedCount} courses tracked
+          <div className="flex items-center gap-1 sm:gap-2">
+            <Badge variant="secondary" className="text-xs px-2 py-1">
+              <Database className="h-3 w-3 mr-1 flex-shrink-0" />
+              <span className="hidden sm:inline">{storedStats.trackedCount} courses tracked</span>
+              <span className="sm:hidden">{storedStats.trackedCount}</span>
             </Badge>
           </div>
         )}
         
         <Dialog open={isAuthDialogOpen} onOpenChange={setIsAuthDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" size="sm" data-testid="button-auth-signin">
-              <User className="h-4 w-4 mr-2" />
-              Sign In
+            <Button variant="outline" size="sm" data-testid="button-auth-signin" className="px-2 sm:px-3">
+              <User className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline ml-0 sm:ml-0">Sign In</span>
+              <span className="sm:hidden sr-only">Sign In</span>
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-[95vw] max-h-[90vh] sm:max-w-md overflow-y-auto">
@@ -112,7 +114,7 @@ export function AuthNav() {
 
   // Authenticated state
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-1 sm:gap-3">
       {/* Show sync button if user has stored data to sync */}
       {hasStoredData && (
         <Button

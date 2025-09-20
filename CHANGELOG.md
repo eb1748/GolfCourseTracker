@@ -35,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Critical mobile functionality freeze where users couldn't scroll, click, or interact
 - Overly aggressive preventDefault() calls blocking all mobile touch interactions
 - Touch action restrictions preventing normal mobile gestures and scrolling
+- Mobile header overlap issue with courses tracked badge and Sign In button
+- Statistics boxes vertical stacking on mobile wasting screen space
 
 ### Changed
 - FilterControls component: Single-column layout on mobile with improved spacing
@@ -44,6 +46,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Map initialization with mobile-specific touch optimizations
 - List view layout: Added collapsible mobile filter system matching map view
 - Touch event handling: Added swipe detection for tab navigation on mobile
+- Overview statistics layout: Changed from vertical stack to horizontal grid on mobile
+- Mobile header layout: Optimized spacing and element positioning to prevent overlap
+- AuthNav component: Responsive text and button sizing for better mobile fit
 
 ### Technical
 - Enhanced LocalStorageService with `getTrackedCoursesCount()` method
@@ -63,6 +68,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Intelligent gesture differentiation between horizontal swipes and vertical scrolling
 - Selective preventDefault() usage - only called when actually handling swipe gestures
 - Changed touchAction from 'pan-x' to 'auto' to restore all normal mobile interactions
+- Statistics grid responsive layout: grid-cols-3 with responsive padding and font sizes
+- Mobile header responsive spacing: gap-1 sm:gap-2 and flex-shrink-0 for element optimization
+- AuthNav responsive text: Conditional display based on screen size for compact mobile layout
 
 ## [2025-09-20] - Course Statistics Fix
 
