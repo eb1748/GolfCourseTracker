@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Map, List, BarChart3, Loader2 } from 'lucide-react';
+import { Map, List, BarChart3, Loader2, Filter } from 'lucide-react';
 
 import HeroSection from '@/components/HeroSection';
 import GolfCourseMap from '@/components/GolfCourseMap';
@@ -21,8 +21,21 @@ export default function Home() {
   const [activeAccessFilter, setActiveAccessFilter] = useState<AccessType | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('hero');
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   const { isAuthenticated } = useAuth();
+
+  // Mobile detection useEffect
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Use the custom courses hook with filters
   const {
@@ -154,9 +167,21 @@ export default function Home() {
           </TabsContent>
 
           <TabsContent value="map" className="lg:space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-1 lg:gap-4">
-              {/* Sidebar with filters */}
-              <div className="lg:col-span-1">
+            {/* Mobile filter toggle button */}
+            <div className="lg:hidden mb-4">
+              <Button
+                variant="outline"
+                onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+                className="w-full"
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Filters {mobileFiltersOpen ? '(Hide)' : '(Show)'}
+              </Button>
+            </div>
+
+            <div className="flex flex-col lg:grid lg:grid-cols-4 gap-4">
+              {/* Collapsible filters on mobile */}
+              <div className={`lg:col-span-1 ${mobileFiltersOpen ? 'block' : 'hidden'} lg:block`}>
                 <ScrollArea className="h-auto lg:h-[calc(100vh-200px)]">
                   <div className="pr-4">
                     <FilterControls
@@ -171,10 +196,10 @@ export default function Home() {
                   </div>
                 </ScrollArea>
               </div>
-              
-              {/* Map */}
+
+              {/* Map with improved mobile height */}
               <div className="lg:col-span-3">
-                <Card className="h-[calc(100svh-160px)] md:h-[calc(100svh-180px)] lg:h-[calc(100vh-200px)]">
+                <Card className="h-[calc(100vh-120px)] lg:h-[calc(100vh-200px)]">
                   <CardContent className="p-0 h-full">
                     <GolfCourseMap
                       courses={filteredCourses}

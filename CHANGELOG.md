@@ -1,0 +1,107 @@
+# Changelog
+
+All notable changes to the Golf Course Tracker project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+- Mobile UI improvements documentation in `feature_dev_markdowns/Mobile_UI_improvements.md`
+- Comprehensive design review recommendations for mobile optimization
+- Collapsible mobile filter system with toggle button
+- Mobile-first responsive layout for map view
+- Enhanced touch targets meeting WCAG 44px minimum requirements
+- Mobile-specific marker scaling for better touch interaction
+- Responsive popup positioning preventing overflow on mobile
+- Mobile detection and state management
+- CSS optimizations for mobile touch performance
+
+### Fixed
+- Backend user stats calculation for authenticated users
+- Course counting logic for both authenticated and unauthenticated users
+- "Not played" calculation to exclude want-to-play courses
+- "Courses tracked" display to show actual tracked count instead of total
+- FilterControls 2-column mobile layout changed to single column
+- Map popup overflow on mobile devices
+- Poor touch targets on mobile (now 44px minimum)
+- Mobile map height utilization and touch interactions
+
+### Changed
+- FilterControls component: Single-column layout on mobile with improved spacing
+- Home component: Mobile-first flexbox layout with collapsible filters
+- GolfCourseMap component: Enhanced mobile touch handling and marker scaling
+- Button sizing from "sm" to "default" for better mobile touch targets
+- Map initialization with mobile-specific touch optimizations
+
+### Technical
+- Enhanced LocalStorageService with `getTrackedCoursesCount()` method
+- Added mobile detection useEffect with window resize listener
+- Updated calculateIconScale function with mobile parameter
+- Implemented responsive popup positioning classes
+- Added mobile-optimized CSS media queries for touch targets
+
+## [2025-09-20] - Course Statistics Fix
+
+### Fixed
+- Removed status update popup notification for cleaner UX
+- Corrected total course count to always show 100 for unauthenticated users
+- Fixed "courses tracked" badge to show session changes, not total courses
+- Backend stats endpoint now correctly calculates not-played as (100 - played courses)
+- Improved mobile header layout responsiveness
+
+### Technical
+- Enhanced LocalStorageService with `getTrackedCoursesCount()` method
+- Updated useStoredDataStatus hook to include trackedCount property
+- Modified AuthNav component to use accurate course tracking counts
+
+## [2025-09-17] - Username Migration System
+
+### Added
+- Complete username-based authentication system
+- Real-time username availability checking
+- Reserved word protection for usernames
+- Automated migration for existing users from email prefixes
+
+### Changed
+- Replaced "Full Name" field with unique username system
+- Username validation: 3-20 characters, alphanumeric + underscore/hyphen
+- Updated all authentication flows to use username instead of full names
+
+### Technical
+- Updated database schema for username field
+- Modified authentication endpoints and validation
+- Enhanced user registration and login forms
+
+## [Earlier Releases]
+
+### Analytics System
+- Daily/monthly user activity tracking
+- Engagement metrics for user interactions and course visits
+- API endpoints: `/api/analytics/daily-activity`, `/api/analytics/monthly-activity`
+
+### Interactive Map Features
+- Leaflet integration for interactive golf course mapping
+- Course filtering by state, rating, and access type
+- Visual progress indicators for visited/planned courses
+- Interactive course detail popups
+
+### Core Features
+- Full-stack TypeScript application with React frontend and Express backend
+- PostgreSQL database with Drizzle ORM
+- Custom session-based authentication with bcrypt
+- Railway deployment with auto-deploy from main branch
+- 100 curated golf courses across America
+- User progress tracking system
+- Responsive design with Tailwind CSS
+
+### Architecture
+- Project structure with separated client/server/shared code
+- Database schema with users, golf_courses, user_course_status, and user_activity_logs tables
+- Development environment with hot reload and concurrent frontend/backend
+- Security measures including rate limiting and input validation
+
+---
+
+*For detailed technical implementation information, see [CLAUDE.md](./CLAUDE.md)*

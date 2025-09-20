@@ -175,18 +175,17 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
   );
 
   // Calculate scale factor based on zoom level (max 450%)
-  const calculateIconScale = (zoom: number): number => {
-    // Base zoom is 4, scale linearly up to max 4.5x at higher zooms
-    // At zoom 4: scale = 1.0
-    // At zoom 10 and above: scale = 4.5 (450%)
+  const calculateIconScale = (zoom: number, isMobile: boolean = false): number => {
+    // Base zoom is 4, scale linearly up to max at higher zooms
+    // Mobile gets larger base size for better touch targets
     const baseZoom = 4;
     const maxZoom = 10;
-    const minScale = 1.0;
-    const maxScale = 4.5;
-    
+    const minScale = isMobile ? 1.2 : 1.0; // Larger base size on mobile
+    const maxScale = isMobile ? 5.0 : 4.5; // Larger max size on mobile
+
     if (zoom <= baseZoom) return minScale;
     if (zoom >= maxZoom) return maxScale;
-    
+
     const progress = (zoom - baseZoom) / (maxZoom - baseZoom);
     return minScale + (maxScale - minScale) * progress;
   };
@@ -221,7 +220,9 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
         touchZoom: true,
         bounceAtZoomLimits: false,
         // Improve mobile performance
-        preferCanvas: true
+        preferCanvas: true,
+        // Disable hover previews on mobile
+        dragging: !('ontouchstart' in window)
       });
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -240,14 +241,16 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
       // Add zoom event listener to update icon sizes
       mapInstanceRef.current.on('zoomend', () => {
         const currentZoom = mapInstanceRef.current!.getZoom();
-        const newScale = calculateIconScale(currentZoom);
+        const isMobile = window.innerWidth < 1024;
+        const newScale = calculateIconScale(currentZoom, isMobile);
         setIconScale(newScale);
         updateMarkersScale(newScale);
       });
 
       // Set initial scale based on initial zoom
       const initialZoom = mapInstanceRef.current.getZoom();
-      const initialScale = calculateIconScale(initialZoom);
+      const isMobile = window.innerWidth < 1024;
+      const initialScale = calculateIconScale(initialZoom, isMobile);
       setIconScale(initialScale);
     }
 
@@ -427,7 +430,7 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
       
       {/* Course Details Popup */}
       {selectedCourse && (
-        <div ref={popupRef} className="absolute top-4 right-4 w-80 z-[1000] pointer-events-auto" data-testid="course-details-popup">
+        <div ref={popupRef} className="absolute top-4 left-4 right-4 lg:top-4 lg:right-4 lg:left-auto lg:w-80 z-[1000] pointer-events-auto max-w-sm lg:max-w-none" data-testid="course-details-popup">
           <Card className="shadow-lg pointer-events-auto golf-popup-card">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">

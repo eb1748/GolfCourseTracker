@@ -91,15 +91,15 @@ export default function FilterControls({
             <Filter className="w-4 h-4 text-muted-foreground" />
             <span className="text-sm font-medium">Filter by Status</span>
           </div>
-          
-          <div className="grid grid-cols-2 lg:grid-cols-1 gap-2">
+
+          <div className="grid grid-cols-1 gap-3">
             {filters.map((filter) => (
               <Button
                 key={filter.key}
                 variant={getFilterVariant(filter.key)}
-                size="sm"
+                size="default"
                 onClick={() => handleFilterClick(filter.key)}
-                className="justify-between gap-2"
+                className="justify-between gap-2 min-h-[44px]"
                 data-testid={`button-filter-${filter.key}`}
               >
                 <span>{filter.label}</span>
@@ -117,15 +117,15 @@ export default function FilterControls({
             <Filter className="w-4 h-4 text-muted-foreground" />
             <span className="text-sm font-medium">Filter by Course Type</span>
           </div>
-          
-          <div className="grid grid-cols-2 lg:grid-cols-1 gap-2">
+
+          <div className="grid grid-cols-1 gap-3">
             {accessFilters.map((filter) => (
               <Button
                 key={filter.key}
                 variant={getAccessFilterVariant(filter.key)}
-                size="sm"
+                size="default"
                 onClick={() => handleAccessFilterClick(filter.key)}
-                className="justify-between gap-2"
+                className="justify-between gap-2 min-h-[44px]"
                 data-testid={`button-access-filter-${filter.key}`}
               >
                 <span>{filter.label}</span>

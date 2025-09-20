@@ -399,3 +399,22 @@
 .enhanced-button:active {
   transform: translateY(0) scale(0.98);
 }
+
+/* Mobile-optimized touch targets */
+@media (max-width: 1024px) {
+  .mobile-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Improved mobile map performance */
+  .leaflet-container {
+    touch-action: pan-x pan-y;
+  }
+
+  /* Mobile popup improvements */
+  .golf-popup-card {
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+  }
+}
