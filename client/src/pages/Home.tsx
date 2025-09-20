@@ -30,10 +30,12 @@ export default function Home() {
 
   const { isAuthenticated } = useAuth();
 
-  // Mobile detection useEffect
+  // Mobile detection useEffect with touch capability detection
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isSmallScreen = window.innerWidth < 1024;
+      setIsMobile(isTouchDevice && isSmallScreen);
     };
 
     checkMobile();
@@ -45,28 +47,56 @@ export default function Home() {
   const minSwipeDistance = 50;
 
   const onTouchStart = (e: React.TouchEvent) => {
+    // Prevent default behaviors that might interfere
+    e.preventDefault();
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
+    console.log('Touch start:', e.targetTouches[0].clientX, 'isMobile:', isMobile);
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
+    // Prevent scrolling while swiping
+    e.preventDefault();
     setTouchEnd(e.targetTouches[0].clientX);
+    const distance = touchStart ? touchStart - e.targetTouches[0].clientX : 0;
+    console.log('Touch move:', e.targetTouches[0].clientX, 'distance:', distance);
   };
 
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
+  const onTouchEnd = (e: React.TouchEvent) => {
+    // Prevent any default behavior
+    e.preventDefault();
+
+    if (!touchStart || !touchEnd) {
+      console.log('Touch end: No start or end detected');
+      return;
+    }
 
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
 
+    console.log('Touch end:', {
+      distance,
+      isLeftSwipe,
+      isRightSwipe,
+      activeTab,
+      isMobile,
+      minSwipeDistance
+    });
+
     // Only handle swipes on mobile and when not on hero tab
     if (isMobile && activeTab !== 'hero') {
       if (isLeftSwipe && activeTab === 'map') {
+        console.log('✅ Switching from map to list');
         setActiveTab('list');
       } else if (isRightSwipe && activeTab === 'list') {
+        console.log('✅ Switching from list to map');
         setActiveTab('map');
+      } else {
+        console.log('❌ No tab switch - conditions not met');
       }
+    } else {
+      console.log('❌ Touch handling blocked - not mobile or on hero tab');
     }
   };
 
@@ -153,14 +183,19 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
-        <Tabs
-          value={activeTab}
-          onValueChange={handleTabChange}
-          className="w-full"
+        {/* Dedicated swipe area for better touch event handling */}
+        <div
+          className="relative w-full"
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
+          style={{ touchAction: 'pan-x' }} // Allow horizontal panning only
         >
+          <Tabs
+            value={activeTab}
+            onValueChange={handleTabChange}
+            className="w-full"
+          >
           <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="hero" data-testid="tab-hero">
               <BarChart3 className="w-4 h-4 mr-2" />
@@ -320,6 +355,7 @@ export default function Home() {
             </div>
           </TabsContent>
         </Tabs>
+        </div>
       </main>
     </div>
   );

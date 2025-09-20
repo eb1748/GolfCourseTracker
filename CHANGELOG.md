@@ -29,6 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Map popup overflow on mobile devices
 - Poor touch targets on mobile (now 44px minimum)
 - Mobile map height utilization and touch interactions
+- Mobile swipe functionality interference from Radix UI components
+- Touch event propagation issues preventing swipe detection
+- Mobile detection to include actual touch capability verification
 
 ### Changed
 - FilterControls component: Single-column layout on mobile with improved spacing
@@ -49,6 +52,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Swipe detection logic with 50px minimum distance threshold
 - Touch event handlers (onTouchStart, onTouchMove, onTouchEnd) on Tabs component
 - Mobile filter toggle state sharing between map and list views
+- Enhanced mobile detection with touch capability verification (`ontouchstart` and `maxTouchPoints`)
+- Added preventDefault() calls to prevent browser default touch behaviors
+- Dedicated swipe area wrapper with `touchAction: 'pan-x'` for horizontal panning
+- Comprehensive debug logging for touch event tracking and swipe detection
 
 ## [2025-09-20] - Course Statistics Fix
 
