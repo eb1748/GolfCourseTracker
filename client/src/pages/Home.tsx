@@ -90,8 +90,8 @@ export default function Home() {
               <Map className="w-5 h-5 text-primary-foreground" />
             </div>
             <div className="min-w-0">
-              <h1 className="font-poppins font-bold text-lg truncate">Golf Journey Map</h1>
-              <p className="text-xs text-muted-foreground hidden sm:block">Play America's Best Golf Courses</p>
+              <h1 className="font-poppins font-bold text-sm sm:text-lg truncate">Golf Journey Map</h1>
+              <p className="text-xs text-muted-foreground hidden md:block">Play America's Best Golf Courses</p>
             </div>
           </div>
           
