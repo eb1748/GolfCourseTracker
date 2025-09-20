@@ -85,13 +85,13 @@ export default function Home() {
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 mr-3">
+            <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center flex-shrink-0">
               <Map className="w-5 h-5 text-primary-foreground" />
             </div>
-            <div>
-              <h1 className="font-poppins font-bold text-lg">Golf Journey Map</h1>
-              <p className="text-xs text-muted-foreground">Play America's Best Golf Courses</p>
+            <div className="min-w-0">
+              <h1 className="font-poppins font-bold text-lg truncate">Golf Journey Map</h1>
+              <p className="text-xs text-muted-foreground hidden sm:block">Play America's Best Golf Courses</p>
             </div>
           </div>
           

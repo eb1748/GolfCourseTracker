@@ -159,7 +159,7 @@ export function useCourses(options: UseCoursesOptions = {}): UseCoursesReturn {
         total: apiStats.total || courses.length,
         played: apiStats.played || courses.filter(c => c.status === 'played').length,
         wantToPlay: apiStats.wantToPlay || courses.filter(c => c.status === 'want-to-play').length,
-        notPlayed: apiStats.notPlayed || (courses.length - courses.filter(c => c.status === 'played').length),
+        notPlayed: apiStats.notPlayed || courses.filter(c => c.status === 'not-played' || !c.status).length,
         public: apiStats.public || courses.filter(c => c.accessType === 'public').length,
         private: apiStats.private || courses.filter(c => c.accessType === 'private').length,
         resort: apiStats.resort || courses.filter(c => c.accessType === 'resort').length,
@@ -170,7 +170,7 @@ export function useCourses(options: UseCoursesOptions = {}): UseCoursesReturn {
     const total = courses.length;
     const played = courses.filter(c => c.status === 'played').length;
     const wantToPlay = courses.filter(c => c.status === 'want-to-play').length;
-    const notPlayed = total - played;
+    const notPlayed = courses.filter(c => c.status === 'not-played' || !c.status).length;
     const publicCourses = courses.filter(c => c.accessType === 'public').length;
     const privateCourses = courses.filter(c => c.accessType === 'private').length;
     const resortCourses = courses.filter(c => c.accessType === 'resort').length;

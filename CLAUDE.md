@@ -227,6 +227,14 @@ curl http://localhost:3000/api/auth/username-available/testuser
 npx drizzle-kit studio  # Opens web UI
 ```
 
+### Test User Account
+- **Reuse existing test account**: A test user account has been created for verification testing
+- **Purpose**: Use this account for all future authentication testing to avoid creating excessive fictitious accounts
+- **Usage**: Authentication flows, course status updates, user-specific statistics, PWA features, mobile optimization
+- **Benefits**: Consistent test data, cleaner database, reproducible results
+- **Credentials**: Test account credentials are maintained separately from the codebase for security
+- **Access**: Contact team lead or check secure documentation for test account login details
+
 ### Common Issues
 1. **Database connection**: Check DATABASE_URL and Railway database status
 2. **Username validation**: Ensure 3-20 chars, alphanumeric + underscore/hyphen

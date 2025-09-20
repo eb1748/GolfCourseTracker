@@ -90,7 +90,7 @@ export function AuthNav() {
               Sign In
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="max-w-[95vw] max-h-[90vh] sm:max-w-md overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Welcome to Golf Journey Map</DialogTitle>
             </DialogHeader>
