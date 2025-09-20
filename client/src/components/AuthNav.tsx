@@ -46,7 +46,7 @@ export function AuthNav() {
       await syncLocalStorageData();
       toast({
         title: "Data synced successfully!",
-        description: `Synced your ${storedStats.total} course status updates to your account.`,
+        description: `Synced your ${storedStats.trackedCount} course status updates to your account.`,
       });
     } catch (error) {
       console.error('Sync error:', error);
@@ -78,7 +78,7 @@ export function AuthNav() {
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="text-xs">
               <Database className="h-3 w-3 mr-1" />
-              {storedStats.total} courses tracked
+              {storedStats.trackedCount} courses tracked
             </Badge>
           </div>
         )}
@@ -98,7 +98,7 @@ export function AuthNav() {
               <Alert>
                 <Info className="h-4 w-4" />
                 <AlertDescription>
-                  You have {storedStats.total} course status updates saved locally. 
+                  You have {storedStats.trackedCount} course status updates saved locally. 
                   Sign in or create an account to sync this data across devices.
                 </AlertDescription>
               </Alert>
@@ -131,7 +131,7 @@ export function AuthNav() {
           ) : (
             <>
               <RefreshCw className="h-3 w-3 mr-1" />
-              Sync {storedStats.total}
+              Sync {storedStats.trackedCount}
             </>
           )}
         </Button>

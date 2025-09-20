@@ -124,13 +124,29 @@ export class LocalStorageService {
     notPlayed: number;
   } {
     const statuses = this.getCourseStatuses();
-    
+    const played = statuses.filter(s => s.status === 'played').length;
+    const wantToPlay = statuses.filter(s => s.status === 'want-to-play').length;
+    const notPlayedExplicit = statuses.filter(s => s.status === 'not-played').length;
+
+    // Total is always 100 (the total number of golf courses available)
+    const total = 100;
+
+    // Calculate not played as total minus courses that are marked as played
+    const notPlayed = total - played;
+
     return {
-      total: statuses.length,
-      played: statuses.filter(s => s.status === 'played').length,
-      wantToPlay: statuses.filter(s => s.status === 'want-to-play').length,
-      notPlayed: statuses.filter(s => s.status === 'not-played').length
+      total,
+      played,
+      wantToPlay,
+      notPlayed
     };
+  }
+
+  /**
+   * Get the count of courses that have been tracked (have status changes)
+   */
+  static getTrackedCoursesCount(): number {
+    return this.getCourseStatuses().length;
   }
 
   /**
@@ -186,3 +202,4 @@ export const setStoredCourseStatus = LocalStorageService.setCourseStatus.bind(Lo
 export const hasStoredCourseData = LocalStorageService.hasStoredData.bind(LocalStorageService);
 export const clearStoredCourseData = LocalStorageService.clearAllData.bind(LocalStorageService);
 export const getStoredCourseStats = LocalStorageService.getStats.bind(LocalStorageService);
+export const getTrackedCoursesCount = LocalStorageService.getTrackedCoursesCount.bind(LocalStorageService);

@@ -140,11 +140,17 @@ export function useLocalStorage(): UseLocalStorageReturn {
  */
 export function useStoredDataStatus() {
   const [hasStoredData, setHasStoredData] = useState(LocalStorageService.hasStoredData());
-  const [storedStats, setStoredStats] = useState(LocalStorageService.getStats());
+  const [storedStats, setStoredStats] = useState(() => ({
+    ...LocalStorageService.getStats(),
+    trackedCount: LocalStorageService.getTrackedCoursesCount()
+  }));
 
   const refreshStoredData = useCallback(() => {
     setHasStoredData(LocalStorageService.hasStoredData());
-    setStoredStats(LocalStorageService.getStats());
+    setStoredStats({
+      ...LocalStorageService.getStats(),
+      trackedCount: LocalStorageService.getTrackedCoursesCount()
+    });
   }, []);
 
   useEffect(() => {
