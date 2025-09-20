@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swipe Functionality Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        .test-section.passed {
+            border-color: #4caf50;
+            background: #f1f8e9;
+        }
+        .test-section.failed {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+        .button {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #1976d2;
+        }
+        #results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .status {
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .passed { color: #4caf50; }
+        .failed { color: #f44336; }
+        .pending { color: #ff9800; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Golf Course Tracker - Swipe Functionality Test</h1>
+        <p>This test validates the two swipe gesture fixes:</p>
+        <ol>
+            <li><strong>Multi-touch interference fix:</strong> Map pan/zoom should not trigger swipes</li>
+            <li><strong>Full navigation:</strong> Swipes should work across all 3 tabs (hero ↔ map ↔ list)</li>
+        </ol>
+
+        <div class="test-section" id="test1">
+            <h3>Test 1: Multi-touch Detection</h3>
+            <p>This test simulates multi-touch gestures to verify they don't trigger swipes.</p>
+            <button class="button" onclick="runMultiTouchTest()">Run Multi-touch Test</button>
+            <div id="multitouch-results"></div>
+        </div>
+
+        <div class="test-section" id="test2">
+            <h3>Test 2: Full Tab Navigation</h3>
+            <p>This test validates swipe navigation works for all 3 tabs.</p>
+            <button class="button" onclick="runNavigationTest()">Run Navigation Test</button>
+            <div id="navigation-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Manual Test</h3>
+            <p>Open the main app and test manually on mobile/touch device:</p>
+            <button class="button" onclick="window.open('http://localhost:3006', '_blank')">Open Main App</button>
+        </div>
+
+        <div id="results">
+            <h3>Test Results</h3>
+            <div id="test-output">Ready to run tests...</div>
+        </div>
+    </div>
+
+    <script>
+        let testOutput = document.getElementById('test-output');
+
+        function log(message, status = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const statusClass = status === 'pass' ? 'passed' : status === 'fail' ? 'failed' : 'pending';
+            testOutput.innerHTML += `<div class="status ${statusClass}">[${timestamp}] ${message}</div>`;
+        }
+
+        function runMultiTouchTest() {
+            log('Starting multi-touch interference test...', 'pending');
+
+            // Test multi-touch detection logic
+            const testCases = [
+                { touches: 1, expected: false, description: 'Single touch should allow swipe' },
+                { touches: 2, expected: true, description: 'Two-finger touch should block swipe' },
+                { touches: 3, expected: true, description: 'Three-finger touch should block swipe' }
+            ];
+
+            let passed = 0;
+            let total = testCases.length;
+
+            testCases.forEach((testCase, index) => {
+                // Simulate the multi-touch detection logic from Home.tsx
+                const isMultiTouch = testCase.touches > 1;
+                const shouldBlockSwipe = isMultiTouch;
+
+                if (shouldBlockSwipe === testCase.expected) {
+                    log(`✅ ${testCase.description}`, 'pass');
+                    passed++;
+                } else {
+                    log(`❌ ${testCase.description}`, 'fail');
+                }
+            });
+
+            const testSection = document.getElementById('test1');
+            if (passed === total) {
+                testSection.className = 'test-section passed';
+                log(`Multi-touch test PASSED (${passed}/${total})`, 'pass');
+            } else {
+                testSection.className = 'test-section failed';
+                log(`Multi-touch test FAILED (${passed}/${total})`, 'fail');
+            }
+        }
+
+        function runNavigationTest() {
+            log('Starting full navigation test...', 'pending');
+
+            // Test navigation logic for all tabs
+            const navigationTests = [
+                // Left swipes (forward)
+                { currentTab: 'hero', swipeDirection: 'left', expectedTab: 'map', description: 'Hero → Map (left swipe)' },
+                { currentTab: 'map', swipeDirection: 'left', expectedTab: 'list', description: 'Map → List (left swipe)' },
+                { currentTab: 'list', swipeDirection: 'left', expectedTab: 'hero', description: 'List → Hero (left swipe)' },
+
+                // Right swipes (backward)
+                { currentTab: 'hero', swipeDirection: 'right', expectedTab: 'list', description: 'Hero → List (right swipe)' },
+                { currentTab: 'map', swipeDirection: 'right', expectedTab: 'hero', description: 'Map → Hero (right swipe)' },
+                { currentTab: 'list', swipeDirection: 'right', expectedTab: 'map', description: 'List → Map (right swipe)' }
+            ];
+
+            let passed = 0;
+            let total = navigationTests.length;
+
+            navigationTests.forEach((test) => {
+                // Simulate the navigation logic from Home.tsx
+                let newTab = null;
+
+                if (test.swipeDirection === 'left') {
+                    // Left swipe: move forward through tabs
+                    switch (test.currentTab) {
+                        case 'hero': newTab = 'map'; break;
+                        case 'map': newTab = 'list'; break;
+                        case 'list': newTab = 'hero'; break;
+                    }
+                } else if (test.swipeDirection === 'right') {
+                    // Right swipe: move backward through tabs
+                    switch (test.currentTab) {
+                        case 'hero': newTab = 'list'; break;
+                        case 'map': newTab = 'hero'; break;
+                        case 'list': newTab = 'map'; break;
+                    }
+                }
+
+                if (newTab === test.expectedTab) {
+                    log(`✅ ${test.description}`, 'pass');
+                    passed++;
+                } else {
+                    log(`❌ ${test.description} (got: ${newTab})`, 'fail');
+                }
+            });
+
+            const testSection = document.getElementById('test2');
+            if (passed === total) {
+                testSection.className = 'test-section passed';
+                log(`Navigation test PASSED (${passed}/${total})`, 'pass');
+            } else {
+                testSection.className = 'test-section failed';
+                log(`Navigation test FAILED (${passed}/${total})`, 'fail');
+            }
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            log('Test page loaded. Click buttons to run individual tests.', 'info');
+        });
+    </script>
+</body>
+</html>

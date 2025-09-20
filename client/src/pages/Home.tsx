@@ -27,6 +27,7 @@ export default function Home() {
   // Touch/swipe state for mobile navigation
   const [touchStart, setTouchStart] = useState<{x: number, y: number} | null>(null);
   const [touchEnd, setTouchEnd] = useState<{x: number, y: number} | null>(null);
+  const [isMultiTouch, setIsMultiTouch] = useState(false);
 
   const { isAuthenticated } = useAuth();
 
@@ -47,27 +48,51 @@ export default function Home() {
   const minSwipeDistance = 50;
 
   const onTouchStart = (e: React.TouchEvent) => {
-    // Only prevent default for swipe detection, don't block all touch events
-    setTouchEnd(null);
-    setTouchStart({
-      x: e.targetTouches[0].clientX,
-      y: e.targetTouches[0].clientY
-    });
-    console.log('Touch start:', e.targetTouches[0].clientX, 'isMobile:', isMobile);
+    // Detect multi-touch gestures (map pan/zoom)
+    const touchCount = e.targetTouches.length;
+    setIsMultiTouch(touchCount > 1);
+
+    // Only track single-finger gestures for swipe detection
+    if (touchCount === 1) {
+      setTouchEnd(null);
+      setTouchStart({
+        x: e.targetTouches[0].clientX,
+        y: e.targetTouches[0].clientY
+      });
+      console.log('Touch start:', e.targetTouches[0].clientX, 'isMobile:', isMobile, 'touches:', touchCount);
+    } else {
+      // Clear swipe state for multi-touch gestures
+      setTouchStart(null);
+      setTouchEnd(null);
+      console.log('Multi-touch detected, disabling swipe:', touchCount);
+    }
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    // Only track touch movement for swipe detection, don't prevent scrolling
-    setTouchEnd({
-      x: e.targetTouches[0].clientX,
-      y: e.targetTouches[0].clientY
-    });
-    const distance = touchStart ? touchStart.x - e.targetTouches[0].clientX : 0;
-    console.log('Touch move:', e.targetTouches[0].clientX, 'distance:', distance);
+    // Skip tracking for multi-touch gestures (let map handle them)
+    if (isMultiTouch || e.targetTouches.length > 1) {
+      console.log('Skipping touch move - multi-touch gesture');
+      return;
+    }
+
+    // Only track single-finger movement for swipe detection
+    if (touchStart && e.targetTouches.length === 1) {
+      setTouchEnd({
+        x: e.targetTouches[0].clientX,
+        y: e.targetTouches[0].clientY
+      });
+      const distance = touchStart.x - e.targetTouches[0].clientX;
+      console.log('Touch move:', e.targetTouches[0].clientX, 'distance:', distance);
+    }
   };
 
   const onTouchEnd = (e: React.TouchEvent) => {
-    // Only handle swipe logic, don't prevent other touch behaviors
+    // Skip processing if this was a multi-touch gesture
+    if (isMultiTouch) {
+      console.log('Skipping touch end - was multi-touch gesture');
+      setIsMultiTouch(false); // Reset for next gesture
+      return;
+    }
 
     if (!touchStart || !touchEnd) {
       console.log('Touch end: No start or end detected');
@@ -93,23 +118,53 @@ export default function Home() {
       minSwipeDistance
     });
 
-    // Only handle swipes on mobile and when not on hero tab
-    if (isMobile && activeTab !== 'hero' && isHorizontalSwipe) {
-      if (isLeftSwipe && activeTab === 'map') {
-        console.log('✅ Switching from map to list');
-        setActiveTab('list');
-        // Only prevent default when we actually handle the swipe
-        e.preventDefault();
-      } else if (isRightSwipe && activeTab === 'list') {
-        console.log('✅ Switching from list to map');
-        setActiveTab('map');
+    // Handle swipes on mobile for all tabs with full navigation
+    if (isMobile && isHorizontalSwipe) {
+      let newTab: string | null = null;
+
+      if (isLeftSwipe) {
+        // Left swipe: move forward through tabs
+        switch (activeTab) {
+          case 'hero':
+            newTab = 'map';
+            console.log('✅ Switching from hero to map');
+            break;
+          case 'map':
+            newTab = 'list';
+            console.log('✅ Switching from map to list');
+            break;
+          case 'list':
+            newTab = 'hero';
+            console.log('✅ Switching from list to hero');
+            break;
+        }
+      } else if (isRightSwipe) {
+        // Right swipe: move backward through tabs
+        switch (activeTab) {
+          case 'hero':
+            newTab = 'list';
+            console.log('✅ Switching from hero to list');
+            break;
+          case 'map':
+            newTab = 'hero';
+            console.log('✅ Switching from map to hero');
+            break;
+          case 'list':
+            newTab = 'map';
+            console.log('✅ Switching from list to map');
+            break;
+        }
+      }
+
+      if (newTab) {
+        setActiveTab(newTab);
         // Only prevent default when we actually handle the swipe
         e.preventDefault();
       } else {
-        console.log('❌ No tab switch - conditions not met');
+        console.log('❌ No tab switch - swipe not strong enough');
       }
     } else {
-      console.log('❌ Touch handling blocked - not mobile, on hero tab, or not horizontal swipe');
+      console.log('❌ Touch handling blocked - not mobile or not horizontal swipe');
     }
   };
 
