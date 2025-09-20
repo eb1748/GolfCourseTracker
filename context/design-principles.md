@@ -50,10 +50,6 @@
 *   [ ] **Strategic White Space:** Use ample negative space to improve clarity, reduce cognitive load, and create visual balance.
 *   [ ] **Clear Visual Hierarchy:** Guide the user's eye using typography (size, weight, color), spacing, and element positioning.
 *   [ ] **Consistent Alignment:** Maintain consistent alignment of elements.
-*   [ ] **Main Dashboard Layout:**
-    *   [ ] Persistent Left Sidebar: For primary navigation between modules.
-    *   [ ] Content Area: Main space for module-specific interfaces.
-    *   [ ] (Optional) Top Bar: For global search, user profile, notifications.
 *   [ ] **Mobile-First Considerations:** Ensure the design adapts gracefully to smaller screens.
 
 ## IV. Interaction Design & Animations
