@@ -24,6 +24,10 @@ export default function Home() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
+  // Touch/swipe state for mobile navigation
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
   const { isAuthenticated } = useAuth();
 
   // Mobile detection useEffect
@@ -36,6 +40,35 @@ export default function Home() {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // Swipe detection constants and functions
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    // Only handle swipes on mobile and when not on hero tab
+    if (isMobile && activeTab !== 'hero') {
+      if (isLeftSwipe && activeTab === 'map') {
+        setActiveTab('list');
+      } else if (isRightSwipe && activeTab === 'list') {
+        setActiveTab('map');
+      }
+    }
+  };
 
   // Use the custom courses hook with filters
   const {
@@ -120,7 +153,14 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-6">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+        <Tabs
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className="w-full"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
           <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="hero" data-testid="tab-hero">
               <BarChart3 className="w-4 h-4 mr-2" />
@@ -213,18 +253,34 @@ export default function Home() {
           </TabsContent>
 
           <TabsContent value="list" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-              {/* Sidebar with filters */}
-              <div className="lg:col-span-1">
-                <FilterControls
-                  activeFilter={activeFilter}
-                  onFilterChange={setActiveFilter}
-                  activeAccessFilter={activeAccessFilter}
-                  onAccessFilterChange={setActiveAccessFilter}
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  stats={calculatedStats}
-                />
+            {/* Mobile filter toggle button */}
+            <div className="lg:hidden mb-4">
+              <Button
+                variant="outline"
+                onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+                className="w-full"
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Filters {mobileFiltersOpen ? '(Hide)' : '(Show)'}
+              </Button>
+            </div>
+
+            <div className="flex flex-col lg:grid lg:grid-cols-4 gap-4">
+              {/* Collapsible filters on mobile */}
+              <div className={`lg:col-span-1 ${mobileFiltersOpen ? 'block' : 'hidden'} lg:block`}>
+                <ScrollArea className="h-auto lg:h-[calc(100vh-200px)]">
+                  <div className="pr-4">
+                    <FilterControls
+                      activeFilter={activeFilter}
+                      onFilterChange={setActiveFilter}
+                      activeAccessFilter={activeAccessFilter}
+                      onAccessFilterChange={setActiveAccessFilter}
+                      searchQuery={searchQuery}
+                      onSearchChange={setSearchQuery}
+                      stats={calculatedStats}
+                    />
+                  </div>
+                </ScrollArea>
               </div>
               
               {/* Course List */}

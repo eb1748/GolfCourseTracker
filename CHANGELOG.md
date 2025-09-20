@@ -10,13 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Mobile UI improvements documentation in `feature_dev_markdowns/Mobile_UI_improvements.md`
 - Comprehensive design review recommendations for mobile optimization
-- Collapsible mobile filter system with toggle button
-- Mobile-first responsive layout for map view
+- Collapsible mobile filter system with toggle button for both map and list views
+- Mobile-first responsive layout for map and list views
 - Enhanced touch targets meeting WCAG 44px minimum requirements
 - Mobile-specific marker scaling for better touch interaction
 - Responsive popup positioning preventing overflow on mobile
 - Mobile detection and state management
 - CSS optimizations for mobile touch performance
+- Mobile swipe functionality between map view and list view (50px minimum distance)
+- Touch gesture navigation matching overview/map swipe patterns
 
 ### Fixed
 - Backend user stats calculation for authenticated users
@@ -30,10 +32,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - FilterControls component: Single-column layout on mobile with improved spacing
-- Home component: Mobile-first flexbox layout with collapsible filters
+- Home component: Mobile-first flexbox layout with collapsible filters for both map and list views
 - GolfCourseMap component: Enhanced mobile touch handling and marker scaling
 - Button sizing from "sm" to "default" for better mobile touch targets
 - Map initialization with mobile-specific touch optimizations
+- List view layout: Added collapsible mobile filter system matching map view
+- Touch event handling: Added swipe detection for tab navigation on mobile
 
 ### Technical
 - Enhanced LocalStorageService with `getTrackedCoursesCount()` method
@@ -41,6 +45,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated calculateIconScale function with mobile parameter
 - Implemented responsive popup positioning classes
 - Added mobile-optimized CSS media queries for touch targets
+- Touch/swipe state management with touchStart, touchEnd tracking
+- Swipe detection logic with 50px minimum distance threshold
+- Touch event handlers (onTouchStart, onTouchMove, onTouchEnd) on Tabs component
+- Mobile filter toggle state sharing between map and list views
 
 ## [2025-09-20] - Course Statistics Fix
 
