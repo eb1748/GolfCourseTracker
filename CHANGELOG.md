@@ -32,6 +32,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mobile swipe functionality interference from Radix UI components
 - Touch event propagation issues preventing swipe detection
 - Mobile detection to include actual touch capability verification
+- Critical mobile functionality freeze where users couldn't scroll, click, or interact
+- Overly aggressive preventDefault() calls blocking all mobile touch interactions
+- Touch action restrictions preventing normal mobile gestures and scrolling
 
 ### Changed
 - FilterControls component: Single-column layout on mobile with improved spacing
@@ -56,6 +59,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added preventDefault() calls to prevent browser default touch behaviors
 - Dedicated swipe area wrapper with `touchAction: 'pan-x'` for horizontal panning
 - Comprehensive debug logging for touch event tracking and swipe detection
+- Enhanced touch coordinate tracking with x/y position objects instead of single values
+- Intelligent gesture differentiation between horizontal swipes and vertical scrolling
+- Selective preventDefault() usage - only called when actually handling swipe gestures
+- Changed touchAction from 'pan-x' to 'auto' to restore all normal mobile interactions
 
 ## [2025-09-20] - Course Statistics Fix
 

@@ -25,8 +25,8 @@ export default function Home() {
   const [isMobile, setIsMobile] = useState(false);
 
   // Touch/swipe state for mobile navigation
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [touchStart, setTouchStart] = useState<{x: number, y: number} | null>(null);
+  const [touchEnd, setTouchEnd] = useState<{x: number, y: number} | null>(null);
 
   const { isAuthenticated } = useAuth();
 
@@ -47,36 +47,45 @@ export default function Home() {
   const minSwipeDistance = 50;
 
   const onTouchStart = (e: React.TouchEvent) => {
-    // Prevent default behaviors that might interfere
-    e.preventDefault();
+    // Only prevent default for swipe detection, don't block all touch events
     setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+    setTouchStart({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY
+    });
     console.log('Touch start:', e.targetTouches[0].clientX, 'isMobile:', isMobile);
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    // Prevent scrolling while swiping
-    e.preventDefault();
-    setTouchEnd(e.targetTouches[0].clientX);
-    const distance = touchStart ? touchStart - e.targetTouches[0].clientX : 0;
+    // Only track touch movement for swipe detection, don't prevent scrolling
+    setTouchEnd({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY
+    });
+    const distance = touchStart ? touchStart.x - e.targetTouches[0].clientX : 0;
     console.log('Touch move:', e.targetTouches[0].clientX, 'distance:', distance);
   };
 
   const onTouchEnd = (e: React.TouchEvent) => {
-    // Prevent any default behavior
-    e.preventDefault();
+    // Only handle swipe logic, don't prevent other touch behaviors
 
     if (!touchStart || !touchEnd) {
       console.log('Touch end: No start or end detected');
       return;
     }
 
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
+    const horizontalDistance = touchStart.x - touchEnd.x;
+    const verticalDistance = Math.abs(touchStart.y - touchEnd.y);
+
+    // Only consider horizontal swipes (not vertical scrolling)
+    const isHorizontalSwipe = Math.abs(horizontalDistance) > verticalDistance;
+    const isLeftSwipe = horizontalDistance > minSwipeDistance;
+    const isRightSwipe = horizontalDistance < -minSwipeDistance;
 
     console.log('Touch end:', {
-      distance,
+      horizontalDistance,
+      verticalDistance,
+      isHorizontalSwipe,
       isLeftSwipe,
       isRightSwipe,
       activeTab,
@@ -85,18 +94,22 @@ export default function Home() {
     });
 
     // Only handle swipes on mobile and when not on hero tab
-    if (isMobile && activeTab !== 'hero') {
+    if (isMobile && activeTab !== 'hero' && isHorizontalSwipe) {
       if (isLeftSwipe && activeTab === 'map') {
         console.log('✅ Switching from map to list');
         setActiveTab('list');
+        // Only prevent default when we actually handle the swipe
+        e.preventDefault();
       } else if (isRightSwipe && activeTab === 'list') {
         console.log('✅ Switching from list to map');
         setActiveTab('map');
+        // Only prevent default when we actually handle the swipe
+        e.preventDefault();
       } else {
         console.log('❌ No tab switch - conditions not met');
       }
     } else {
-      console.log('❌ Touch handling blocked - not mobile or on hero tab');
+      console.log('❌ Touch handling blocked - not mobile, on hero tab, or not horizontal swipe');
     }
   };
 
@@ -189,7 +202,7 @@ export default function Home() {
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
-          style={{ touchAction: 'pan-x' }} // Allow horizontal panning only
+          style={{ touchAction: 'auto' }} // Allow all touch actions
         >
           <Tabs
             value={activeTab}
