@@ -224,11 +224,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = (req as any).userId; // Optional - from session or undefined
       const courses = await getStorage().getCoursesWithStatus(userId);
 
+      const played = courses.filter(c => c.status === 'played').length;
+      const wantToPlay = courses.filter(c => c.status === 'want-to-play').length;
+
       const stats = {
-        total: courses.length,
-        played: courses.filter(c => c.status === 'played').length,
-        wantToPlay: courses.filter(c => c.status === 'want-to-play').length,
-        notPlayed: courses.filter(c => c.status === 'not-played').length,
+        total: 100, // Total number of golf courses available
+        played: played,
+        wantToPlay: wantToPlay,
+        notPlayed: 100 - played, // Not played = total minus played courses only
       };
 
       res.json(stats);
@@ -237,10 +240,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Fallback stats when database is unavailable
       const fallbackStats = {
-        total: 0,
+        total: 100,
         played: 0,
         wantToPlay: 0,
-        notPlayed: 0,
+        notPlayed: 100,
       };
 
       res.json(fallbackStats);
