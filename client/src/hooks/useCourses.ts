@@ -98,11 +98,7 @@ export function useCourses(options: UseCoursesOptions = {}): UseCoursesReturn {
       };
     },
     onSuccess: () => {
-      toast({
-        title: "Status Updated",
-        description: "Course status updated successfully.",
-        variant: "default",
-      });
+      // No notification needed for successful status updates
     },
     onError: (error, variables, context) => {
       // Rollback optimistic updates on error
