@@ -174,7 +174,7 @@ export default function Home() {
               
               {/* Map */}
               <div className="lg:col-span-3">
-                <Card className="h-[calc(100svh-160px)] md:h-[calc(100dvh-180px)] lg:h-[calc(100vh-200px)]">
+                <Card className="h-[calc(100svh-160px)] md:h-[calc(100svh-180px)] lg:h-[calc(100vh-200px)]">
                   <CardContent className="p-0 h-full">
                     <GolfCourseMap
                       courses={filteredCourses}

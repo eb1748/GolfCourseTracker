@@ -214,12 +214,28 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
         center: [39.8283, -98.5795], // Center of US
         zoom: 4,
         zoomControl: true,
-        scrollWheelZoom: true
+        scrollWheelZoom: true,
+        // Enhanced touch support for iOS
+        tap: true,
+        tapTolerance: 15,
+        touchZoom: true,
+        bounceAtZoomLimits: false,
+        // Improve mobile performance
+        preferCanvas: true
       });
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
+        attribution: '© OpenStreetMap contributors',
+        // Mobile optimizations
+        maxZoom: 18,
+        tileSize: 256,
+        zoomOffset: 0
       }).addTo(mapInstanceRef.current);
+
+      // Custom zoom control positioned for mobile
+      if (mapInstanceRef.current.zoomControl) {
+        mapInstanceRef.current.zoomControl.setPosition('bottomright');
+      }
 
       // Add zoom event listener to update icon sizes
       mapInstanceRef.current.on('zoomend', () => {
