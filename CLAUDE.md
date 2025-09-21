@@ -21,7 +21,7 @@
 - **Drizzle ORM**: Database schema and migrations
 - **Zod**: Runtime validation and type safety
 - **React Hook Form**: Form handling with validation
-- **Leaflet**: Interactive maps for golf course locations
+- **Leaflet**: Interactive maps with custom clustering system
 - **Express Rate Limit**: API protection
 - **Express Session**: Session management
 
@@ -111,7 +111,7 @@ PORT=3000  # Optional, defaults to 3000
 
 ### Frontend Core
 - `client/src/components/AuthForms.tsx` - **CRITICAL**: Login/signup with username validation
-- `client/src/components/GolfCourseMap.tsx` - Interactive map component with mobile optimization
+- `client/src/components/GolfCourseMap.tsx` - **CRITICAL**: Interactive map with custom clustering algorithm
 - `client/src/pages/Home.tsx` - **CRITICAL**: Main page with responsive map height system
 - `client/src/data/golfCourses.ts` - Golf course data (100 courses)
 
@@ -266,9 +266,11 @@ npx drizzle-kit studio  # Opens web UI
 - Performance monitoring and engagement metrics
 
 ### Interactive Features
-- Leaflet-based interactive golf course mapping
+- Leaflet-based interactive golf course mapping with custom clustering
 - Advanced filtering by state, rating, and access type
 - Real-time progress indicators and user status tracking
+- Geographic-based clustering with zoom-dependent behavior
+- Water body detection and outlier course handling
 
 ## Performance Considerations
 
@@ -280,7 +282,8 @@ npx drizzle-kit studio  # Opens web UI
 ### Frontend
 - **Code Splitting**: Vite handles automatic code splitting
 - **Asset Optimization**: Vite optimizes bundles for production
-- **Map Performance**: Efficient rendering of 100+ golf course markers
+- **Map Performance**: Custom clustering algorithm for efficient rendering of 100+ golf course markers
+- **Geographic Optimization**: Pure geographic distance calculations without screen projection distortion
 
 ## Security Notes
 
@@ -335,6 +338,49 @@ npx drizzle-kit studio  # Opens web UI
 
 5. **Test**: Visit `http://localhost:3000` and test user registration with username
 
+## Map Clustering System
+
+### Custom Clustering Implementation
+The application uses a custom clustering algorithm instead of Leaflet.markercluster to ensure accurate geographic positioning.
+
+#### Key Features
+- **Pure Geographic Distance**: Uses latitude/longitude calculations without screen projection distortion
+- **Progressive Distance Limits**: Zoom-dependent clustering thresholds (200km→100km→50km→25km→10km→0km)
+- **Water Body Detection**: Prevents clusters over oceans, lakes, and major water bodies
+- **Outlier Handling**: Canadian and international courses displayed as individual markers
+- **Central Course Selection**: Distance-based algorithm finds optimal cluster center for navigation
+
+#### Technical Implementation
+```typescript
+// Custom clustering algorithm in GolfCourseMap.tsx
+const createCustomClusters = (
+  courses: GolfCourseWithStatus[],
+  zoom: number,
+  mapBounds: L.LatLngBounds,
+  mapInstance: L.Map
+): CustomCluster[] => {
+  // Pure geographic distance clustering with zoom-dependent limits
+}
+
+// Progressive distance limits
+const getMaxClusterDistance = (zoom: number): number => {
+  if (zoom <= 5) return 200000;   // 200km max
+  if (zoom <= 6) return 100000;   // 100km max
+  if (zoom <= 7) return 50000;    // 50km max
+  // ... progressive reduction
+}
+```
+
+#### Architecture Benefits
+- **Accurate Positioning**: Clusters appear at actual golf course locations
+- **Performance Optimized**: Efficient geographic calculations without DOM manipulation
+- **Scalable**: Handles 100+ courses with smooth rendering at all zoom levels
+- **Maintainable**: Single algorithm controls all clustering behavior
+
+#### Dependencies Removed
+- `leaflet.markercluster` - Replaced with custom implementation
+- `@types/leaflet.markercluster` - No longer needed
+
 ## Support & Documentation
 
 - **Database Schema**: See `shared/schema.ts` for complete schema
@@ -342,3 +388,4 @@ npx drizzle-kit studio  # Opens web UI
 - **Feature Documentation**: See `feature_dev_markdowns/` for detailed feature specs
 - **Change History**: See `CHANGELOG.md` for project history and release notes
 - **Migration Documentation**: See `username_migration_plan.md` for username system details
+- **Clustering Documentation**: See `cluster_fix.md` for detailed clustering implementation

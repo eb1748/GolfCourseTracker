@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import 'leaflet.markercluster/dist/MarkerCluster.css';
-import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
-import 'leaflet.markercluster';
 import type { GolfCourseWithStatus, CourseStatus, AccessType } from '@shared/schema';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -159,17 +156,17 @@ const createGolfPinIcon = (accessType: AccessType, status: CourseStatus, scale: 
   });
 };
 
-// Custom cluster icon creation with golf theme and improved positioning
-const createClusterIcon = (cluster: L.MarkerCluster): L.DivIcon => {
-  const childCount = cluster.getChildCount();
-  const childMarkers = cluster.getAllChildMarkers();
+// Custom cluster data structure
+interface CustomCluster {
+  id: string;
+  courses: GolfCourseWithStatus[];
+  centerPosition: L.LatLng;
+  marker?: L.Marker;
+}
 
-  // Store the most central course position for proper click handling
-  if (childMarkers.length > 1) {
-    const centralPosition = findMostCentralCourse(childMarkers);
-    (cluster as any)._centralPosition = centralPosition;
-    console.log(`🎯 Stored central position for cluster with ${childCount} courses: ${centralPosition.lat.toFixed(6)}, ${centralPosition.lng.toFixed(6)}`);
-  }
+// Custom cluster icon creation with golf theme - now for custom clusters
+const createCustomClusterIcon = (courses: GolfCourseWithStatus[]): L.DivIcon => {
+  const childCount = courses.length;
 
   // Determine cluster size based on child count - smaller thresholds for better grouping
   let size: 'small' | 'medium' | 'large';
@@ -198,241 +195,466 @@ const createClusterIcon = (cluster: L.MarkerCluster): L.DivIcon => {
   });
 };
 
-// Create land-validated cluster positioning function
-// Most central course positioning - uses actual course coordinates to avoid projection issues
+// Find most central course positioning - uses actual course coordinates to avoid projection issues
 // Finds the course with minimum total distance to all other courses in the cluster
-const findMostCentralCourse = (markers: L.Marker[]): L.LatLng => {
-  if (markers.length === 0) return L.latLng(0, 0);
-  if (markers.length === 1) return markers[0].getLatLng();
+const findMostCentralCourse = (courses: GolfCourseWithStatus[]): L.LatLng => {
+  if (courses.length === 0) return L.latLng(0, 0);
+  if (courses.length === 1) {
+    return L.latLng(parseFloat(courses[0].latitude), parseFloat(courses[0].longitude));
+  }
 
-  let centralMarker = markers[0];
+  let centralCourse = courses[0];
   let minTotalDistance = Infinity;
 
-  markers.forEach(candidateMarker => {
-    // Calculate total distance from this candidate to all other markers
-    const totalDistance = markers.reduce((sum, otherMarker) => {
-      if (candidateMarker === otherMarker) return sum;
-      return sum + candidateMarker.getLatLng().distanceTo(otherMarker.getLatLng());
+  courses.forEach(candidateCourse => {
+    const candidatePos = L.latLng(parseFloat(candidateCourse.latitude), parseFloat(candidateCourse.longitude));
+
+    // Calculate total distance from this candidate to all other courses
+    const totalDistance = courses.reduce((sum, otherCourse) => {
+      if (candidateCourse === otherCourse) return sum;
+      const otherPos = L.latLng(parseFloat(otherCourse.latitude), parseFloat(otherCourse.longitude));
+      return sum + candidatePos.distanceTo(otherPos);
     }, 0);
 
     // Update if this candidate is more central
     if (totalDistance < minTotalDistance) {
       minTotalDistance = totalDistance;
-      centralMarker = candidateMarker;
+      centralCourse = candidateCourse;
     }
   });
 
-  const centralPosition = centralMarker.getLatLng();
-  console.log(`🎯 Most central course selected for ${markers.length} markers: ${centralPosition.lat.toFixed(6)}, ${centralPosition.lng.toFixed(6)} (total distance: ${minTotalDistance.toFixed(0)}m)`);
-
-  return centralPosition;
+  return L.latLng(parseFloat(centralCourse.latitude), parseFloat(centralCourse.longitude));
 };
 
-// Anti-collision system for overlapping markers at close zoom levels
-const detectOverlappingMarkers = (markers: L.Marker[], zoom: number): { marker: L.Marker, conflicts: L.Marker[] }[] => {
-  const iconSize = calculateIconScale(zoom, window.innerWidth < 1024) * 25; // Base icon size scaled
-  const minDistance = iconSize * 1.5; // Minimum distance to avoid overlap
-  const overlaps: { marker: L.Marker, conflicts: L.Marker[] }[] = [];
+// Get cluster radius based on zoom level
+const getClusterRadius = (zoom: number): number => {
+  // Progressive declustering - same thresholds as before
+  if (zoom <= 3) return 80;  // World view clustering
+  if (zoom <= 4) return 60;  // Continental clustering
+  if (zoom <= 5) return 40;  // Regional clustering
+  if (zoom <= 6) return 25;  // State-level clustering
+  if (zoom <= 7) return 18;  // Metropolitan clustering
+  if (zoom <= 8) return 12;  // City-level clustering
+  if (zoom <= 9) return 8;   // Local area clustering
+  if (zoom <= 10) return 5;  // Neighborhood clustering
+  if (zoom <= 11) return 3;  // Close-up separation
+  return 0; // Individual markers only at maximum zoom
+};
 
-  markers.forEach(marker => {
-    const conflicts = markers.filter(other => {
-      if (marker === other) return false;
-      const distance = marker.getLatLng().distanceTo(other.getLatLng());
-      return distance < minDistance;
+// Get maximum geographic distance for clustering (in meters) based on zoom level
+const getMaxClusterDistance = (zoom: number): number => {
+  // Prevent cross-continental clustering by limiting max geographic distance
+  if (zoom <= 3) return 800000;   // 800km max - prevents Alaska/Continental US clustering
+  if (zoom <= 4) return 500000;   // 500km max - regional clustering only
+  if (zoom <= 5) return 200000;   // 200km max - multi-state regions (reduced from 300km)
+  if (zoom <= 6) return 100000;   // 100km max - state-level clusters (reduced from 150km)
+  if (zoom <= 7) return 50000;    // 50km max - metropolitan areas (increased from 30km for better grouping)
+  if (zoom <= 8) return 15000;    // 15km max - city districts
+  if (zoom <= 9) return 8000;     // 8km max - neighborhoods
+  if (zoom <= 10) return 4000;    // 4km max - local areas
+  if (zoom <= 11) return 2000;    // 2km max - very local areas
+  return 1000; // 1km max for closest zoom levels
+};
+
+// Detect if coordinates are likely over water bodies
+const isOverWater = (lat: number, lng: number, zoom: number): boolean => {
+  // Major water body exclusions for common problem areas
+
+  // Atlantic Ocean off East Coast
+  if (lat >= 35 && lat <= 45 && lng >= -75 && lng <= -65) return true;
+
+  // Gulf of Mexico
+  if (lat >= 24 && lat <= 30 && lng >= -97 && lng <= -80) return true;
+
+  // Pacific Ocean off West Coast
+  if (lat >= 32 && lat <= 48 && lng >= -130 && lng <= -115) return true;
+
+  // Great Lakes (approximate)
+  if (lat >= 41 && lat <= 49 && lng >= -92 && lng <= -76) {
+    // Lake Superior
+    if (lat >= 46 && lat <= 49 && lng >= -92 && lng <= -84) return true;
+    // Lake Michigan
+    if (lat >= 41 && lat <= 46 && lng >= -88 && lng <= -84) return true;
+    // Lake Huron
+    if (lat >= 43 && lat <= 46 && lng >= -85 && lng <= -79) return true;
+    // Lake Erie
+    if (lat >= 41 && lat <= 43 && lng >= -83 && lng <= -78) return true;
+    // Lake Ontario
+    if (lat >= 43 && lat <= 44 && lng >= -80 && lng <= -76) return true;
+  }
+
+  // San Francisco Bay Area (detailed for close zoom)
+  if (zoom >= 7 && lat >= 37.3 && lat <= 38.1 && lng >= -122.6 && lng <= -121.8) {
+    // San Francisco Bay
+    if (lat >= 37.4 && lat <= 37.9 && lng >= -122.5 && lng <= -122.0) return true;
+  }
+
+  // New York Harbor/Long Island Sound (detailed for close zoom)
+  if (zoom >= 7 && lat >= 40.4 && lat <= 41.2 && lng >= -74.5 && lng <= -72.8) {
+    // New York Harbor
+    if (lat >= 40.6 && lat <= 40.8 && lng >= -74.2 && lng <= -73.8) return true;
+    // Long Island Sound
+    if (lat >= 40.8 && lat <= 41.1 && lng >= -73.8 && lng <= -72.8) return true;
+  }
+
+  // Chesapeake Bay
+  if (zoom >= 6 && lat >= 36.5 && lat <= 39.5 && lng >= -76.5 && lng <= -75.5) return true;
+
+  return false;
+};
+
+// Enhanced bounds validation based on zoom level
+const isValidClusterPosition = (lat: number, lng: number, zoom: number): boolean => {
+  // Continental US bounds (broad validation)
+  const isWithinContinentalBounds = lat >= 20 && lat <= 55 && lng >= -130 && lng <= -60;
+
+  if (!isWithinContinentalBounds) return false;
+
+  // Check if over water
+  if (isOverWater(lat, lng, zoom)) return false;
+
+  // Additional close-zoom validation for metropolitan areas
+  if (zoom >= 8) {
+    // Tighter bounds for close zoom levels to avoid edge cases
+    const isWithinTightBounds = lat >= 25 && lat <= 50 && lng >= -125 && lng <= -65;
+    return isWithinTightBounds;
+  }
+
+  return true;
+};
+
+// Calculate the maximum spread (distance) within a cluster
+const calculateClusterSpread = (courses: GolfCourseWithStatus[]): number => {
+  if (courses.length <= 1) return 0;
+
+  let maxDistance = 0;
+  for (let i = 0; i < courses.length; i++) {
+    for (let j = i + 1; j < courses.length; j++) {
+      const pos1 = L.latLng(parseFloat(courses[i].latitude), parseFloat(courses[i].longitude));
+      const pos2 = L.latLng(parseFloat(courses[j].latitude), parseFloat(courses[j].longitude));
+      const distance = pos1.distanceTo(pos2);
+      maxDistance = Math.max(maxDistance, distance);
+    }
+  }
+  return maxDistance;
+};
+
+// Enhanced cluster validation for intermediate zoom levels
+const isValidClusterForZoom = (clusterCourses: GolfCourseWithStatus[], zoom: number): boolean => {
+  // For intermediate zoom levels (5-7), add specific validation
+  if (zoom >= 5 && zoom <= 7) {
+    const clusterSpread = calculateClusterSpread(clusterCourses);
+    const maxDistance = getMaxClusterDistance(zoom);
+
+    // Ensure cluster spread doesn't exceed 80% of max distance
+    const isReasonableSpread = clusterSpread <= maxDistance * 0.8;
+
+    // For zoom 5-7, clusters with only 2 courses shouldn't be too spread out
+    if (clusterCourses.length === 2) {
+      const spreadLimit = zoom === 5 ? 150000 : zoom === 6 ? 75000 : 40000; // Progressive limits
+      return clusterSpread <= spreadLimit;
+    }
+
+    return isReasonableSpread;
+  }
+
+  return true; // No additional validation for other zoom levels
+};
+
+// Custom clustering algorithm - groups courses based on screen distance
+const createCustomClusters = (
+  courses: GolfCourseWithStatus[],
+  zoom: number,
+  mapBounds: L.LatLngBounds,
+  mapInstance: L.Map
+): CustomCluster[] => {
+  const radius = getClusterRadius(zoom);
+
+  // If radius is 0, no clustering
+  if (radius === 0 || zoom >= 15) {
+    return courses.map((course, index) => ({
+      id: `single-${course.id}-${index}`,
+      courses: [course],
+      centerPosition: L.latLng(parseFloat(course.latitude), parseFloat(course.longitude))
+    }));
+  }
+
+  const clusters: CustomCluster[] = [];
+  const used = new Set<string>();
+
+  courses.forEach((course, index) => {
+    if (used.has(course.id)) return;
+
+    const coursePos = L.latLng(parseFloat(course.latitude), parseFloat(course.longitude));
+    const clusterCourses: GolfCourseWithStatus[] = [course];
+    used.add(course.id);
+
+    // Find nearby courses within radius using proper map projection
+    courses.forEach((otherCourse, otherIndex) => {
+      if (otherIndex <= index || used.has(otherCourse.id)) return;
+
+      const otherPos = L.latLng(parseFloat(otherCourse.latitude), parseFloat(otherCourse.longitude));
+
+      // Calculate actual distance between courses
+      const distance = coursePos.distanceTo(otherPos);
+
+      // Get maximum allowed distance for this zoom level
+      const maxDistance = getMaxClusterDistance(zoom);
+
+      // Add maximum screen radius limit to prevent excessive visual clustering
+      const maxScreenRadius = zoom <= 5 ? 150 : zoom <= 8 ? 100 : 60; // pixels
+      const isReasonableScreenRadius = radius <= maxScreenRadius;
+
+      // Use ONLY geographic distance for clustering decisions (eliminates projection distortion)
+      if (distance <= maxDistance && isReasonableScreenRadius) {
+        clusterCourses.push(otherCourse);
+        used.add(otherCourse.id);
+      }
     });
 
-    if (conflicts.length > 0) {
-      overlaps.push({ marker, conflicts });
+    // Create cluster with central position and validate bounds
+    const centerPosition = findMostCentralCourse(clusterCourses);
+
+    // Enhanced validation: bounds + water detection + zoom-specific validation
+    const lat = centerPosition.lat;
+    const lng = centerPosition.lng;
+    const isValidPosition = isValidClusterPosition(lat, lng, zoom);
+
+    // Additional validation: ensure cluster center is within reasonable distance of all member courses
+    const maxDistanceFromCenter = getMaxClusterDistance(zoom) * 0.75; // 75% of max clustering distance
+    const isReasonableCenter = clusterCourses.every(course => {
+      const coursePos = L.latLng(parseFloat(course.latitude), parseFloat(course.longitude));
+      const distanceFromCenter = centerPosition.distanceTo(coursePos);
+      return distanceFromCenter <= maxDistanceFromCenter;
+    });
+
+    // Enhanced validation: ensure cluster center is close to at least one actual course
+    const hasNearbyActualCourse = clusterCourses.some(course => {
+      const coursePos = L.latLng(parseFloat(course.latitude), parseFloat(course.longitude));
+      return centerPosition.distanceTo(coursePos) <= maxDistanceFromCenter * 0.5;
+    });
+
+    // Enhanced validation for intermediate zoom levels (5-7)
+    const isValidForZoom = isValidClusterForZoom(clusterCourses, zoom);
+
+    if (isValidPosition && isReasonableCenter && hasNearbyActualCourse && isValidForZoom) {
+      clusters.push({
+        id: `cluster-${index}-${clusterCourses.length}`,
+        courses: clusterCourses,
+        centerPosition
+      });
+    } else {
+      // If cluster center is invalid, create individual markers for each course
+      clusterCourses.forEach((invalidCourse, courseIndex) => {
+        clusters.push({
+          id: `fallback-${invalidCourse.id}-${courseIndex}`,
+          courses: [invalidCourse],
+          centerPosition: L.latLng(parseFloat(invalidCourse.latitude), parseFloat(invalidCourse.longitude))
+        });
+      });
     }
   });
 
-  return overlaps;
+  return clusters;
 };
 
-const calculateAntiCollisionOffset = (
+// Create common marker event handlers
+const attachMarkerEventHandlers = (
   marker: L.Marker,
-  conflicts: L.Marker[],
-  index: number,
-  zoom: number
-): { lat: number, lng: number } => {
-  const iconSize = calculateIconScale(zoom, window.innerWidth < 1024) * 25;
-  const separationDistance = iconSize * 2; // 2x icon size separation
-
-  // Calculate offset in radial pattern to avoid overlaps
-  const angle = (2 * Math.PI * index) / (conflicts.length + 1);
-  const offsetMeters = separationDistance;
-
-  // Convert meters to degrees (approximate)
-  const latOffset = (offsetMeters / 111000) * Math.cos(angle); // ~111km per degree lat
-  const lngOffset = (offsetMeters / (111000 * Math.cos(marker.getLatLng().lat * Math.PI / 180))) * Math.sin(angle);
-
-  return { lat: latOffset, lng: lngOffset };
-};
-
-const applyAntiCollisionPositioning = (markers: L.Marker[], zoom: number): { marker: L.Marker, originalPosition: L.LatLng, newPosition: L.LatLng }[] => {
-  // Only apply anti-collision at very close zoom levels
-  if (zoom < 11) return [];
-
-  const overlaps = detectOverlappingMarkers(markers, zoom);
-  const displacements: { marker: L.Marker, originalPosition: L.LatLng, newPosition: L.LatLng }[] = [];
-
-  overlaps.forEach(({ marker, conflicts }, index) => {
-    const originalPosition = marker.getLatLng();
-    const offset = calculateAntiCollisionOffset(marker, conflicts, index, zoom);
-    const newPosition = L.latLng(
-      originalPosition.lat + offset.lat,
-      originalPosition.lng + offset.lng
-    );
-
-    // Apply the offset to the marker
-    marker.setLatLng(newPosition);
-    displacements.push({ marker, originalPosition, newPosition });
-
-    console.log(`🚧 Anti-collision: Moved ${marker.options.alt || 'marker'} by ${offset.lat.toFixed(6)}, ${offset.lng.toFixed(6)}`);
-  });
-
-  return displacements;
-};
-
-// SVG Leader Lines for displaced markers
-const createLeaderLine = (
-  originalPosition: L.LatLng,
-  newPosition: L.LatLng,
-  map: L.Map
-): L.Polyline => {
-  const leaderLine = L.polyline(
-    [originalPosition, newPosition],
-    {
-      color: '#d4af37', // Golf-themed gold color
-      weight: 2,
-      opacity: 0.7,
-      dashArray: '5, 8', // Dotted line pattern
-      className: 'golf-leader-line'
+  course: GolfCourseWithStatus,
+  hoverTimeoutRef: React.MutableRefObject<NodeJS.Timeout | null>,
+  setPreviewCourse: (course: GolfCourseWithStatus | null) => void,
+  setPreviewPosition: (position: { x: number, y: number } | null) => void,
+  setSelectedCourse: (course: GolfCourseWithStatus | null) => void
+) => {
+  // Click handler for full details popup
+  marker.on('click', (e) => {
+    // Clear any hover preview immediately
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
     }
-  );
+    setPreviewCourse(null);
+    setPreviewPosition(null);
 
-  leaderLine.addTo(map);
-  console.log(`🔗 Leader line created from ${originalPosition.lat.toFixed(6)}, ${originalPosition.lng.toFixed(6)} to ${newPosition.lat.toFixed(6)}, ${newPosition.lng.toFixed(6)}`);
-
-  return leaderLine;
-};
-
-const addLeaderLines = (
-  displacements: { marker: L.Marker, originalPosition: L.LatLng, newPosition: L.LatLng }[],
-  map: L.Map,
-  leaderLinesRef: React.MutableRefObject<L.Polyline[]>
-): void => {
-  // Clear existing leader lines
-  removeLeaderLines(map, leaderLinesRef);
-
-  // Create new leader lines for displaced markers
-  displacements.forEach(({ originalPosition, newPosition }) => {
-    const leaderLine = createLeaderLine(originalPosition, newPosition, map);
-    leaderLinesRef.current.push(leaderLine);
+    playClickSound();
+    setSelectedCourse(course);
+    // Stop event propagation to prevent map clicks
+    L.DomEvent.stopPropagation(e);
   });
 
-  console.log(`📏 Added ${displacements.length} leader lines`);
-};
+  // Hover handlers for preview
+  marker.on('mouseover', (e) => {
+    // Clear any existing timeout
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
 
-const removeLeaderLines = (
-  map: L.Map,
-  leaderLinesRef: React.MutableRefObject<L.Polyline[]>
-): void => {
-  leaderLinesRef.current.forEach(line => {
-    map.removeLayer(line);
-  });
-  leaderLinesRef.current = [];
-  console.log(`🧹 Removed all leader lines`);
-};
+    // Set timeout for 175ms delay
+    hoverTimeoutRef.current = setTimeout(() => {
+      // Check if popup is open at the time of showing preview
+      const isPopupOpen = document.querySelector('.golf-popup-card') !== null;
+      if (isPopupOpen) return;
 
-const createClusterGroup = (
-  iconCreateFunction: (cluster: L.MarkerCluster) => L.DivIcon,
-  mapInstance: L.Map
-): L.MarkerClusterGroup => {
-  // Create a standard cluster group with custom icon function
-  const clusterGroup = L.markerClusterGroup({
-    iconCreateFunction: iconCreateFunction,
-    spiderfyOnMaxZoom: true,
-    showCoverageOnHover: true,
-    zoomToBoundsOnClick: false, // Disable default to implement custom behavior
-    spiderfyDistanceMultiplier: 1.5,
-    chunkedLoading: true,
-    chunkProgress: null,
-    maxClusterRadius: (zoom: number) => {
-      // Progressive declustering - more aggressive separation at close zoom levels
-      // Ensures courses like Winged Foot separate naturally without anti-collision
-      if (zoom <= 3) return 80;  // World view clustering
-      if (zoom <= 4) return 60;  // Continental clustering
-      if (zoom <= 5) return 40;  // Regional clustering (reduced)
-      if (zoom <= 6) return 25;  // State-level clustering (reduced)
-      if (zoom <= 7) return 18;  // Metropolitan clustering (reduced)
-      if (zoom <= 8) return 12;  // City-level clustering (reduced)
-      if (zoom <= 9) return 8;   // Local area clustering (reduced)
-      if (zoom <= 10) return 5;  // Neighborhood clustering (heavily reduced)
-      if (zoom <= 11) return 3;  // Close-up separation for adjacent courses
-      return 0; // Individual markers only at maximum zoom
-    },
-    disableClusteringAtZoom: 15,
-    animate: true,
-    animateAddingMarkers: true,
-    spiderfyShapePositions: function(count: number, centerPt: L.Point) {
-      // Custom spiderfy positioning for golf aesthetic
-      const angle = Math.PI * 2 / count;
-      const radius = 25;
-      const positions: L.Point[] = [];
-
-      for (let i = 0; i < count; i++) {
-        const x = centerPt.x + radius * Math.cos(i * angle);
-        const y = centerPt.y + radius * Math.sin(i * angle);
-        positions.push(L.point(x, y));
+      const containerPoint = e.containerPoint;
+      if (containerPoint) {
+        setPreviewCourse(course);
+        setPreviewPosition({
+          x: containerPoint.x,
+          y: containerPoint.y
+        });
       }
-
-      return positions;
-    }
+    }, 175);
   });
 
-  // Add custom cluster click handler to fix navigation issues
-  clusterGroup.on('clusterclick', function(event: any) {
-    try {
-      const cluster = event.layer as L.MarkerCluster;
-      const centralPosition = (cluster as any)._centralPosition;
+  marker.on('mouseout', () => {
+    // Cancel the timeout if mouse leaves before preview shows
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+    // Hide preview if it's showing
+    setPreviewCourse(null);
+    setPreviewPosition(null);
+  });
+};
+
+// Custom cluster event handlers with spiderfy-like behavior
+const attachClusterEventHandlers = (
+  marker: L.Marker,
+  cluster: CustomCluster,
+  mapInstance: L.Map,
+  setSelectedCourse: (course: GolfCourseWithStatus | null) => void,
+  iconScale: number,
+  hoverTimeoutRef: React.MutableRefObject<NodeJS.Timeout | null>,
+  setPreviewCourse: (course: GolfCourseWithStatus | null) => void,
+  setPreviewPosition: (position: { x: number, y: number } | null) => void
+) => {
+  marker.on('click', (e) => {
+    playClickSound();
+
+    // If single course, show details
+    if (cluster.courses.length === 1) {
+      setSelectedCourse(cluster.courses[0]);
+    } else {
       const currentZoom = mapInstance.getZoom();
 
-      console.log(`🖱️ Cluster clicked: ${cluster.getChildCount()} courses, current zoom: ${currentZoom}`);
-
-      if (centralPosition) {
-        // Use the stored central position for accurate navigation
-        console.log(`🎯 Zooming to central position: ${centralPosition.lat.toFixed(6)}, ${centralPosition.lng.toFixed(6)}`);
-        mapInstance.setView(centralPosition, Math.min(currentZoom + 2, 15), {
+      // At high zoom levels (13+), spiderfy the cluster instead of zooming further
+      if (currentZoom >= 13) {
+        spiderfyCluster(cluster, mapInstance, iconScale, setSelectedCourse, hoverTimeoutRef, setPreviewCourse, setPreviewPosition);
+      } else {
+        // Multiple courses - zoom to central position
+        mapInstance.setView(cluster.centerPosition, Math.min(currentZoom + 2, 15), {
           animate: true,
           duration: 0.5
         });
-      } else {
-        // Fallback to default cluster bounds behavior
-        console.log(`📍 Using default cluster bounds behavior`);
-        const childMarkers = cluster.getAllChildMarkers();
-        if (childMarkers.length > 0) {
-          const group = new L.featureGroup(childMarkers);
-          mapInstance.fitBounds(group.getBounds(), {
-            padding: [20, 20],
-            maxZoom: 15
-          });
-        }
       }
-
-      // Prevent any default navigation behavior
-      if (event.originalEvent) {
-        event.originalEvent.preventDefault();
-        event.originalEvent.stopPropagation();
-      }
-    } catch (error) {
-      console.error('❌ Cluster click handling failed:', error);
-      // Fallback: just zoom in slightly if custom handling fails
-      mapInstance.zoomIn();
     }
+
+    // Stop event propagation
+    L.DomEvent.stopPropagation(e);
   });
 
-  return clusterGroup;
+  // Show course count on hover for multi-course clusters
+  if (cluster.courses.length > 1) {
+    marker.on('mouseover', () => {
+      marker.bindTooltip(`${cluster.courses.length} courses`, {
+        permanent: false,
+        direction: 'top',
+        offset: [0, -10]
+      }).openTooltip();
+    });
+
+    marker.on('mouseout', () => {
+      marker.closeTooltip();
+    });
+  }
+};
+
+// Spiderfy cluster to show individual course markers
+const spiderfyCluster = (
+  cluster: CustomCluster,
+  mapInstance: L.Map,
+  iconScale: number,
+  setSelectedCourse: (course: GolfCourseWithStatus | null) => void,
+  hoverTimeoutRef: React.MutableRefObject<NodeJS.Timeout | null>,
+  setPreviewCourse: (course: GolfCourseWithStatus | null) => void,
+  setPreviewPosition: (position: { x: number, y: number } | null) => void
+) => {
+  const centerPoint = mapInstance.latLngToLayerPoint(cluster.centerPosition);
+  const radius = 60; // Pixels from center
+  const courses = cluster.courses;
+
+  // Remove cluster marker temporarily
+  if (cluster.marker) {
+    mapInstance.removeLayer(cluster.marker);
+  }
+
+  // Create spiderfied markers in a circle around the center
+  const spiderMarkers: L.Marker[] = [];
+  courses.forEach((course, index) => {
+    const angle = (360 / courses.length) * index;
+    const radian = (angle * Math.PI) / 180;
+
+    // Calculate position around circle
+    const offsetX = radius * Math.cos(radian);
+    const offsetY = radius * Math.sin(radian);
+    const spiderPoint = L.point(centerPoint.x + offsetX, centerPoint.y + offsetY);
+    const spiderLatLng = mapInstance.layerPointToLatLng(spiderPoint);
+
+    // Create individual course marker
+    const spiderMarker = L.marker(spiderLatLng, {
+      icon: createGolfPinIcon(course.accessType, course.status || 'not-played', iconScale)
+    });
+
+    // Add event handlers for individual course
+    attachMarkerEventHandlers(
+      spiderMarker,
+      course,
+      hoverTimeoutRef,
+      setPreviewCourse,
+      setPreviewPosition,
+      setSelectedCourse
+    );
+
+    // Add connection line from center to marker
+    const line = L.polyline([cluster.centerPosition, spiderLatLng], {
+      color: 'rgba(26, 77, 51, 0.6)',
+      weight: 1.5,
+      opacity: 0.8
+    });
+
+    mapInstance.addLayer(line);
+    mapInstance.addLayer(spiderMarker);
+    spiderMarkers.push(spiderMarker);
+
+    // Store line reference for cleanup
+    (spiderMarker as any)._spiderLine = line;
+  });
+
+  // Add click handler to map to unspiderfy when clicking elsewhere
+  const unspiderfyHandler = () => {
+    // Remove all spider markers and lines
+    spiderMarkers.forEach(spiderMarker => {
+      mapInstance.removeLayer(spiderMarker);
+      if ((spiderMarker as any)._spiderLine) {
+        mapInstance.removeLayer((spiderMarker as any)._spiderLine);
+      }
+    });
+
+    // Restore cluster marker
+    if (cluster.marker) {
+      mapInstance.addLayer(cluster.marker);
+    }
+
+    // Remove this handler
+    mapInstance.off('click', unspiderfyHandler);
+  };
+
+  // Add the unspiderfy handler with a small delay to avoid immediate triggering
+  setTimeout(() => {
+    mapInstance.on('click', unspiderfyHandler);
+  }, 100);
 };
 
 
@@ -440,9 +662,8 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
-  const clusterGroupRef = useRef<L.MarkerClusterGroup | null>(null);
+  const clustersRef = useRef<CustomCluster[]>([]);
   const outlierMarkersRef = useRef<L.Marker[]>([]);
-  const leaderLinesRef = useRef<L.Polyline[]>([]);
   const popupRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const [selectedCourse, setSelectedCourse] = useState<GolfCourseWithStatus | null>(null);
@@ -474,7 +695,6 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
         clusterable.push(course);
       } else {
         outliers.push(course);
-        console.log(`🌎 Showing geographic outlier individually: ${course.name} at ${lat}, ${lng}`);
       }
     });
 
@@ -497,26 +717,6 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
     return minScale + (maxScale - minScale) * progress;
   };
 
-  // Function to update all markers with new scale
-  const updateMarkersScale = (scale: number) => {
-    if (clusterGroupRef.current) {
-      // Get all markers from the cluster group
-      clusterGroupRef.current.eachLayer((layer: L.Layer) => {
-        if (layer instanceof L.Marker) {
-          const marker = layer as L.Marker;
-          const course = filteredCourses.find(c =>
-            marker.getLatLng().lat === parseFloat(c.latitude) &&
-            marker.getLatLng().lng === parseFloat(c.longitude)
-          );
-          if (course) {
-            const newIcon = createGolfPinIcon(course.accessType, course.status || 'not-played', scale);
-            marker.setIcon(newIcon);
-          }
-        }
-      });
-    }
-  };
-
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -528,7 +728,6 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
         zoomControl: true,
         scrollWheelZoom: true,
         // Enhanced touch support for iOS
-        tap: true,
         tapTolerance: 15,
         touchZoom: true,
         bounceAtZoomLimits: false,
@@ -551,13 +750,13 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
         mapInstanceRef.current.zoomControl.setPosition('bottomright');
       }
 
-      // Add zoom event listener to update icon sizes
+      // Add zoom event listener to update icon scale and re-cluster
       mapInstanceRef.current.on('zoomend', () => {
         const currentZoom = mapInstanceRef.current!.getZoom();
         const isMobile = window.innerWidth < 1024;
         const newScale = calculateIconScale(currentZoom, isMobile);
         setIconScale(newScale);
-        updateMarkersScale(newScale);
+        // Re-clustering happens automatically via useEffect dependency on iconScale
       });
 
       // Set initial scale based on initial zoom
@@ -566,190 +765,137 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
       const initialScale = calculateIconScale(initialZoom, isMobile);
       setIconScale(initialScale);
 
-      // Initialize cluster group with improved click handling
-      // Geographic outliers (e.g., Nova Scotia) are filtered upstream in filteredCourses
-      clusterGroupRef.current = createClusterGroup(createClusterIcon, mapInstanceRef.current);
-
-      // Add cluster group to map
-      mapInstanceRef.current.addLayer(clusterGroupRef.current);
+      // Custom clustering will be managed in the marker update section
     }
 
-    // Clear existing markers from cluster group
-    if (clusterGroupRef.current) {
-      clusterGroupRef.current.clearLayers();
-    }
+    // Clear all existing markers
+    markersRef.current.forEach(marker => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.removeLayer(marker);
+      }
+    });
     markersRef.current = [];
 
-    // Add clusterable courses (continental US) to cluster group
-    clusterableCourses.forEach(course => {
-      const marker = L.marker(
-        [parseFloat(course.latitude), parseFloat(course.longitude)],
-        { icon: createGolfPinIcon(course.accessType, course.status || 'not-played', iconScale) }
-      );
-
-      // Add marker to cluster group
-      if (clusterGroupRef.current) {
-        clusterGroupRef.current.addLayer(marker);
+    // Clear existing clusters
+    clustersRef.current.forEach(cluster => {
+      if (cluster.marker && mapInstanceRef.current) {
+        mapInstanceRef.current.removeLayer(cluster.marker);
       }
-      
-      // Click handler for full details popup
-      marker.on('click', (e) => {
-        console.log(`[DEBUG] Marker clicked for course: ${course.name}`);
-        // Clear any hover preview immediately
-        if (hoverTimeoutRef.current) {
-          clearTimeout(hoverTimeoutRef.current);
-          hoverTimeoutRef.current = null;
-        }
-        setPreviewCourse(null);
-        setPreviewPosition(null);
-        
-        playClickSound();
-        setSelectedCourse(course);
-        console.log(`Golf course selected: ${course.name}`);
-        // Stop event propagation to prevent map clicks
-        L.DomEvent.stopPropagation(e);
-      });
-      
-      // Hover handlers for preview
-      marker.on('mouseover', (e) => {
-        // Clear any existing timeout
-        if (hoverTimeoutRef.current) {
-          clearTimeout(hoverTimeoutRef.current);
-        }
-        
-        // Set timeout for 175ms delay (middle of 150-200ms range)
-        hoverTimeoutRef.current = setTimeout(() => {
-          // Check if popup is open at the time of showing preview, not when hovering starts
-          const isPopupOpen = document.querySelector('.golf-popup-card') !== null;
-          if (isPopupOpen) return;
-          
-          const containerPoint = e.containerPoint;
-          if (containerPoint) {
-            setPreviewCourse(course);
-            setPreviewPosition({
-              x: containerPoint.x,
-              y: containerPoint.y
-            });
-          }
-        }, 175);
-      });
-      
-      marker.on('mouseout', () => {
-        // Cancel the timeout if mouse leaves before preview shows
-        if (hoverTimeoutRef.current) {
-          clearTimeout(hoverTimeoutRef.current);
-          hoverTimeoutRef.current = null;
-        }
-        // Hide preview if it's showing
-        setPreviewCourse(null);
-        setPreviewPosition(null);
-      });
+    });
+    clustersRef.current = [];
 
-      markersRef.current.push(marker);
+    // Clear outlier markers
+    outlierMarkersRef.current.forEach(marker => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.removeLayer(marker);
+      }
+    });
+    outlierMarkersRef.current = [];
+
+    if (!mapInstanceRef.current) return;
+
+    const currentZoom = mapInstanceRef.current.getZoom();
+    const mapBounds = mapInstanceRef.current.getBounds();
+
+    // Create custom clusters for clusterable courses
+    const clusters = createCustomClusters(clusterableCourses, currentZoom, mapBounds, mapInstanceRef.current);
+    clustersRef.current = clusters;
+
+    // Add cluster markers to map
+    clusters.forEach(cluster => {
+      if (cluster.courses.length === 1) {
+        // Single course - use regular golf pin icon
+        const course = cluster.courses[0];
+        const marker = L.marker(
+          [cluster.centerPosition.lat, cluster.centerPosition.lng],
+          { icon: createGolfPinIcon(course.accessType, course.status || 'not-played', iconScale) }
+        );
+
+        // Attach individual course event handlers
+        attachMarkerEventHandlers(
+          marker,
+          course,
+          hoverTimeoutRef,
+          setPreviewCourse,
+          setPreviewPosition,
+          setSelectedCourse
+        );
+
+        cluster.marker = marker;
+        mapInstanceRef.current.addLayer(marker);
+        markersRef.current.push(marker);
+      } else {
+        // Multiple courses - use cluster icon
+        const clusterIcon = createCustomClusterIcon(cluster.courses);
+        const marker = L.marker(
+          [cluster.centerPosition.lat, cluster.centerPosition.lng],
+          { icon: clusterIcon }
+        );
+
+        // Attach cluster event handlers
+        attachClusterEventHandlers(
+          marker,
+          cluster,
+          mapInstanceRef.current,
+          setSelectedCourse,
+          iconScale,
+          hoverTimeoutRef,
+          setPreviewCourse,
+          setPreviewPosition
+        );
+
+        cluster.marker = marker;
+        mapInstanceRef.current.addLayer(marker);
+        markersRef.current.push(marker);
+      }
     });
 
-    // Add outlier courses (geographic outliers like Nova Scotia) as individual markers
-    // These are shown on the map but not included in clustering to prevent ocean clusters
+    // Add outlier courses as individual markers (no clustering)
     outlierCourses.forEach(course => {
       const marker = L.marker(
         [parseFloat(course.latitude), parseFloat(course.longitude)],
         { icon: createGolfPinIcon(course.accessType, course.status || 'not-played', iconScale) }
       );
 
-      // Add marker directly to map (not to cluster group)
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.addLayer(marker);
-      }
+      // Attach individual course event handlers
+      attachMarkerEventHandlers(
+        marker,
+        course,
+        hoverTimeoutRef,
+        setPreviewCourse,
+        setPreviewPosition,
+        setSelectedCourse
+      );
 
-      // Click handler for full details popup
-      marker.on('click', (e) => {
-        console.log(`[DEBUG] Outlier marker clicked for course: ${course.name}`);
-        // Clear any hover preview immediately
-        if (hoverTimeoutRef.current) {
-          clearTimeout(hoverTimeoutRef.current);
-          hoverTimeoutRef.current = null;
-        }
-        setPreviewCourse(null);
-        setPreviewPosition(null);
-
-        playClickSound();
-        setSelectedCourse(course);
-        console.log(`Geographic outlier course selected: ${course.name}`);
-        // Stop event propagation to prevent map clicks
-        L.DomEvent.stopPropagation(e);
-      });
-
-      // Hover handlers for preview
-      marker.on('mouseover', (e) => {
-        // Clear any existing timeout
-        if (hoverTimeoutRef.current) {
-          clearTimeout(hoverTimeoutRef.current);
-        }
-
-        // Set timeout for 175ms delay (middle of 150-200ms range)
-        hoverTimeoutRef.current = setTimeout(() => {
-          // Check if popup is open at the time of showing preview, not when hovering starts
-          const isPopupOpen = document.querySelector('.golf-popup-card') !== null;
-          if (isPopupOpen) return;
-
-          const containerPoint = e.containerPoint;
-          if (containerPoint) {
-            setPreviewCourse(course);
-            setPreviewPosition({
-              x: containerPoint.x,
-              y: containerPoint.y
-            });
-          }
-        }, 175);
-      });
-
-      marker.on('mouseout', () => {
-        // Cancel the timeout if mouse leaves before preview shows
-        if (hoverTimeoutRef.current) {
-          clearTimeout(hoverTimeoutRef.current);
-          hoverTimeoutRef.current = null;
-        }
-        // Hide preview if it's showing
-        setPreviewCourse(null);
-        setPreviewPosition(null);
-      });
-
+      mapInstanceRef.current.addLayer(marker);
       markersRef.current.push(marker);
+      outlierMarkersRef.current.push(marker);
     });
 
-    // Store outlier markers separately for cleanup
-    outlierMarkersRef.current = outlierCourses.map(course =>
-      markersRef.current[markersRef.current.length - outlierCourses.length + outlierCourses.indexOf(course)]
-    );
-
-    // Note: Cluster positioning is now handled safely in the createClusterIcon function
-    // This avoids direct manipulation of Leaflet's internal state that was causing click issues
-
-    // Apply anti-collision positioning to all individual markers at close zoom levels
-    const currentZoom = mapInstanceRef.current?.getZoom() || 4;
-    const individualMarkers = outlierMarkersRef.current; // Only outlier markers are individual (clusterable are in cluster group)
-    const displacements = applyAntiCollisionPositioning(individualMarkers, currentZoom);
-
-    // Add leader lines for displaced markers
-    if (displacements.length > 0 && mapInstanceRef.current) {
-      addLeaderLines(displacements, mapInstanceRef.current, leaderLinesRef);
-      console.log(`✨ Enhanced clustering system active: ${displacements.length} markers displaced with leader lines`);
-    }
-
     return () => {
-      // Cleanup is handled by clearing the cluster group above
-      // Clean up individual outlier markers
+      // Cleanup all markers
+      markersRef.current.forEach(marker => {
+        if (mapInstanceRef.current && marker) {
+          mapInstanceRef.current.removeLayer(marker);
+        }
+      });
+      markersRef.current = [];
+
+      // Clear clusters
+      clustersRef.current.forEach(cluster => {
+        if (cluster.marker && mapInstanceRef.current) {
+          mapInstanceRef.current.removeLayer(cluster.marker);
+        }
+      });
+      clustersRef.current = [];
+
+      // Clear outlier markers
       outlierMarkersRef.current.forEach(marker => {
         if (mapInstanceRef.current && marker) {
           mapInstanceRef.current.removeLayer(marker);
         }
       });
       outlierMarkersRef.current = [];
-
-      // Clean up leader lines
-      if (mapInstanceRef.current) {
-        removeLeaderLines(mapInstanceRef.current, leaderLinesRef);
-      }
     };
   }, [filteredCourses, iconScale]); // Removed selectedCourse and onStatusChange to prevent marker recreation
 
@@ -758,7 +904,6 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
     const handleClickOutside = (event: MouseEvent) => {
       if (selectedCourse && popupRef.current && !popupRef.current.contains(event.target as Node)) {
         setSelectedCourse(null);
-        console.log('Popup closed by clicking outside');
       }
     };
 
@@ -779,7 +924,6 @@ export default function GolfCourseMap({ courses, onStatusChange, filterStatus = 
       setSelectedCourse({ ...selectedCourse, status: newStatus });
     }
     
-    console.log(`Status changed for course ${courseId}: ${newStatus}`);
   };
 
   const getStatusColor = (status: CourseStatus) => {
