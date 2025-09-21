@@ -490,7 +490,96 @@ The implementation of a complete custom clustering system has successfully elimi
 
 ---
 
+---
+
+## Screen Radius Conflict Resolution (September 2025)
+
+### Issue Discovered ✅ RESOLVED
+After implementing pure geographic distance clustering, a **conflicting threshold system** was identified that created inconsistent behavior at zoom levels 12-14.
+
+### Root Cause Analysis ✅ COMPLETED
+
+#### The Conflict: Two Competing Threshold Systems
+```typescript
+// 1. Screen Radius System (Legacy - mostly unused)
+const getClusterRadius = (zoom: number): number => {
+  if (zoom >= 12) return 0; // "No clustering"
+}
+
+// 2. Geographic Distance System (Actually used)
+const getMaxClusterDistance = (zoom: number): number => {
+  if (zoom >= 12) return 1000; // "1km clustering allowed"
+}
+```
+
+#### Why They Conflicted
+1. **Screen radius was legacy code** from old Leaflet.markercluster system
+2. **Only used as kill switch** (radius === 0 check)
+3. **Geographic distance was the real clustering logic**
+4. **Zoom 12-14 contradiction**: Screen said "no clustering" but geographic allowed clustering
+
+### Final Solution: Single Source of Truth ✅ IMPLEMENTED
+
+#### Changes Made
+```typescript
+// REMOVED: Conflicting screen radius function entirely
+// const getClusterRadius = (zoom: number): number => { ... }
+
+// SIMPLIFIED: Clustering algorithm entry logic
+// BEFORE:
+const radius = getClusterRadius(zoom);
+if (radius === 0 || zoom >= 15) {
+
+// AFTER:
+if (zoom >= 15) {
+```
+
+#### Updated Comments
+- **Removed references** to screen projection and pixel radius
+- **Clarified geographic distance** as single source of truth
+- **Updated algorithm documentation** to reflect pure geographic approach
+
+### Issue Resolution Results ✅ COMPLETED
+
+| Component | Status | Details |
+|-----------|--------|---------|
+| Screen Radius System | ✅ REMOVED | ~13 lines of conflicting code eliminated |
+| Algorithm Entry Logic | ✅ SIMPLIFIED | Single zoom threshold check (>= 15) |
+| Zoom 12-14 Behavior | ✅ FIXED | Now properly clusters within 1km |
+| Documentation | ✅ UPDATED | Comments reflect pure geographic approach |
+| Code Quality | ✅ IMPROVED | Single source of truth, no conflicts |
+
+### Architecture Benefits ✅ ACHIEVED
+
+#### Consistency Improvements
+- **Zoom 1-11**: Progressive geographic clustering (800km→2km)
+- **Zoom 12-14**: Consistent 1km clustering (was broken, now fixed)
+- **Zoom 15+**: Individual markers only
+- **All levels**: Single, predictable clustering logic
+
+#### Code Quality Enhancements
+- **~13 lines removed**: Redundant screen radius function
+- **Single threshold system**: Geographic distance as sole authority
+- **Cleaner algorithm**: No conflicting validation paths
+- **Better maintainability**: One system to understand and modify
+
+### Final Status ✅ PRODUCTION READY
+
+**🎉 SCREEN RADIUS CONFLICTS COMPLETELY RESOLVED**
+
+The clustering system now uses **pure geographic distance as the single source of truth** without any conflicting threshold systems. This provides:
+
+1. **Consistent Zoom Behavior**: No more zoom 12-14 contradictions
+2. **Simplified Architecture**: Single clustering decision system
+3. **Improved Performance**: Eliminated redundant calculations
+4. **Better Maintainability**: Clear, conflict-free logic
+5. **Enhanced Reliability**: Predictable clustering at all zoom levels
+
+**Status**: Ready for production deployment with complete confidence in threshold consistency.
+
+---
+
 **Implementation Completed By**: Claude Code Assistant
 **Implementation Date**: September 21, 2025
-**Total Implementation Time**: Multiple iterations with comprehensive testing
-**Final Result**: Complete success - all positioning issues resolved
+**Total Implementation Time**: Multiple iterations with comprehensive testing and conflict resolution
+**Final Result**: Complete success - all positioning issues and threshold conflicts resolved

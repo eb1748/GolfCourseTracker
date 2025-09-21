@@ -195,8 +195,8 @@ const createCustomClusterIcon = (courses: GolfCourseWithStatus[]): L.DivIcon => 
   });
 };
 
-// Find most central course positioning - uses actual course coordinates to avoid projection issues
-// Finds the course with minimum total distance to all other courses in the cluster
+// Find the most geographically central course within a cluster
+// Returns the course with minimum total distance to all other courses
 const findMostCentralCourse = (courses: GolfCourseWithStatus[]): L.LatLng => {
   if (courses.length === 0) return L.latLng(0, 0);
   if (courses.length === 1) {
@@ -226,24 +226,10 @@ const findMostCentralCourse = (courses: GolfCourseWithStatus[]): L.LatLng => {
   return L.latLng(parseFloat(centralCourse.latitude), parseFloat(centralCourse.longitude));
 };
 
-// Get cluster radius based on zoom level
-const getClusterRadius = (zoom: number): number => {
-  // Progressive declustering - same thresholds as before
-  if (zoom <= 3) return 80;  // World view clustering
-  if (zoom <= 4) return 60;  // Continental clustering
-  if (zoom <= 5) return 40;  // Regional clustering
-  if (zoom <= 6) return 25;  // State-level clustering
-  if (zoom <= 7) return 18;  // Metropolitan clustering
-  if (zoom <= 8) return 12;  // City-level clustering
-  if (zoom <= 9) return 8;   // Local area clustering
-  if (zoom <= 10) return 5;  // Neighborhood clustering
-  if (zoom <= 11) return 3;  // Close-up separation
-  return 0; // Individual markers only at maximum zoom
-};
 
-// Get maximum geographic distance for clustering (in meters) based on zoom level
+// Get maximum geographic distance for clustering (in meters) - single source of truth for clustering decisions
 const getMaxClusterDistance = (zoom: number): number => {
-  // Prevent cross-continental clustering by limiting max geographic distance
+  // Progressive clustering thresholds based purely on geographic distance
   if (zoom <= 3) return 800000;   // 800km max - prevents Alaska/Continental US clustering
   if (zoom <= 4) return 500000;   // 500km max - regional clustering only
   if (zoom <= 5) return 200000;   // 200km max - multi-state regions (reduced from 300km)
@@ -256,122 +242,46 @@ const getMaxClusterDistance = (zoom: number): number => {
   return 1000; // 1km max for closest zoom levels
 };
 
-// Detect if coordinates are likely over water bodies
-const isOverWater = (lat: number, lng: number, zoom: number): boolean => {
-  // Major water body exclusions for common problem areas
+// Detect if coordinates are likely over major open water (basic ocean boundaries only)
+const isOverWater = (lat: number, lng: number): boolean => {
+  // Only prevent clusters truly over open ocean - removed coastal restrictions
 
-  // Atlantic Ocean off East Coast
-  if (lat >= 35 && lat <= 45 && lng >= -75 && lng <= -65) return true;
+  // Far Atlantic Ocean (well offshore)
+  if (lng > -60) return true;
 
-  // Gulf of Mexico
-  if (lat >= 24 && lat <= 30 && lng >= -97 && lng <= -80) return true;
+  // Far Pacific Ocean (well offshore)
+  if (lng < -130) return true;
 
-  // Pacific Ocean off West Coast
-  if (lat >= 32 && lat <= 48 && lng >= -130 && lng <= -115) return true;
-
-  // Great Lakes (approximate)
-  if (lat >= 41 && lat <= 49 && lng >= -92 && lng <= -76) {
-    // Lake Superior
-    if (lat >= 46 && lat <= 49 && lng >= -92 && lng <= -84) return true;
-    // Lake Michigan
-    if (lat >= 41 && lat <= 46 && lng >= -88 && lng <= -84) return true;
-    // Lake Huron
-    if (lat >= 43 && lat <= 46 && lng >= -85 && lng <= -79) return true;
-    // Lake Erie
-    if (lat >= 41 && lat <= 43 && lng >= -83 && lng <= -78) return true;
-    // Lake Ontario
-    if (lat >= 43 && lat <= 44 && lng >= -80 && lng <= -76) return true;
-  }
-
-  // San Francisco Bay Area (detailed for close zoom)
-  if (zoom >= 7 && lat >= 37.3 && lat <= 38.1 && lng >= -122.6 && lng <= -121.8) {
-    // San Francisco Bay
-    if (lat >= 37.4 && lat <= 37.9 && lng >= -122.5 && lng <= -122.0) return true;
-  }
-
-  // New York Harbor/Long Island Sound (detailed for close zoom)
-  if (zoom >= 7 && lat >= 40.4 && lat <= 41.2 && lng >= -74.5 && lng <= -72.8) {
-    // New York Harbor
-    if (lat >= 40.6 && lat <= 40.8 && lng >= -74.2 && lng <= -73.8) return true;
-    // Long Island Sound
-    if (lat >= 40.8 && lat <= 41.1 && lng >= -73.8 && lng <= -72.8) return true;
-  }
-
-  // Chesapeake Bay
-  if (zoom >= 6 && lat >= 36.5 && lat <= 39.5 && lng >= -76.5 && lng <= -75.5) return true;
+  // Gulf of Mexico (only southern offshore areas)
+  if (lat < 26 && lng > -95 && lng < -82) return true;
 
   return false;
 };
 
-// Enhanced bounds validation based on zoom level
-const isValidClusterPosition = (lat: number, lng: number, zoom: number): boolean => {
-  // Continental US bounds (broad validation)
-  const isWithinContinentalBounds = lat >= 20 && lat <= 55 && lng >= -130 && lng <= -60;
+// Simplified bounds validation for cluster positions
+const isValidClusterPosition = (lat: number, lng: number): boolean => {
+  // Continental US bounds (simplified - no zoom dependency)
+  const isWithinContinentalBounds = lat >= 24 && lat <= 49 && lng >= -125 && lng <= -66;
 
   if (!isWithinContinentalBounds) return false;
 
-  // Check if over water
-  if (isOverWater(lat, lng, zoom)) return false;
-
-  // Additional close-zoom validation for metropolitan areas
-  if (zoom >= 8) {
-    // Tighter bounds for close zoom levels to avoid edge cases
-    const isWithinTightBounds = lat >= 25 && lat <= 50 && lng >= -125 && lng <= -65;
-    return isWithinTightBounds;
-  }
+  // Check if over major open water
+  if (isOverWater(lat, lng)) return false;
 
   return true;
 };
 
-// Calculate the maximum spread (distance) within a cluster
-const calculateClusterSpread = (courses: GolfCourseWithStatus[]): number => {
-  if (courses.length <= 1) return 0;
 
-  let maxDistance = 0;
-  for (let i = 0; i < courses.length; i++) {
-    for (let j = i + 1; j < courses.length; j++) {
-      const pos1 = L.latLng(parseFloat(courses[i].latitude), parseFloat(courses[i].longitude));
-      const pos2 = L.latLng(parseFloat(courses[j].latitude), parseFloat(courses[j].longitude));
-      const distance = pos1.distanceTo(pos2);
-      maxDistance = Math.max(maxDistance, distance);
-    }
-  }
-  return maxDistance;
-};
 
-// Enhanced cluster validation for intermediate zoom levels
-const isValidClusterForZoom = (clusterCourses: GolfCourseWithStatus[], zoom: number): boolean => {
-  // For intermediate zoom levels (5-7), add specific validation
-  if (zoom >= 5 && zoom <= 7) {
-    const clusterSpread = calculateClusterSpread(clusterCourses);
-    const maxDistance = getMaxClusterDistance(zoom);
-
-    // Ensure cluster spread doesn't exceed 80% of max distance
-    const isReasonableSpread = clusterSpread <= maxDistance * 0.8;
-
-    // For zoom 5-7, clusters with only 2 courses shouldn't be too spread out
-    if (clusterCourses.length === 2) {
-      const spreadLimit = zoom === 5 ? 150000 : zoom === 6 ? 75000 : 40000; // Progressive limits
-      return clusterSpread <= spreadLimit;
-    }
-
-    return isReasonableSpread;
-  }
-
-  return true; // No additional validation for other zoom levels
-};
-
-// Custom clustering algorithm - groups courses based on screen distance
+// Custom clustering algorithm - groups courses based on geographic distance
 const createCustomClusters = (
   courses: GolfCourseWithStatus[],
   zoom: number,
   mapBounds: L.LatLngBounds,
   mapInstance: L.Map
 ): CustomCluster[] => {
-  const radius = getClusterRadius(zoom);
-
-  // If radius is 0, no clustering
-  if (radius === 0 || zoom >= 15) {
+  // No clustering at maximum zoom levels - show individual markers only
+  if (zoom >= 15) {
     return courses.map((course, index) => ({
       id: `single-${course.id}-${index}`,
       courses: [course],
@@ -389,24 +299,20 @@ const createCustomClusters = (
     const clusterCourses: GolfCourseWithStatus[] = [course];
     used.add(course.id);
 
-    // Find nearby courses within radius using proper map projection
+    // Find nearby courses within geographic distance threshold
     courses.forEach((otherCourse, otherIndex) => {
       if (otherIndex <= index || used.has(otherCourse.id)) return;
 
       const otherPos = L.latLng(parseFloat(otherCourse.latitude), parseFloat(otherCourse.longitude));
 
-      // Calculate actual distance between courses
+      // Calculate geographic distance between courses
       const distance = coursePos.distanceTo(otherPos);
 
       // Get maximum allowed distance for this zoom level
       const maxDistance = getMaxClusterDistance(zoom);
 
-      // Add maximum screen radius limit to prevent excessive visual clustering
-      const maxScreenRadius = zoom <= 5 ? 150 : zoom <= 8 ? 100 : 60; // pixels
-      const isReasonableScreenRadius = radius <= maxScreenRadius;
-
-      // Use ONLY geographic distance for clustering decisions (eliminates projection distortion)
-      if (distance <= maxDistance && isReasonableScreenRadius) {
+      // Use geographic distance for clustering decisions
+      if (distance <= maxDistance) {
         clusterCourses.push(otherCourse);
         used.add(otherCourse.id);
       }
@@ -415,29 +321,25 @@ const createCustomClusters = (
     // Create cluster with central position and validate bounds
     const centerPosition = findMostCentralCourse(clusterCourses);
 
-    // Enhanced validation: bounds + water detection + zoom-specific validation
+    // Simplified validation: basic bounds + water detection
     const lat = centerPosition.lat;
     const lng = centerPosition.lng;
-    const isValidPosition = isValidClusterPosition(lat, lng, zoom);
+    const isValidPosition = isValidClusterPosition(lat, lng);
 
-    // Additional validation: ensure cluster center is within reasonable distance of all member courses
-    const maxDistanceFromCenter = getMaxClusterDistance(zoom) * 0.75; // 75% of max clustering distance
+    // Ensure cluster center is reasonable and close to actual courses
+    const maxDistanceFromCenter = getMaxClusterDistance(zoom) * 0.5; // 50% of max clustering distance (reduced from 75%)
     const isReasonableCenter = clusterCourses.every(course => {
       const coursePos = L.latLng(parseFloat(course.latitude), parseFloat(course.longitude));
       const distanceFromCenter = centerPosition.distanceTo(coursePos);
       return distanceFromCenter <= maxDistanceFromCenter;
     });
 
-    // Enhanced validation: ensure cluster center is close to at least one actual course
     const hasNearbyActualCourse = clusterCourses.some(course => {
       const coursePos = L.latLng(parseFloat(course.latitude), parseFloat(course.longitude));
-      return centerPosition.distanceTo(coursePos) <= maxDistanceFromCenter * 0.5;
+      return centerPosition.distanceTo(coursePos) <= maxDistanceFromCenter * 0.4; // Tightened from 0.5 to 0.4
     });
 
-    // Enhanced validation for intermediate zoom levels (5-7)
-    const isValidForZoom = isValidClusterForZoom(clusterCourses, zoom);
-
-    if (isValidPosition && isReasonableCenter && hasNearbyActualCourse && isValidForZoom) {
+    if (isValidPosition && isReasonableCenter && hasNearbyActualCourse) {
       clusters.push({
         id: `cluster-${index}-${clusterCourses.length}`,
         courses: clusterCourses,

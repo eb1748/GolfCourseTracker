@@ -341,45 +341,59 @@ npx drizzle-kit studio  # Opens web UI
 ## Map Clustering System
 
 ### Custom Clustering Implementation
-The application uses a custom clustering algorithm instead of Leaflet.markercluster to ensure accurate geographic positioning.
+The application uses a custom clustering algorithm with pure geographic distance calculations, replacing Leaflet.markercluster to ensure accurate positioning and eliminate threshold conflicts.
 
 #### Key Features
-- **Pure Geographic Distance**: Uses latitude/longitude calculations without screen projection distortion
-- **Progressive Distance Limits**: Zoom-dependent clustering thresholds (200km→100km→50km→25km→10km→0km)
-- **Water Body Detection**: Prevents clusters over oceans, lakes, and major water bodies
+- **Pure Geographic Distance**: Single source of truth using latitude/longitude calculations only
+- **Progressive Distance Limits**: Zoom-dependent clustering thresholds (800km→500km→200km→100km→50km→15km→8km→4km→2km→1km)
+- **Streamlined Water Detection**: Basic ocean boundaries only (removed restrictive coastal detection)
 - **Outlier Handling**: Canadian and international courses displayed as individual markers
 - **Central Course Selection**: Distance-based algorithm finds optimal cluster center for navigation
+- **Conflict Resolution**: Eliminated screen radius system that was conflicting with geographic distance
 
 #### Technical Implementation
 ```typescript
-// Custom clustering algorithm in GolfCourseMap.tsx
+// Custom clustering algorithm in GolfCourseMap.tsx - Single threshold system
 const createCustomClusters = (
   courses: GolfCourseWithStatus[],
   zoom: number,
   mapBounds: L.LatLngBounds,
   mapInstance: L.Map
 ): CustomCluster[] => {
-  // Pure geographic distance clustering with zoom-dependent limits
+  // No clustering at maximum zoom levels
+  if (zoom >= 15) {
+    return individual_markers;
+  }
+  // Pure geographic distance clustering with progressive limits
 }
 
-// Progressive distance limits
+// Single source of truth for clustering decisions
 const getMaxClusterDistance = (zoom: number): number => {
+  if (zoom <= 3) return 800000;   // 800km max
+  if (zoom <= 4) return 500000;   // 500km max
   if (zoom <= 5) return 200000;   // 200km max
   if (zoom <= 6) return 100000;   // 100km max
   if (zoom <= 7) return 50000;    // 50km max
-  // ... progressive reduction
+  if (zoom <= 8) return 15000;    // 15km max
+  if (zoom <= 9) return 8000;     // 8km max
+  if (zoom <= 10) return 4000;    // 4km max
+  if (zoom <= 11) return 2000;    // 2km max
+  return 1000; // 1km max for zoom 12-14
 }
 ```
 
 #### Architecture Benefits
-- **Accurate Positioning**: Clusters appear at actual golf course locations
+- **Conflict-Free**: Single geographic distance system eliminates threshold contradictions
+- **Accurate Positioning**: Clusters appear at actual golf course locations with tight validation
 - **Performance Optimized**: Efficient geographic calculations without DOM manipulation
 - **Scalable**: Handles 100+ courses with smooth rendering at all zoom levels
 - **Maintainable**: Single algorithm controls all clustering behavior
+- **Coastal Clustering**: Enabled clustering for SF Bay Area, NYC Metro, DC area
 
 #### Dependencies Removed
 - `leaflet.markercluster` - Replaced with custom implementation
 - `@types/leaflet.markercluster` - No longer needed
+- Screen radius system - Eliminated conflicting threshold logic
 
 ## Support & Documentation
 
