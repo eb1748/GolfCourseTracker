@@ -232,10 +232,10 @@ const getMaxClusterDistance = (zoom: number): number => {
   // Progressive clustering thresholds based purely on geographic distance
   if (zoom <= 3) return 800000;   // 800km max - prevents Alaska/Continental US clustering
   if (zoom <= 4) return 500000;   // 500km max - regional clustering only
-  if (zoom <= 5) return 200000;   // 200km max - multi-state regions (reduced from 300km)
-  if (zoom <= 6) return 100000;   // 100km max - state-level clusters (reduced from 150km)
-  if (zoom <= 7) return 50000;    // 50km max - metropolitan areas (increased from 30km for better grouping)
-  if (zoom <= 8) return 15000;    // 15km max - city districts
+  if (zoom <= 5) return 150000;   // 150km max - multi-state regions (reduced by 25% from 200km)
+  if (zoom <= 6) return 75000;    // 75km max - state-level clusters (reduced by 25% from 100km)
+  if (zoom <= 7) return 50000;    // 50km max - metropolitan areas (increased from 37.5km for Scottsdale clustering)
+  if (zoom <= 8) return 35000;    // 35km max - city districts (increased from 15km for Scottsdale clustering)
   if (zoom <= 9) return 8000;     // 8km max - neighborhoods
   if (zoom <= 10) return 4000;    // 4km max - local areas
   if (zoom <= 11) return 2000;    // 2km max - very local areas
@@ -301,7 +301,7 @@ const createCustomClusters = (
 
     // Find nearby courses within geographic distance threshold
     courses.forEach((otherCourse, otherIndex) => {
-      if (otherIndex <= index || used.has(otherCourse.id)) return;
+      if (otherIndex === index || used.has(otherCourse.id)) return;
 
       const otherPos = L.latLng(parseFloat(otherCourse.latitude), parseFloat(otherCourse.longitude));
 
@@ -327,7 +327,7 @@ const createCustomClusters = (
     const isValidPosition = isValidClusterPosition(lat, lng);
 
     // Ensure cluster center is reasonable and close to actual courses
-    const maxDistanceFromCenter = getMaxClusterDistance(zoom) * 0.5; // 50% of max clustering distance (reduced from 75%)
+    const maxDistanceFromCenter = getMaxClusterDistance(zoom) * 0.75; // 75% of max clustering distance (increased from 50%)
     const isReasonableCenter = clusterCourses.every(course => {
       const coursePos = L.latLng(parseFloat(course.latitude), parseFloat(course.longitude));
       const distanceFromCenter = centerPosition.distanceTo(coursePos);
@@ -336,7 +336,7 @@ const createCustomClusters = (
 
     const hasNearbyActualCourse = clusterCourses.some(course => {
       const coursePos = L.latLng(parseFloat(course.latitude), parseFloat(course.longitude));
-      return centerPosition.distanceTo(coursePos) <= maxDistanceFromCenter * 0.4; // Tightened from 0.5 to 0.4
+      return centerPosition.distanceTo(coursePos) <= maxDistanceFromCenter * 0.6; // Relaxed from 0.4 to 0.6
     });
 
     if (isValidPosition && isReasonableCenter && hasNearbyActualCourse) {
